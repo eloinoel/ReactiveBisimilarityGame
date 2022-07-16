@@ -13,7 +13,7 @@ export default class Game extends Phaser.Scene {
   /* create function is used to add the objects to the game */
   create() {
 
-    const logo = this.add.image(400, 70, 'logo');
+    const logo = this.add.image(this.cameras.main.centerX, 70, 'logo');
 
     this.tweens.add({
       targets: logo,

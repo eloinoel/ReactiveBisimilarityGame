@@ -22,7 +22,7 @@ export default {
   
 
   scale: {
-    mode: Phaser.Scale.NONE, //Set to FIT otherwise if scaling of game objects doesnt work properly
+    mode: Phaser.Scale.ENVELOP, //Set to FIT otherwise if scaling of game objects doesnt work properly
     //Game size
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
@@ -46,50 +46,57 @@ export default {
 
 const resize = () => {
   const w = window.innerWidth
-    const h = window.innerHeight
+  const h = window.innerHeight
 
-    let width = DEFAULT_WIDTH
-    let height = DEFAULT_HEIGHT
-    let maxWidth = MAX_WIDTH
-    let maxHeight = MAX_HEIGHT
-    let scaleMode = SCALE_MODE
+  let width = DEFAULT_WIDTH
+  let height = DEFAULT_HEIGHT
+  let maxWidth = MAX_WIDTH
+  let maxHeight = MAX_HEIGHT
+  let scaleMode = SCALE_MODE
 
-    let scale = Math.min(w / width, h / height)
-    let newWidth = Math.min(w / scale, maxWidth)
-    let newHeight = Math.min(h / scale, maxHeight)
+  let scale = Math.min(w / width, h / height)
+  let newWidth = Math.min(w / scale, maxWidth)
+  let newHeight = Math.min(h / scale, maxHeight)
 
-    let defaultRatio = DEFAULT_WIDTH / DEFAULT_HEIGHT
-    let maxRatioWidth = MAX_WIDTH / DEFAULT_HEIGHT
-    let maxRatioHeight = DEFAULT_WIDTH / MAX_HEIGHT
+  let defaultRatio = DEFAULT_WIDTH / DEFAULT_HEIGHT
+  let maxRatioWidth = MAX_WIDTH / DEFAULT_HEIGHT
+  let maxRatioHeight = DEFAULT_WIDTH / MAX_HEIGHT
 
-    // smooth scaling
-    let smooth = 1
-    if (scaleMode === 'SMOOTH') {
-      const maxSmoothScale = 1.15
-      const normalize = (value: number, min: number, max: number) => {
-        return (value - min) / (max - min)
-      }
-      if (width / height < w / h) {
-        smooth =
-          -normalize(newWidth / newHeight, defaultRatio, maxRatioWidth) / (1 / (maxSmoothScale - 1)) + maxSmoothScale
-      } else {
-        smooth =
-          -normalize(newWidth / newHeight, defaultRatio, maxRatioHeight) / (1 / (maxSmoothScale - 1)) + maxSmoothScale
-      }
+  // smooth scaling
+  let smooth = 1
+  if (scaleMode === 'SMOOTH') {
+    const maxSmoothScale = 1.15
+    const normalize = (value: number, min: number, max: number) => {
+      return (value - min) / (max - min)
     }
+    if (width / height < w / h) {
+      smooth =
+        -normalize(newWidth / newHeight, defaultRatio, maxRatioWidth) / (1 / (maxSmoothScale - 1)) + maxSmoothScale
+    } else {
+      smooth =
+        -normalize(newWidth / newHeight, defaultRatio, maxRatioHeight) / (1 / (maxSmoothScale - 1)) + maxSmoothScale
+    }
+  }
 
-    // resize the game
-    game.scale.resize(newWidth * smooth, newHeight * smooth)
+  // resize the game
+  game.scale.resize(newWidth * smooth, newHeight * smooth)
 
-    // scale the width and height of the css
-    game.canvas.style.width = newWidth * scale + 'px'
-    game.canvas.style.height = newHeight * scale + 'px'
+  //reset camera
+  game.scene.getScenes(true, false).at(0)?.cameras.main.setViewport(0, 0, newWidth, newHeight);
 
-    // center the game with css margin
-    game.canvas.style.marginTop = `${(h - newHeight * scale) / 2}px`
-    game.canvas.style.marginLeft = `${(w - newWidth * scale) / 2}px`
+  // scale the width and height of the css
+  game.canvas.style.width = newWidth * scale + 'px'
+  game.canvas.style.height = newHeight * scale + 'px'
+
+  // center the game with css margin
+  game.canvas.style.marginTop = `${(h - newHeight * scale) / 2}px`
+  game.canvas.style.marginLeft = `${(w - newWidth * scale) / 2}px`
 }
+
+/* window.addEventListener('load', () => {
+  resize();
+})
 
 window.addEventListener('resize', () => {
   resize();
-}) 
+})  */
