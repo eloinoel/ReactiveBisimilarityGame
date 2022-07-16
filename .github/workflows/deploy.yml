@@ -12,30 +12,30 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout repo
-          uses: actions/checkout@v2
-        
-        #- name: Setup Node
-        #  uses: actions/setup-node@v1
-        #  with:
-        #    node-verion: 16
-        
-        - name: Install dependencies
-          uses: borales/actions-yarn@v3.0.0
-          with:
-            cmd: install # will run 'yarn install' command
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      
+      #- name: Setup Node
+      #  uses: actions/setup-node@v1
+      #  with:
+      #    node-verion: 16
+      
+      - name: Install dependencies
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: install # will run 'yarn install' command
 
-        - name: Build project
-          uses: borales/actions-yarn@v3.0.0
-            with:
-              cmd: build # will run 'yarn build' command
-        
-        - name: Upload production-ready build files
-          uses: actions/upload-artifact@v2
+      - name: Build project
+        uses: borales/actions-yarn@v3.0.0
           with:
-            name: production-files
-            path: ./dist
+            cmd: build # will run 'yarn build' command
+      
+      - name: Upload production-ready build files
+        uses: actions/upload-artifact@v2
+        with:
+          name: production-files
+          path: ./dist
 
   deploy:
     name: Deploy
