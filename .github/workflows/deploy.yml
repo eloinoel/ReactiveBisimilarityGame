@@ -24,12 +24,12 @@ jobs:
       - name: Install dependencies
         uses: borales/actions-yarn@v3.0.0
         with:
-          cmd: install # will run 'yarn install' command
+          cmd: install # will run `yarn install` command
 
       - name: Build project
         uses: borales/actions-yarn@v3.0.0
-          with:
-            cmd: build # will run 'yarn build' command
+        with:
+          cmd: build # will run `yarn build` command
       
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v2
