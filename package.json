@@ -1,7 +1,7 @@
 {
   "name": "phaser3-rollup-typescript",
   "version": "1.1.0",
-  "description": "Phaser 3 TypeScript Starter",
+  "description": "Reactive Bisimilarity Game",
   "main": "dist/index.js",
   "scripts": {
     "dev": "vite",
