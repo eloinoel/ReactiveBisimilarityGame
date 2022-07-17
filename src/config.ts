@@ -7,10 +7,10 @@ import PreloadScene from './scenes/Preloader'
 
 // Aspect Ratio 16:9
 const SCALE_MODE = 'SMOOTH' //FIT or SMOOTH
-const MAX_WIDTH = 1920
-const MAX_HEIGHT = 1080
-/* const MIN_WIDTH = 480
-const MIN_HEIGHT = 270 */ //use this with mode: Phaser.Scale.FIT
+const MAX_WIDTH = 4096 //1920
+const MAX_HEIGHT = 2304 //1080
+const MIN_WIDTH = 480
+const MIN_HEIGHT = 270 
 const DEFAULT_WIDTH = 960
 const DEFAULT_HEIGHT = 540
 
@@ -26,15 +26,15 @@ export default {
     //Game size
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
-    //autoCenter: Phaser.Scale.CENTER_BOTH,
-    /* min : {
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    min : {
       width: MIN_WIDTH,
       height: MIN_HEIGHT
     },
     max: {
       width: MAX_WIDTH,
       height: MAX_HEIGHT
-    }, */
+    }, 
     
     zoom: 1
   },
@@ -44,6 +44,8 @@ export default {
   scene: [PreloadScene, GameScene]
 };
 
+
+/** DOESNT WORK PROPERLY, disabled currently */
 const resize = () => {
   const w = window.innerWidth
   const h = window.innerHeight
@@ -82,7 +84,7 @@ const resize = () => {
   game.scale.resize(newWidth * smooth, newHeight * smooth)
 
   //reset camera
-  game.scene.getScenes(true, false).at(0)?.cameras.main.setViewport(0, 0, newWidth, newHeight);
+  //game.scene.getScenes(true, false).at(0)?.cameras.main.setViewport(0, 0, newWidth, newHeight);
 
   // scale the width and height of the css
   game.canvas.style.width = newWidth * scale + 'px'
