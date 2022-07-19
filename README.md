@@ -1,21 +1,16 @@
 <h1> Reactive Bisimilarity Game </h1>
 
-This project is part of a bachelor's thesis. The aim is to build a video game that plants the seed of intuition for the rather complex concept of reactive bisimilarity in players. Reactive bisimilarity is a semantic notion of equivalence for labelled transition systems (LTS) with timeouts, which represent how processes behave in a specific environment and how they interact with each other. The behaviour of processes can be compared to assert whether they act identical. For this, many different notions of equivalence exist in theoretical computer science, reactive bisimilarity being one of them. Other popular examples are "Trace equivalence", "Simulation" and "Bisimulation".
+This project is part of a bachelor's thesis. The aim is to build a video game that plants the seed of intuition for the rather complex concept of reactive bisimilarity in players. Reactive bisimilarity is a semantic notion of equivalence for labelled transition systems (LTS) with timeouts, which represent how processes behave in a specific environment and how they interact with each other. The behaviour of processes can be compared to assert whether they act identical. For this, many different notions of equivalence exist in theoretical computer science, reactive bisimilarity being one of them. Other popular examples are "Trace equivalence", "Simulation" and "Bisimulation".<h2 >
 
-If you would like to use this software without the GPL-Licence, you can contact me.
-
-
-
-<h2 >
   <br>
   Get the Game
   <br>
   <br>
   <a href="https://github.com/geocine/phaser3-rollup-typescript#readme"><img src="https://i.imgur.com/6lcIxDs.png" alt="header" width="600"/></a>
-  
+
 </h2>
 
-This is a [Phaser 3](https://github.com/photonstorm/phaser) project with [TypeScript](https://www.typescriptlang.org/), [Rollup](https://rollupjs.org) with ⚡️ lightning fast HMR through [Vite](https://vitejs.dev/). 
+This is a [Phaser 3](https://github.com/photonstorm/phaser) project with [TypeScript](https://www.typescriptlang.org/), [Rollup](https://rollupjs.org) with ⚡️ lightning fast HMR through [Vite](https://vitejs.dev/).
 
 ### Available Commands
 
