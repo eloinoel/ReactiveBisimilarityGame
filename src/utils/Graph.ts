@@ -1,7 +1,7 @@
 /**
  * Graph class with labelled nodes and edges
  * The core of this code originally stems from Ricardo Borges (https://ricardoborges.dev/data-structures-in-typescript-graph, last accessed: 18.07.2022)
- * I slightly modified it to feature labelled edges
+ * I modified it to suit my needs
  */
 
 /**
@@ -10,8 +10,8 @@
 export class Graph<T> {
     private nodes: Map<T, Node<T>> = new Map();
     private comparator: (a: T, b: T) => number; //used in Node<T> class to differentiate nodes
-    /*------------------ EXAMPLE ------------------
     
+    /*------------------ EXAMPLE ------------------
     function comparator(a: number, b: number) {
         if (a < b) return -1;
       
@@ -130,6 +130,7 @@ export class Graph<T> {
         return edgeString;
     }
 
+
     /**
      * Disgustingly written print method, that is here purely for testing purposes
      */
@@ -203,6 +204,10 @@ export class Node <T>{
 
         //if no edge is found, return null
         return node;
+    }
+
+    hasEdge(destination: T, edgeLabel: string): boolean {
+        return this.adjacent.some(edge => edge.node.data == destination && edge.edgeLabel == edgeLabel);
     }
 
     getType<T>(type: T): string {
