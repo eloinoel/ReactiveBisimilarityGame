@@ -133,21 +133,17 @@ export class Graph<T> {
     /**
      * Disgustingly written print method, that is here purely for testing purposes
      */
-    print(): void {
-        console.log("vertices: " + this.getNodes().toString());
-        console.log("edges: " + this.getEdgesAsString());
-            
-
+    print(): void {        
+        console.log("Graph: <Vertex>: <(edgeLabel, destinationNode)> ...");
         let i = 0;
         this.nodes.forEach((node) => {
-            let edgestring = "Vertex " + i + ": ";
+            let edgestring = "Vertex " + node.data + ": ";
             for(let j = 0; j < node.adjacent.length; j++) {
                 edgestring = edgestring.concat("(", node.adjacent[j].edgeLabel, ", ", node.adjacent[j].node.toString(), "), ");
             }
             console.log(edgestring);
             i++;
         })
-
     }
 }
 
@@ -194,15 +190,16 @@ export class Node <T>{
      * @returns 
      */
     removeAdjacent(data: T): Node<T> | null {
-        let index = 0;
         let node = null;
-        this.adjacent.forEach(({node, edgeLabel}) => {
+
+        for(let i = 0; i < this.adjacent.length; i++) {
+            let edge = this.adjacent[i]
             //find adjacent node
-            if(this.comparator(node.data, data) === 0) {
-                node = this.adjacent.splice(index, 1)[0].node; //will always be the same node but overwritten multiple times if multiple edges
+            if(this.comparator(edge.node.data, data) === 0) {
+                this.adjacent.splice(i, 1); 
+                i--;
             }
-            index++;
-        })
+        }
 
         //if no edge is found, return null
         return node;
@@ -237,6 +234,8 @@ export class Node <T>{
 
 
 //----------------------------------------- TESTING -----------------------------------------
+
+/*
 function comparator0(a: number, b: number) {
     if (a < b) return -1;
   
@@ -249,8 +248,24 @@ const graph = new Graph(comparator0);
 graph.addNode(0);
 graph.addNode(1);
 graph.addNode(2);
+graph.addNode(3);
+graph.addNode(4);
 graph.addEdge(0, 1, 'a');
 graph.addEdge(0, 2, 't');
+graph.addEdge(1, 3, 'tau');
+graph.addEdge(2, 4, "b");
+graph.addEdge(0, 3, 'tau');
+graph.addEdge(0, 4, "b");
+graph.addEdge(1, 3, "t");
+console.log("NodeAmount: " + graph.getNodeAmount());
+console.log("vertices: " + graph.getNodes().toString());
+console.log("edges: " + graph.getEdgesAsString());
 graph.print();
+console.log("-------------------------------------------------------");
+graph.removeNode(3);
+graph.removeEdge(0, 4, 'b');
+graph.print();
+
+*/
 
 
