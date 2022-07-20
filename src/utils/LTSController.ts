@@ -6,7 +6,7 @@ export default class LTSController {
     graph: Graph<string>;
     current: string[];  //the states/processes we are currently in, can be more than one eg. when we compare two processes
 
-    constructor(comparator: (a: string, b: string) => number) {
+    constructor() {
         this.graph = new Graph((a, b) => {
                 if (a < b) return -1;
                 if (a > b) return 1;
@@ -104,3 +104,34 @@ export default class LTSController {
         return -1;
     }
 }
+
+//----------------------------------------- TESTING -----------------------------------------
+
+/*
+  
+const lts = new LTSController();
+lts.addState("0");
+lts.addState("1");
+lts.addState("2");
+lts.addState("3");
+lts.addState("4");
+lts.addTransition("0", "1", 'a');
+lts.addTransition("0", "2", 't');
+lts.addTransition("1", "3", 'tau');
+lts.addTransition("2", "4", "b");
+lts.addTransition("0", "3", 'tau');
+lts.addTransition("0", "4", "b");
+lts.addTransition("1", "3", "t");
+lts.setCurrentState("0");
+console.log("current: " + lts.current);
+lts.graph.print();
+console.log("-------------------------------------------------------");
+lts.performAction("0", "1", "a");   //possible
+lts.performAction("1", "2", "a");   //not possible
+lts.performAction("1", "3", "tau"); //possible
+console.log("current: " + lts.current);
+lts.setCurrentState("3", 1);
+console.log(lts.current);
+lts.graph.print();
+
+*/
