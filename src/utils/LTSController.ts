@@ -1,8 +1,8 @@
-import {Graph, Node} from './Graph'
+import {Graph} from './Graph';
 /**
  * Model for representing LTS in code
  */
-export default class LTSController {
+export class LTSController {
     graph: Graph<string>;
     current: string[];  //the states/processes we are currently in, can be more than one eg. when we compare two processes
 
