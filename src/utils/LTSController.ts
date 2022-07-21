@@ -103,6 +103,55 @@ export class LTSController {
         }
         return -1;
     }
+
+    /**
+     * 
+     * @param node 
+     * @returns a set of all the outgoing transitions a process/state has
+     */
+    getInitialActions(node: string): Set<string> {
+        let actionList: string[] = [];
+        let nodeObj = this.graph.getNode(node);
+
+        if(nodeObj != null) {
+            for(let i = 0; i < nodeObj.adjacent.length; i++) {
+                actionList.push(nodeObj.adjacent[i].edgeLabel);
+            }
+        }
+
+        return new Set<string>(actionList);
+    }
+
+    /**
+     * 
+     * @returns a set of all the action labels in the lts
+     */
+    getAllActions(): Set<string> {
+        let edgesInGraph = this.graph.getEdgesList();
+        let edgeLabelsInGraph: string[] = [];
+
+        for(let i = 0; i < edgesInGraph.length; i++) {
+            for(let j = 0; j < edgesInGraph[i].length; j++) {
+                //if edgeLabelsInGraph doesn't already contain the label
+                edgeLabelsInGraph.push(edgesInGraph[i][j].edgeLabel);
+            }
+        }
+
+        return new Set<string>(edgeLabelsInGraph);
+    }
+
+    /**
+     * 
+     * @param name 
+     * @returns true if a state exists in the lts
+     */
+    hasState(name: string): boolean {
+        let node = this.graph.getNode(name);
+        if(node != null) {
+            return true
+        }
+        return false;
+    }
 }
 
 //----------------------------------------- TESTING -----------------------------------------

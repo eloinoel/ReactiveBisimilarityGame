@@ -1,22 +1,44 @@
 import {LTSController} from './LTSController';
+import { Constants } from './Constants';
+import { AttackerNode, GamePosition } from './GamePosition';
 
 export default class ReactiveBisimilarityGame {
 
     lts: LTSController; //lts for the game to be played on
-    //moveHistory
+    play: GamePosition[];
     environment: Set<string>; //set of currently possible actions, can be triggered to change at any time
 
-    constructor() {
-        this.lts = new LTSController();
+    constructor(process1: string, process2: string, lts: LTSController) {
+        this.lts = lts;
         this.environment = new Set<string>();
+        this.play = [];
+        this.startNewGame(process1, process2);
     }
 
     /**
      * init currents and other data structures
      * @returns -1 if something went wrong
      */
-    startNewGame(): Number {
-        return -1;
+    startNewGame(process1: string, process2:string, startingPosition?: GamePosition): Number {
+        if(this.lts.hasState(process1) && this.lts.hasState(process2)) {
+            this.lts.setCurrentState(process1, 0);
+            this.lts.setCurrentState(process2, 1);
+            this.environment = this.lts.getAllActions();
+
+            if(startingPosition !== undefined) {
+                this.play.push(new AttackerNode(process1, process2));
+            } else {
+                this.play.push(startingPosition!);
+            }
+        } else {
+            try {
+                throw new Error('Could not start new game: some of the processes do not exist.');
+            } catch (error) {
+                console.log(error);
+            }
+            return -1;
+        }
+        return 0;
     }
 
     /**
@@ -30,5 +52,7 @@ export default class ReactiveBisimilarityGame {
     performMove(): Number {
         return -1;
     }
+
+
 
 }
