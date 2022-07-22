@@ -1,6 +1,6 @@
 import { LTSController } from './LTSController';
 import { Constants } from './Constants';
-import { AttackerNode, GamePosition } from './GamePosition';
+import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from './GamePosition';
 import { SetOps } from './SetOps';
 
 export default class ReactiveBisimilarityGame {
@@ -45,25 +45,110 @@ export default class ReactiveBisimilarityGame {
     /**
      * check if any kind of move from the definition is possible in a position
      * @position if evaluation for an other position than the current position is needed
-     * @action action to perform
+     * @action action to perform, supply an empty string for symmetry moves
      * @returns 
      */
-    isMovePossible(action: string, curPosition?: GamePosition, environment?: Set<string>): boolean {
+    isMovePossible(action: string, nextPosition: GamePosition, curPosition?: GamePosition, environment?: Set<string>): boolean {
+        let A = this.lts.getAllActions();
+
+        //deal with some optional arguments
         if(curPosition === undefined) {
             curPosition = this.play[this.play.length - 1]; //get last element in move history
         }
         if(environment === undefined) {
-            environment = this.lts.getAllActions();
+            environment = this.environment; //TODO: check if this ruins anything 
         }
-        //check if action is in environment
-        if(!environment?.has(action)) {
+
+        //check if environment is viable
+        if(!SetOps.isSubsetEq(environment, A)) {
+            this.printError('isMovePossible: environment is not a subset of all the possible actions in the LTS.')
             return false;
         }
 
-        /* check all game position cases */
-        //simulation challenge
+        //check if action is viable
+        if(!(action === "")) {  //empty action means symmetry move
+            if(!environment?.has(action) || !A.has(action)) {
+                return false;
+            }
+        }
+        
+        //check if processes of positions exist in LTS
+        if(curPosition == null || curPosition.process1 == null || curPosition.process2 == null 
+        || !this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
+            return false;
+        }
+        if(nextPosition == null || nextPosition.process1 == null || !this.lts.hasState(nextPosition.process1)
+        || nextPosition.process2 == null || !this.lts.hasState(nextPosition.process2)) {
+            return false;
+        }
 
+        /* check all game move cases */
+        //- check if action is possible from p or q
+        if(curPosition instanceof AttackerNode) {
+            //symmetry move
+            if(action === "") {
+                return true;
+            //does process1 have the action it is supposed to execute
+            } else if(this.lts.getInitialActions(curPosition.process1).has(action)) {
+                //simulation challenge
+                if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action) {
+                    //check conditions of move, may be redundant with other code but for clarity's sake
+                    if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && (A.has(action) || action === Constants.HIDDEN_ACTION)) {
+                        return true;
+                    }
+                //timeout simulation challenge
+                } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action
+                     && environment === nextPosition.environment && nextPosition.previousAction === Constants.TIMEOUT_ACTION) {
+                    //check move conditions
+                    if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, environment) 
+                    && SetOps.isSubsetEq(environment, A)) {
+                        return true;
+                    }
+                }
+            }
+        } else if(curPosition instanceof SimulationDefenderNode) {
 
+        } else if(curPosition instanceof RestrictedAttackerNode) {
+
+        } else if(curPosition instanceof RestrictedSimulationDefenderNode) {
+
+        } else {
+            this.printError('isMovePossible: unknown game position type')
+            return false;
+        }
+        return false;
+    }
+
+    performMove(): Number {
+        return -1;
+    }
+
+    /**
+     * 
+     * @param error throws an error message that prints in red to the console
+     */
+    printError(error: string) {
+        try {
+            throw(error);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    /**
+     * returns true if: initialActions(process) <intersect> (environment <union> {hidden action}) == empty
+     * @param process 
+     * @param environment 
+     * @returns 
+     */
+    initialsEmpty(process: string, environment: Set<string>): boolean {
+        if(this.lts.hasState(process)) {
+            let initials = this.lts.getInitialActions(process);
+            let union = SetOps.union(environment, new Set<string>([...Constants.HIDDEN_ACTION]));
+            if(SetOps.isEmpty(SetOps.intersect(initials, union))) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -74,11 +159,6 @@ export default class ReactiveBisimilarityGame {
     setEnvironment(newEnv: Set<string>) {
         this.environment = newEnv;
     }
-
-    performMove(): Number {
-        return -1;
-    }
-
 
 
 }

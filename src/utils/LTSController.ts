@@ -152,6 +152,16 @@ export class LTSController {
         }
         return false;
     }
+
+    hasTransition(source: string, destination: string, edgeLabel: string): boolean {
+        let node1 = this.graph.getNode(source);
+        if(node1 != null) {
+            if(node1.hasEdge(destination, edgeLabel)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 //----------------------------------------- TESTING -----------------------------------------
