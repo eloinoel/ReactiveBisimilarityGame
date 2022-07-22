@@ -60,7 +60,7 @@ export class LTSController {
         if(node != null) {
             //state isn't already current
             if(!this.current.some((element) => state == element)) {
-                if(typeof index !== 'undefined') {
+                if(index !== undefined) {
                     this.current[index] = state;
                 } else {
                     this.current[0] = state
@@ -90,7 +90,7 @@ export class LTSController {
         let currentIndex = this.current.findIndex(state => source == state);
 
         //if source is current state
-        if(typeof currentIndex !== 'undefined') {
+        if(currentIndex !== undefined) {
             let sourceNode = this.graph.getNode(source);
             //if source exists in graph
             if(sourceNode != null) {

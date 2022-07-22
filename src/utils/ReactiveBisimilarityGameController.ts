@@ -1,6 +1,7 @@
-import {LTSController} from './LTSController';
+import { LTSController } from './LTSController';
 import { Constants } from './Constants';
 import { AttackerNode, GamePosition } from './GamePosition';
+import { SetOps } from './SetOps';
 
 export default class ReactiveBisimilarityGame {
 
@@ -42,11 +43,36 @@ export default class ReactiveBisimilarityGame {
     }
 
     /**
-     * check if any kind of move from the definition is possible
+     * check if any kind of move from the definition is possible in a position
+     * @position if evaluation for an other position than the current position is needed
+     * @action action to perform
      * @returns 
      */
-    isMovePossible(): boolean {
+    isMovePossible(action: string, curPosition?: GamePosition, environment?: Set<string>): boolean {
+        if(curPosition === undefined) {
+            curPosition = this.play[this.play.length - 1]; //get last element in move history
+        }
+        if(environment === undefined) {
+            environment = this.lts.getAllActions();
+        }
+        //check if action is in environment
+        if(!environment?.has(action)) {
+            return false;
+        }
+
+        /* check all game position cases */
+        //simulation challenge
+
+
         return false;
+    }
+
+    /**
+     * The environment can change at any time
+     * @param newEnv new Environment
+     */
+    setEnvironment(newEnv: Set<string>) {
+        this.environment = newEnv;
     }
 
     performMove(): Number {
