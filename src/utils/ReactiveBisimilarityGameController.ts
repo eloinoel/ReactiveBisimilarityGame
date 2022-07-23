@@ -1,6 +1,6 @@
 import { LTSController } from './LTSController';
 import { Constants } from './Constants';
-import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from './GamePosition';
+import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode, Player } from './GamePosition';
 import { SetOps } from './SetOps';
 
 export default class ReactiveBisimilarityGame {
@@ -153,11 +153,35 @@ export default class ReactiveBisimilarityGame {
         return false;
     }
 
-    performMove(): Number {
+    /**
+     * perform a move in the current play
+     * @param action 
+     * @param nextPosition 
+     * @param curPosition 
+     * @returns -1 if the move could not be carried out
+     */
+    performMove(action: string, nextPosition: GamePosition): number {
+
         //check if move is possible
+        let curPosition = this.play[this.play.length - 1];
+        let legalMove = this.isMovePossible(action, nextPosition, curPosition, this.environment);
+        if(!legalMove) {
+            return -1;
+        }
+
         //update currents
+        let process1Index = this.lts.getCurrentIndexOf(curPosition.process1);
+        let process2Index = this.lts.getCurrentIndexOf(curPosition.process2);
+        if(process1Index === -1 || process2Index === -1) {
+            this.printError('performMove: current states from LTS differ from current game position.');
+        }
+        this.lts.setCurrentState(nextPosition.process1, process1Index);
+        this.lts.setCurrentState(nextPosition.process2, process2Index);
+
         //update move history
-        return -1;
+        this.play.push(nextPosition);
+
+        return 0;
     }
 
     /**

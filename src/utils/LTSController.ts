@@ -104,6 +104,10 @@ export class LTSController {
         return -1;
     }
 
+    getCurrentIndexOf(process: string): number {
+        return this.current.findIndex( value => value == process);
+    }
+
     /**
      * 
      * @param node 
