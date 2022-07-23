@@ -66,7 +66,7 @@ export default class ReactiveBisimilarityGame {
         }
 
         //check if action is viable
-        if(!(action === "")) {  //empty action means symmetry move
+        if(!(action === Constants.NO_ACTION)) {  //empty action means symmetry move
             if(!environment?.has(action) || !A.has(action)) {
                 return false;
             }
@@ -86,18 +86,18 @@ export default class ReactiveBisimilarityGame {
         //- check if action is possible from p or q
         if(curPosition instanceof AttackerNode) {
             //symmetry move
-            if(action === "") {
+            if(action === Constants.NO_ACTION) {
                 return true;
             //does process1 have the action it is supposed to execute
             } else if(this.lts.getInitialActions(curPosition.process1).has(action)) {
                 //simulation challenge
-                if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action) {
+                if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
                     //check conditions of move, may be redundant with other code but for clarity's sake
                     if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && (A.has(action) || action === Constants.HIDDEN_ACTION)) {
                         return true;
                     }
                 //timeout simulation challenge
-                } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action
+                } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2
                      && environment === nextPosition.environment && nextPosition.previousAction === Constants.TIMEOUT_ACTION) {
                     //check move conditions
                     if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, environment) 
@@ -107,11 +107,45 @@ export default class ReactiveBisimilarityGame {
                 }
             }
         } else if(curPosition instanceof SimulationDefenderNode) {
-
+            if(action !== Constants.NO_ACTION) {
+                //simulation answer
+                if(nextPosition instanceof AttackerNode && curPosition.process1 === nextPosition.process1 && action === curPosition.previousAction) {
+                    if(this.lts.hasTransition(curPosition.process2, nextPosition.process2, action)) {
+                        return true;
+                    }
+                }
+            }
         } else if(curPosition instanceof RestrictedAttackerNode) {
-
+            //restricted symmetry move
+            if(action === Constants.NO_ACTION) {
+                return true;
+            } else if(this.lts.getInitialActions(curPosition.process1).has(action)) {
+                //restricted simulation challenge
+                if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
+                    if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && A.has(action) && (environment.has(action) || this.initialsEmpty(curPosition.process1, environment))) {
+                        return true;
+                    }
+                //invisible simulation challenge
+                } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && action === Constants.HIDDEN_ACTION && curPosition.process2 === nextPosition.process2) {
+                    if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action)) {
+                        return true;
+                    }
+                //timeouted timeout simulation challenge
+                } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && action === Constants.TIMEOUT_ACTION && curPosition.process2 === nextPosition.process2) {
+                    if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, SetOps.union(curPosition.environment, environment)) && SetOps.isSubsetEq(environment, A)) {
+                        return true;
+                    }
+                }
+            }
         } else if(curPosition instanceof RestrictedSimulationDefenderNode) {
-
+            if(action !== Constants.NO_ACTION) {
+                //timeout simulation answer and invisible simulation answer
+                if(nextPosition instanceof RestrictedAttackerNode && curPosition.process1 == nextPosition.process1 && SetOps.areEqual(curPosition.environment, nextPosition.environment) && action === curPosition.previousAction) {
+                    if(this.lts.hasTransition(curPosition.process2, nextPosition.process2, action)) {
+                        return true;
+                    }
+                }
+            }
         } else {
             this.printError('isMovePossible: unknown game position type')
             return false;
@@ -120,6 +154,9 @@ export default class ReactiveBisimilarityGame {
     }
 
     performMove(): Number {
+        //check if move is possible
+        //update currents
+        //update move history
         return -1;
     }
 
@@ -136,7 +173,7 @@ export default class ReactiveBisimilarityGame {
     }
 
     /**
-     * returns true if: initialActions(process) <intersect> (environment <union> {hidden action}) == empty
+     * returns true if: initialActions(process) <intersect> (environment <union> {hidden action}) == empty set
      * @param process 
      * @param environment 
      * @returns 
