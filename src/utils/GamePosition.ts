@@ -13,9 +13,11 @@ export abstract class GamePosition {
         this.process2 = process2;
         this.activePlayer = activePlayer;
     }
+
+    abstract invertProcesses(): GamePosition;
 }
 
-enum Player {
+export enum Player {
     Attacker,
     Defender,
 }
@@ -28,6 +30,11 @@ export class AttackerNode extends GamePosition {
     constructor(process1: string, process2: string) {
         super(process1, process2, Player.Attacker);
     }
+
+    invertProcesses(): GamePosition {
+        return new AttackerNode(this.process2, this.process1);
+    }
+
 }
 
 /**
@@ -41,6 +48,10 @@ export class SimulationDefenderNode extends GamePosition {
         super(process1, process2, Player.Defender);
         this.previousAction = previousAction;
     }
+
+    invertProcesses(): GamePosition {
+        return new SimulationDefenderNode(this.process2, this.process1, this.previousAction);
+    }
 }
 
 /**
@@ -52,6 +63,10 @@ export class RestrictedAttackerNode extends GamePosition {
     constructor(process1: string, process2: string, environment: Set<string>) {
         super(process1, process2, Player.Attacker);
         this.environment = environment;
+    }
+
+    invertProcesses(): GamePosition {
+        return new RestrictedAttackerNode(this.process2, this.process1, this.environment);
     }
 }
 
@@ -68,5 +83,9 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
         super(process1, process2, Player.Defender);
         this.previousAction = previousAction;
         this.environment = environment;
+    }
+
+    invertProcesses(): GamePosition {
+        return new RestrictedSimulationDefenderNode(this.process2, this.process1, this.previousAction, this.environment);
     }
 }

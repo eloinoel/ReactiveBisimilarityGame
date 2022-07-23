@@ -221,5 +221,40 @@ export default class ReactiveBisimilarityGame {
         this.environment = newEnv;
     }
 
+    /**
+     * TODO:
+     * good for debugging purposes
+     * @param process 
+     */
+    possibleMoves(curPosition: GamePosition): GamePosition[] {
+        let moves: GamePosition[] = []
+
+        if(!this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
+            this.printError('possibleMoves: some process from given game position does not exist');
+            return moves;
+        }
+        if(curPosition.activePlayer === Player.Attacker) {
+            //symmetry move
+            if(this.isMovePossible(Constants.NO_ACTION, curPosition.invertProcesses(), curPosition, this.environment)) {
+                moves.push(curPosition.invertProcesses());
+            }
+            //other moves
+            let actions = this.lts.getInitialActions(curPosition.process1)
+            if(curPosition instanceof AttackerNode) {
+
+            } else if(curPosition instanceof RestrictedAttackerNode) {
+
+            }
+            //TODO: LTS or this class should have generate moves function, to just call isMovePossible() upon 
+
+        } else {
+
+        }
+
+
+        let pos = new AttackerNode("TO", "DO");
+        return [pos];
+    } 
+
 
 }
