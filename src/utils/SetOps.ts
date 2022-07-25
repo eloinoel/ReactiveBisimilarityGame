@@ -15,9 +15,14 @@ export class SetOps {
      * @returns 
      */
     static isSubset(a: Set<any>, b: Set<any>): boolean {
-        a.forEach( value => {
-            if(!b.has(value)) { return false; }
-        })
+        let c = this.toArray(a);
+        if(a.size !== b.size) {
+            for(let item of c) {
+                if(!b.has(item)) {
+                    return false; 
+                }
+            }
+        }
         return true;
     }
 
@@ -35,12 +40,14 @@ export class SetOps {
      * @returns 
      */
     static areEqual(a: Set<any>, b: Set<any>): boolean {
-        a.forEach( value => {
+        let c = this.toArray(a);
+        let d = this.toArray(b);
+        for(let value of c) {
             if(!b.has(value)) { return false; }
-        })
-        b.forEach( value => {
-            if(!a.has(value)) { return false; }
-        })
+        }
+        for(let value of d) {
+            if(!b.has(value)) { return false; }
+        }
         return true;
     }
 
@@ -51,7 +58,7 @@ export class SetOps {
      * @returns 
      */
     static intersect(a: Set<any>, b: Set<any>): Set<any> {
-        return new Set([...a].filter( value => b.has(value)));
+        return new Set(this.toArray(a).filter( value => b.has(value)));
     }
 
     /**
@@ -61,7 +68,7 @@ export class SetOps {
      * @returns 
      */
     static union(a: Set<any>, b: Set<any>): Set<any> {
-        return new Set([...a, ...b]);
+        return new Set([...this.toArray(a), ...this.toArray(b)]);
     }
 
     /**
@@ -71,7 +78,15 @@ export class SetOps {
      * @returns 
      */
     static difference(a: Set<any>, b: Set<any>): Set<any> {
-        return new Set([...a].filter( value => !b.has(value)));
+        return new Set(this.toArray(a).filter( value => !b.has(value)));
+    }
+
+    static toArray(a: Set<any>): any[] {
+        let b: any[] = [];
+        a.forEach( value => {
+            b.push(value);
+        } )
+        return b;
     }
 
 }

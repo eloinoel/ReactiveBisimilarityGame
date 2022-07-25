@@ -238,39 +238,4 @@ export class Node <T>{
 }
 
 
-//----------------------------------------- TESTING -----------------------------------------
-
-/*
-function comparator0(a: number, b: number) {
-    if (a < b) return -1;
-  
-    if (a > b) return 1;
-  
-    return 0;
-}
-  
-const graph = new Graph(comparator0);
-graph.addNode(0);
-graph.addNode(1);
-graph.addNode(2);
-graph.addNode(3);
-graph.addNode(4);
-graph.addEdge(0, 1, 'a');
-graph.addEdge(0, 2, 't');
-graph.addEdge(1, 3, 'tau');
-graph.addEdge(2, 4, "b");
-graph.addEdge(0, 3, 'tau');
-graph.addEdge(0, 4, "b");
-graph.addEdge(1, 3, "t");
-console.log("NodeAmount: " + graph.getNodeAmount());
-console.log("vertices: " + graph.getNodes().toString());
-console.log("edges: " + graph.getEdgesAsString());
-graph.print();
-console.log("-------------------------------------------------------");
-graph.removeNode(3);
-graph.removeEdge(0, 4, 'b');
-graph.print();
-
-*/
-
 

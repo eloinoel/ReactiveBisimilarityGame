@@ -3,11 +3,11 @@ import { Constants } from './Constants';
 import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode, Player } from './GamePosition';
 import { SetOps } from './SetOps';
 
-export default class ReactiveBisimilarityGame {
+export class ReactiveBisimilarityGame {
 
     lts: LTSController; //lts for the game to be played on
     play: GamePosition[];
-    environment: Set<string>; //set of currently possible actions, can be triggered to change at any time
+    private environment: Set<string>; //set of currently possible actions, can be triggered to change at any time
 
     constructor(process1: string, process2: string, lts: LTSController) {
         this.lts = lts;
@@ -18,18 +18,23 @@ export default class ReactiveBisimilarityGame {
 
     /**
      * init currents and other data structures
+     * @startingPosition if the game starts with a position other than an attacker node
      * @returns -1 if something went wrong
      */
     startNewGame(process1: string, process2:string, startingPosition?: GamePosition): Number {
         if(this.lts.hasState(process1) && this.lts.hasState(process2)) {
             this.lts.setCurrentState(process1, 0);
             this.lts.setCurrentState(process2, 1);
-            this.environment = this.lts.getAllActions();
+            this.environment = this.getAllNormalActions();
 
-            if(startingPosition !== undefined) {
-                this.play.push(new AttackerNode(process1, process2));
-            } else {
+            if(startingPosition !== undefined && startingPosition !== null 
+                && startingPosition.process1 === process1 && startingPosition.process2 === process2) {
                 this.play.push(startingPosition!);
+                if(startingPosition instanceof RestrictedAttackerNode || startingPosition instanceof RestrictedSimulationDefenderNode) {
+                    this.environment = startingPosition.environment;
+                }
+            } else {
+                this.play.push(new AttackerNode(process1, process2));
             }
         } else {
             try {
@@ -48,8 +53,8 @@ export default class ReactiveBisimilarityGame {
      * @action action to perform, supply an empty string for symmetry moves
      * @returns 
      */
-    isMovePossible(action: string, nextPosition: GamePosition, curPosition?: GamePosition, environment?: Set<string>): boolean {
-        let A = this.lts.getAllActions();
+    isMovePossible(action: string, nextPosition: GamePosition, environment?: Set<string>, curPosition?: GamePosition,): boolean {
+        let A = this.getAllNormalActions();
 
         //deal with some optional arguments
         if(curPosition === undefined) {
@@ -59,17 +64,10 @@ export default class ReactiveBisimilarityGame {
             environment = this.environment; //TODO: check if this ruins anything 
         }
 
-        //check if environment is viable
-        if(!SetOps.isSubsetEq(environment, A)) {
-            this.printError('isMovePossible: environment is not a subset of all the possible actions in the LTS.')
-            return false;
-        }
-
         //check if action is viable
-        if(!(action === Constants.NO_ACTION)) {  //empty action means symmetry move
-            if(!environment?.has(action) || !A.has(action)) {
-                return false;
-            }
+        if(!Constants.isSpecialAction(action) && (!environment?.has(action) || !A.has(action))) {  //empty action means symmetry move
+            this.printError('False: action not viable');
+            return false;
         }
         
         //check if processes of positions exist in LTS
@@ -164,7 +162,7 @@ export default class ReactiveBisimilarityGame {
 
         //check if move is possible
         let curPosition = this.play[this.play.length - 1];
-        let legalMove = this.isMovePossible(action, nextPosition, curPosition, this.environment);
+        let legalMove = this.isMovePossible(action, nextPosition, this.environment, curPosition);
         if(!legalMove) {
             return -1;
         }
@@ -182,6 +180,17 @@ export default class ReactiveBisimilarityGame {
         this.play.push(nextPosition);
 
         return 0;
+    }
+
+    getAllNormalActions(): Set<string> {
+        let a = SetOps.toArray(this.lts.getAllActions());
+        for(let i = 0; i < a.length; i++) {
+            if(Constants.isSpecialAction(a[i])) {
+                a.splice(i, 1);
+                i--;
+            }
+        }
+        return new Set(a);
     }
 
     /**
@@ -205,7 +214,7 @@ export default class ReactiveBisimilarityGame {
     initialsEmpty(process: string, environment: Set<string>): boolean {
         if(this.lts.hasState(process)) {
             let initials = this.lts.getInitialActions(process);
-            let union = SetOps.union(environment, new Set<string>([...Constants.HIDDEN_ACTION]));
+            let union = SetOps.union(environment, new Set<string>([Constants.HIDDEN_ACTION]));
             if(SetOps.isEmpty(SetOps.intersect(initials, union))) {
                 return true;
             }
@@ -218,7 +227,22 @@ export default class ReactiveBisimilarityGame {
      * @param newEnv new Environment
      */
     setEnvironment(newEnv: Set<string>) {
-        this.environment = newEnv;
+        if(!newEnv.has(Constants.HIDDEN_ACTION) && !newEnv.has(Constants.NO_ACTION) && !newEnv.has(Constants.TIMEOUT_ACTION)) {
+            let tmp = SetOps.toArray(newEnv).sort();
+            this.environment = new Set(tmp);
+            console.log("Environment was set to {" + SetOps.toArray(this.environment) + "}.");
+        } else {
+            this.printError('setEnvironment: Error: some illegal action in given environment');
+        }
+    }
+
+    getEnvironment(): Set<string> {
+        return this.environment;
+    }
+
+    resetEnvironment() {
+        this.environment = new Set(SetOps.toArray(this.getAllNormalActions()).sort());
+        console.log("Environment was reset to {" + SetOps.toArray(this.environment) + "}.");
     }
 
     /**
@@ -235,7 +259,7 @@ export default class ReactiveBisimilarityGame {
         }
         if(curPosition.activePlayer === Player.Attacker) {
             //symmetry move
-            if(this.isMovePossible(Constants.NO_ACTION, curPosition.invertProcesses(), curPosition, this.environment)) {
+            if(this.isMovePossible(Constants.NO_ACTION, curPosition.invertProcesses(), this.environment, curPosition)) {
                 moves.push(curPosition.invertProcesses());
             }
             //other moves

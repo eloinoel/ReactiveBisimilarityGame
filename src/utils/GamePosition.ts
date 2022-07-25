@@ -62,7 +62,7 @@ export class RestrictedAttackerNode extends GamePosition {
 
     constructor(process1: string, process2: string, environment: Set<string>) {
         super(process1, process2, Player.Attacker);
-        this.environment = environment;
+        this.environment = new Set(environment);
     }
 
     invertProcesses(): GamePosition {
@@ -82,7 +82,7 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
     constructor(process1: string, process2:string, previousAction: string, environment: Set<string>) {
         super(process1, process2, Player.Defender);
         this.previousAction = previousAction;
-        this.environment = environment;
+        this.environment = new Set(environment);
     }
 
     invertProcesses(): GamePosition {
