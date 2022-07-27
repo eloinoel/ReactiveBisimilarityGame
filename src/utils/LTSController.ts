@@ -1,10 +1,13 @@
+import { Constants } from './Constants';
 import {Graph} from './Graph';
+import { SetOps } from './SetOps';
 /**
  * Model for representing LTS in code
  */
 export class LTSController {
     graph: Graph<string>;
     current: string[];  //the states/processes we are currently in, can be more than one eg. when we compare two processes
+    private A: Set<string>; //set of visible actions
 
     constructor() {
         this.graph = new Graph((a, b) => {
@@ -13,6 +16,7 @@ export class LTSController {
                 return 0;
         })
         this.current = [];
+        this.A = new Set<string>();
     }
 
     addState(data: string): void {
@@ -39,11 +43,22 @@ export class LTSController {
     }
 
     addTransition(source: string, destination: string, edgeLabel: string): void {
-        this.graph.addEdge(source, destination, edgeLabel);
+        if(edgeLabel !== "") {
+            this.graph.addEdge(source, destination, edgeLabel);
+            if(!Constants.isSpecialAction(edgeLabel)) {
+                this.A.add(edgeLabel);
+            }
+        } else {
+            try {
+                throw new Error('addTransition: given edgelabel is empty');
+            } catch (error) {
+                console.error(error);
+            }
+        }
     }
 
     removeTransition(source: string, destination: string, edgeLabel: string): void {
-        this.graph.addEdge(source, destination, edgeLabel);
+        this.graph.removeEdge(source, destination, edgeLabel);
     }
 
     /**
@@ -111,9 +126,48 @@ export class LTSController {
     /**
      * 
      * @param node 
-     * @returns a set of all the outgoing transitions a process/state has
+     * @returns a set of all the outgoing transitions a process/state has except timeout actions
      */
     getInitialActions(node: string): Set<string> {
+        let actionList: string[] = [];
+        let nodeObj = this.graph.getNode(node);
+
+        if(nodeObj != null) {
+            for(let i = 0; i < nodeObj.adjacent.length; i++) {
+                if(nodeObj.adjacent[i].edgeLabel !== Constants.TIMEOUT_ACTION) {
+                    actionList.push(nodeObj.adjacent[i].edgeLabel);
+                }
+            }
+        }
+
+        return new Set<string>(actionList);
+    }
+
+    /**
+     * searches the entire graph for all actions and returns a set of all the non special ones
+     * @returns 
+     */
+    private getAllVisibleActions(): Set<string> {
+        let edgesInGraph = this.graph.getEdgesList();
+        let edgeLabelsInGraph: string[] = [];
+
+        for(let i = 0; i < edgesInGraph.length; i++) {
+            for(let j = 0; j < edgesInGraph[i].length; j++) {
+                if(edgesInGraph[i][j].edgeLabel !== Constants.HIDDEN_ACTION && edgesInGraph[i][j].edgeLabel !== Constants.TIMEOUT_ACTION) {
+                    edgeLabelsInGraph.push(edgesInGraph[i][j].edgeLabel);
+                }
+            }
+        }
+
+        return new Set<string>(edgeLabelsInGraph);
+    }
+
+    /**
+     * 
+     * @param node 
+     * @returns a set of all outgoing transitions
+     */
+    getOutgoingActions(node: string): Set<string> {
         let actionList: string[] = [];
         let nodeObj = this.graph.getNode(node);
 
@@ -165,6 +219,27 @@ export class LTSController {
             }
         }
         return false;
+    }
+
+    setVisibleActions(A: Set<string>): void {
+        let B = this.getAllVisibleActions();
+        if(SetOps.isSubsetEq(B, A) && !SetOps.hasSpecialAction(A)) {
+            this.A = A;
+        }
+    }
+
+    addVisibleActionToA(action: string): void {
+        if(!Constants.isSpecialAction(action)) {
+            this.A.add(action);
+        }
+    }
+
+    /**
+     * getter Method for A
+     * @returns 
+     */
+    getVisibleActions(): Set<string> {
+        return this.A;
     }
 }
 

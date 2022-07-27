@@ -25,7 +25,7 @@ export class ReactiveBisimilarityGame {
         if(this.lts.hasState(process1) && this.lts.hasState(process2)) {
             this.lts.setCurrentState(process1, 0);
             this.lts.setCurrentState(process2, 1);
-            this.environment = this.getAllNormalActions();
+            this.environment = this.lts.getVisibleActions();
 
             if(startingPosition !== undefined && startingPosition !== null 
                 && startingPosition.process1 === process1 && startingPosition.process2 === process2) {
@@ -54,49 +54,60 @@ export class ReactiveBisimilarityGame {
      * @returns 
      */
     isMovePossible(action: string, nextPosition: GamePosition, environment?: Set<string>, curPosition?: GamePosition,): boolean {
-        let A = this.getAllNormalActions();
+        let A = this.lts.getVisibleActions();
 
         //deal with some optional arguments
         if(curPosition === undefined) {
             curPosition = this.play[this.play.length - 1]; //get last element in move history
         }
         if(environment === undefined) {
+            //console.log("environment undefined")    //TODO: debug
             environment = this.environment; //TODO: check if this ruins anything 
         }
 
         //check if action is viable
         if(!Constants.isSpecialAction(action) && (!environment?.has(action) || !A.has(action))) {  //empty action means symmetry move
-            this.printError('False: action not viable');
+            //this.printError('False: action not viable');    //TODO: delete debug
             return false;
         }
         
         //check if processes of positions exist in LTS
         if(curPosition == null || curPosition.process1 == null || curPosition.process2 == null 
         || !this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
+            //this.printError('False: curPosition not viable'); //TODO: delete debug
             return false;
         }
         if(nextPosition == null || nextPosition.process1 == null || !this.lts.hasState(nextPosition.process1)
         || nextPosition.process2 == null || !this.lts.hasState(nextPosition.process2)) {
+            //this.printError('False: nextPosition not viable'); //TODO: delete debug
             return false;
         }
 
         /* check all game move cases */
         //- check if action is possible from p or q
         if(curPosition instanceof AttackerNode) {
+            //this.printError('isMovePossible: curPosition AttackerNode if case'); //TODO: delete debug
+            //console.log("outgoing actions: " + SetOps.toArray(this.lts.getOutgoingActions(curPosition.process1))); //TODO: delete debug
             //symmetry move
             if(action === Constants.NO_ACTION) {
+                //this.printError('isMovePossible: Empty Action if case'); //TODO: delete debug
                 return true;
             //does process1 have the action it is supposed to execute
-            } else if(this.lts.getInitialActions(curPosition.process1).has(action)) {
+            } else if(this.lts.getOutgoingActions(curPosition.process1).has(action)) {
+                //this.printError('isMovePossible: process has action if case'); //TODO: delete debug
+                //console.log("environment:" +  SetOps.toArray(environment)); //TODO: delete debug
+                //console.log("environment:" +  SetOps.toArray((nextPosition as RestrictedSimulationDefenderNode).environment)); //TODO: delete debug
                 //simulation challenge
                 if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
+                    //this.printError('isMovePossible: simulation challenge if case'); //TODO: delete debug
                     //check conditions of move, may be redundant with other code but for clarity's sake
                     if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && (A.has(action) || action === Constants.HIDDEN_ACTION)) {
                         return true;
                     }
                 //timeout simulation challenge
                 } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2
-                     && environment === nextPosition.environment && nextPosition.previousAction === Constants.TIMEOUT_ACTION) {
+                     && SetOps.areEqual(environment, nextPosition.environment) && nextPosition.previousAction === Constants.TIMEOUT_ACTION) {
+                    //this.printError('isMovePossible: timeout simulation challenge if case'); //TODO: delete debug
                     //check move conditions
                     if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, environment) 
                     && SetOps.isSubsetEq(environment, A)) {
@@ -117,7 +128,7 @@ export class ReactiveBisimilarityGame {
             //restricted symmetry move
             if(action === Constants.NO_ACTION) {
                 return true;
-            } else if(this.lts.getInitialActions(curPosition.process1).has(action)) {
+            } else if(this.lts.getOutgoingActions(curPosition.process1).has(action)) {
                 //restricted simulation challenge
                 if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
                     if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && A.has(action) && (environment.has(action) || this.initialsEmpty(curPosition.process1, environment))) {
@@ -164,6 +175,8 @@ export class ReactiveBisimilarityGame {
         let curPosition = this.play[this.play.length - 1];
         let legalMove = this.isMovePossible(action, nextPosition, this.environment, curPosition);
         if(!legalMove) {
+            console.log("performMove: move not possible: (" + curPosition.process1 + ", " + curPosition.process2 + ") --" + 
+            action + "-> (" + nextPosition.process1 + ", " + nextPosition.process2 + ")");
             return -1;
         }
 
@@ -178,20 +191,12 @@ export class ReactiveBisimilarityGame {
 
         //update move history
         this.play.push(nextPosition);
+        console.log("Performed move from (" + curPosition.process1 + ", " + curPosition.process2 + ") --" + 
+        action + "-> (" + nextPosition.process1 + ", " + nextPosition.process2 + ")");
 
         return 0;
     }
 
-    getAllNormalActions(): Set<string> {
-        let a = SetOps.toArray(this.lts.getAllActions());
-        for(let i = 0; i < a.length; i++) {
-            if(Constants.isSpecialAction(a[i])) {
-                a.splice(i, 1);
-                i--;
-            }
-        }
-        return new Set(a);
-    }
 
     /**
      * 
@@ -241,7 +246,7 @@ export class ReactiveBisimilarityGame {
     }
 
     resetEnvironment() {
-        this.environment = new Set(SetOps.toArray(this.getAllNormalActions()).sort());
+        this.environment = new Set(SetOps.toArray(this.lts.getVisibleActions()).sort());
         console.log("Environment was reset to {" + SetOps.toArray(this.environment) + "}.");
     }
 
@@ -263,7 +268,7 @@ export class ReactiveBisimilarityGame {
                 moves.push(curPosition.invertProcesses());
             }
             //other moves
-            let actions = this.lts.getInitialActions(curPosition.process1)
+            let actions = this.lts.getInitialActions(curPosition.process1) //TODO: outgoing or initials
             if(curPosition instanceof AttackerNode) {
 
             } else if(curPosition instanceof RestrictedAttackerNode) {

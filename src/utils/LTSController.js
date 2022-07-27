@@ -1,6 +1,8 @@
 "use strict";
 exports.__esModule = true;
+var Constants_1 = require("./Constants");
 var Graph_1 = require("./Graph");
+var SetOps_1 = require("./SetOps");
 /**
  * Model for representing LTS in code
  */
@@ -14,6 +16,7 @@ var LTSController = /** @class */ (function () {
             return 0;
         });
         this.current = [];
+        this.A = new Set();
     }
     LTSController.prototype.addState = function (data) {
         this.graph.addNode(data);
@@ -39,10 +42,23 @@ var LTSController = /** @class */ (function () {
         }
     };
     LTSController.prototype.addTransition = function (source, destination, edgeLabel) {
-        this.graph.addEdge(source, destination, edgeLabel);
+        if (edgeLabel !== "") {
+            this.graph.addEdge(source, destination, edgeLabel);
+            if (!Constants_1.Constants.isSpecialAction(edgeLabel)) {
+                this.A.add(edgeLabel);
+            }
+        }
+        else {
+            try {
+                throw new Error('addTransition: given edgelabel is empty');
+            }
+            catch (error) {
+                console.error(error);
+            }
+        }
     };
     LTSController.prototype.removeTransition = function (source, destination, edgeLabel) {
-        this.graph.addEdge(source, destination, edgeLabel);
+        this.graph.removeEdge(source, destination, edgeLabel);
     };
     /**
      * Set state/process we are currently in
@@ -108,9 +124,42 @@ var LTSController = /** @class */ (function () {
     /**
      *
      * @param node
-     * @returns a set of all the outgoing transitions a process/state has
+     * @returns a set of all the outgoing transitions a process/state has except timeout actions
      */
     LTSController.prototype.getInitialActions = function (node) {
+        var actionList = [];
+        var nodeObj = this.graph.getNode(node);
+        if (nodeObj != null) {
+            for (var i = 0; i < nodeObj.adjacent.length; i++) {
+                if (nodeObj.adjacent[i].edgeLabel !== Constants_1.Constants.TIMEOUT_ACTION) {
+                    actionList.push(nodeObj.adjacent[i].edgeLabel);
+                }
+            }
+        }
+        return new Set(actionList);
+    };
+    /**
+     * searches the entire graph for all actions and returns a set of all the non special ones
+     * @returns
+     */
+    LTSController.prototype.getAllVisibleActions = function () {
+        var edgesInGraph = this.graph.getEdgesList();
+        var edgeLabelsInGraph = [];
+        for (var i = 0; i < edgesInGraph.length; i++) {
+            for (var j = 0; j < edgesInGraph[i].length; j++) {
+                if (edgesInGraph[i][j].edgeLabel !== Constants_1.Constants.HIDDEN_ACTION && edgesInGraph[i][j].edgeLabel !== Constants_1.Constants.TIMEOUT_ACTION) {
+                    edgeLabelsInGraph.push(edgesInGraph[i][j].edgeLabel);
+                }
+            }
+        }
+        return new Set(edgeLabelsInGraph);
+    };
+    /**
+     *
+     * @param node
+     * @returns a set of all outgoing transitions
+     */
+    LTSController.prototype.getOutgoingActions = function (node) {
         var actionList = [];
         var nodeObj = this.graph.getNode(node);
         if (nodeObj != null) {
@@ -155,6 +204,24 @@ var LTSController = /** @class */ (function () {
             }
         }
         return false;
+    };
+    LTSController.prototype.setVisibleActions = function (A) {
+        var B = this.getAllVisibleActions();
+        if (SetOps_1.SetOps.isSubsetEq(B, A) && !SetOps_1.SetOps.hasSpecialAction(A)) {
+            this.A = A;
+        }
+    };
+    LTSController.prototype.addVisibleActionToA = function (action) {
+        if (!Constants_1.Constants.isSpecialAction(action)) {
+            this.A.add(action);
+        }
+    };
+    /**
+     * getter Method for A
+     * @returns
+     */
+    LTSController.prototype.getVisibleActions = function () {
+        return this.A;
     };
     return LTSController;
 }());

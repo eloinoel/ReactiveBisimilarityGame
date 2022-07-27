@@ -19,7 +19,7 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
         if (this.lts.hasState(process1) && this.lts.hasState(process2)) {
             this.lts.setCurrentState(process1, 0);
             this.lts.setCurrentState(process2, 1);
-            this.environment = this.getAllNormalActions();
+            this.environment = this.lts.getVisibleActions();
             if (startingPosition !== undefined && startingPosition !== null
                 && startingPosition.process1 === process1 && startingPosition.process2 === process2) {
                 this.play.push(startingPosition);
@@ -49,39 +49,49 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
      * @returns
      */
     ReactiveBisimilarityGame.prototype.isMovePossible = function (action, nextPosition, environment, curPosition) {
-        var A = this.getAllNormalActions();
+        var A = this.lts.getVisibleActions();
         //deal with some optional arguments
         if (curPosition === undefined) {
             curPosition = this.play[this.play.length - 1]; //get last element in move history
         }
         if (environment === undefined) {
+            //console.log("environment undefined")    //TODO: debug
             environment = this.environment; //TODO: check if this ruins anything 
         }
         //check if action is viable
         if (!Constants_1.Constants.isSpecialAction(action) && (!(environment === null || environment === void 0 ? void 0 : environment.has(action)) || !A.has(action))) { //empty action means symmetry move
-            this.printError('False: action not viable');
+            //this.printError('False: action not viable');    //TODO: delete debug
             return false;
         }
         //check if processes of positions exist in LTS
         if (curPosition == null || curPosition.process1 == null || curPosition.process2 == null
             || !this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
+            //this.printError('False: curPosition not viable'); //TODO: delete debug
             return false;
         }
         if (nextPosition == null || nextPosition.process1 == null || !this.lts.hasState(nextPosition.process1)
             || nextPosition.process2 == null || !this.lts.hasState(nextPosition.process2)) {
+            //this.printError('False: nextPosition not viable'); //TODO: delete debug
             return false;
         }
         /* check all game move cases */
         //- check if action is possible from p or q
         if (curPosition instanceof GamePosition_1.AttackerNode) {
+            //this.printError('isMovePossible: curPosition AttackerNode if case'); //TODO: delete debug
+            //console.log("outgoing actions: " + SetOps.toArray(this.lts.getOutgoingActions(curPosition.process1))); //TODO: delete debug
             //symmetry move
             if (action === Constants_1.Constants.NO_ACTION) {
+                //this.printError('isMovePossible: Empty Action if case'); //TODO: delete debug
                 return true;
                 //does process1 have the action it is supposed to execute
             }
-            else if (this.lts.getInitialActions(curPosition.process1).has(action)) {
+            else if (this.lts.getOutgoingActions(curPosition.process1).has(action)) {
+                //this.printError('isMovePossible: process has action if case'); //TODO: delete debug
+                //console.log("environment:" +  SetOps.toArray(environment)); //TODO: delete debug
+                //console.log("environment:" +  SetOps.toArray((nextPosition as RestrictedSimulationDefenderNode).environment)); //TODO: delete debug
                 //simulation challenge
                 if (nextPosition instanceof GamePosition_1.SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
+                    //this.printError('isMovePossible: simulation challenge if case'); //TODO: delete debug
                     //check conditions of move, may be redundant with other code but for clarity's sake
                     if (this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && (A.has(action) || action === Constants_1.Constants.HIDDEN_ACTION)) {
                         return true;
@@ -89,7 +99,8 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
                     //timeout simulation challenge
                 }
                 else if (nextPosition instanceof GamePosition_1.RestrictedSimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2
-                    && environment === nextPosition.environment && nextPosition.previousAction === Constants_1.Constants.TIMEOUT_ACTION) {
+                    && SetOps_1.SetOps.areEqual(environment, nextPosition.environment) && nextPosition.previousAction === Constants_1.Constants.TIMEOUT_ACTION) {
+                    //this.printError('isMovePossible: timeout simulation challenge if case'); //TODO: delete debug
                     //check move conditions
                     if (this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, environment)
                         && SetOps_1.SetOps.isSubsetEq(environment, A)) {
@@ -113,7 +124,7 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
             if (action === Constants_1.Constants.NO_ACTION) {
                 return true;
             }
-            else if (this.lts.getInitialActions(curPosition.process1).has(action)) {
+            else if (this.lts.getOutgoingActions(curPosition.process1).has(action)) {
                 //restricted simulation challenge
                 if (nextPosition instanceof GamePosition_1.SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
                     if (this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && A.has(action) && (environment.has(action) || this.initialsEmpty(curPosition.process1, environment))) {
@@ -162,6 +173,8 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
         var curPosition = this.play[this.play.length - 1];
         var legalMove = this.isMovePossible(action, nextPosition, this.environment, curPosition);
         if (!legalMove) {
+            console.log("performMove: move not possible: (" + curPosition.process1 + ", " + curPosition.process2 + ") --" +
+                action + "-> (" + nextPosition.process1 + ", " + nextPosition.process2 + ")");
             return -1;
         }
         //update currents
@@ -174,17 +187,9 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
         this.lts.setCurrentState(nextPosition.process2, process2Index);
         //update move history
         this.play.push(nextPosition);
+        console.log("Performed move from (" + curPosition.process1 + ", " + curPosition.process2 + ") --" +
+            action + "-> (" + nextPosition.process1 + ", " + nextPosition.process2 + ")");
         return 0;
-    };
-    ReactiveBisimilarityGame.prototype.getAllNormalActions = function () {
-        var a = SetOps_1.SetOps.toArray(this.lts.getAllActions());
-        for (var i = 0; i < a.length; i++) {
-            if (Constants_1.Constants.isSpecialAction(a[i])) {
-                a.splice(i, 1);
-                i--;
-            }
-        }
-        return new Set(a);
     };
     /**
      *
@@ -222,7 +227,7 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
         if (!newEnv.has(Constants_1.Constants.HIDDEN_ACTION) && !newEnv.has(Constants_1.Constants.NO_ACTION) && !newEnv.has(Constants_1.Constants.TIMEOUT_ACTION)) {
             var tmp = SetOps_1.SetOps.toArray(newEnv).sort();
             this.environment = new Set(tmp);
-            console.log("Environment was set to {" + SetOps_1.SetOps.toArray(this.environment) + "}");
+            console.log("Environment was set to {" + SetOps_1.SetOps.toArray(this.environment) + "}.");
         }
         else {
             this.printError('setEnvironment: Error: some illegal action in given environment');
@@ -232,8 +237,8 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
         return this.environment;
     };
     ReactiveBisimilarityGame.prototype.resetEnvironment = function () {
-        this.environment = new Set(SetOps_1.SetOps.toArray(this.getAllNormalActions()).sort());
-        console.log("Environment was reset to {" + SetOps_1.SetOps.toArray(this.environment) + "}");
+        this.environment = new Set(SetOps_1.SetOps.toArray(this.lts.getVisibleActions()).sort());
+        console.log("Environment was reset to {" + SetOps_1.SetOps.toArray(this.environment) + "}.");
     };
     /**
      * TODO:
@@ -252,7 +257,7 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
                 moves.push(curPosition.invertProcesses());
             }
             //other moves
-            var actions = this.lts.getInitialActions(curPosition.process1);
+            var actions = this.lts.getInitialActions(curPosition.process1); //TODO: outgoing or initials
             if (curPosition instanceof GamePosition_1.AttackerNode) {
             }
             else if (curPosition instanceof GamePosition_1.RestrictedAttackerNode) {

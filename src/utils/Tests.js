@@ -12,16 +12,26 @@ var Tests = /** @class */ (function () {
     Tests.prototype.testReactiveBisimGame = function () {
         var lts = this.getReactiveBisimLTS();
         var game = new ReactiveBisimilarityGameController_1.ReactiveBisimilarityGame("0", "0'", lts);
-        console.log("currents: " + lts.current);
-        lts.graph.print();
+        //console.log("currents: " + lts.current);
+        //lts.graph.print();
         console.log("----------------- TESTS -----------------");
+        //simulation challenge
         game.setEnvironment(new Set(["c"]));
         console.log("isMovePossible(0-b->P ): " + game.isMovePossible("b", new GamePosition_1.SimulationDefenderNode("P", "0'", "b")) + ", expected: false (environment doesn't allow)");
         game.resetEnvironment();
-        console.log("isMovePossible(0-b->P ): " + game.isMovePossible("b", new GamePosition_1.SimulationDefenderNode("P", "0'", "b"), new Set(["c"])) + ", expected: false (environment doesn't allow)");
+        console.log("isMovePossible(0-b->P ): " + game.isMovePossible("b", new GamePosition_1.SimulationDefenderNode("P", "0'", "b"), new Set(["c"])) + ", expected: false (custom environment {c} doesn't allow)");
         console.log("isMovePossible(0-b->P ): " + game.isMovePossible("b", new GamePosition_1.SimulationDefenderNode("P", "0'", "b")) + ", expected: true");
-        game.isMovePossible(Constants_1.Constants.TIMEOUT_ACTION, new GamePosition_1.SimulationDefenderNode("P", "0'", "b"));
+        //timeout simulation challenge
+        console.log("Timeout action: " + game.isMovePossible(Constants_1.Constants.TIMEOUT_ACTION, new GamePosition_1.RestrictedSimulationDefenderNode("2", "0'", Constants_1.Constants.TIMEOUT_ACTION, game.getEnvironment())) + ", expected false");
+        lts.addVisibleActionToA("c");
+        game.resetEnvironment();
+        console.log("Timeout action, env: {c}: " + game.isMovePossible(Constants_1.Constants.TIMEOUT_ACTION, new GamePosition_1.RestrictedSimulationDefenderNode("2", "0'", Constants_1.Constants.TIMEOUT_ACTION, new Set(["c"])), new Set(["c"])) + ", expected true");
+        console.log("Timeout action, wrong nextNode: " + game.isMovePossible(Constants_1.Constants.TIMEOUT_ACTION, new GamePosition_1.SimulationDefenderNode("2", "0'", Constants_1.Constants.TIMEOUT_ACTION)) + ", expected false");
+        //game.performMove("b", new SimulationDefenderNode("P", "0'", "b"));
+        //game.performMove("b", new AttackerNode("P", "P'"));
+        //console.log("currents: " + lts.current);
         //game.isMovePossible("b", new RestrictedSimulationDefenderNode("P", "0'", "b", game.getEnvironment()));
+        //TODO: Test with possibleMoves() function
     };
     /**
      * Constructs the first reactive bisimilar LTS from the van Glabbeek Paper

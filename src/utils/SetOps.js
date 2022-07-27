@@ -7,12 +7,20 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 exports.__esModule = true;
+var Constants_1 = require("./Constants");
 /**
  * contains functions that do all the standard set operations
  */
 var SetOps = /** @class */ (function () {
     function SetOps() {
     }
+    SetOps.hasSpecialAction = function (a) {
+        var b = Array.from(a);
+        if (b.some(function (element) { return Constants_1.Constants.isSpecialAction(element); })) {
+            return true;
+        }
+        return false;
+    };
     SetOps.isEmpty = function (a) {
         if (a.size === 0)
             return true;

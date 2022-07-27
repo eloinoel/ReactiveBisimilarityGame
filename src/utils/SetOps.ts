@@ -1,7 +1,17 @@
+import { Constants } from "./Constants";
+
 /**
  * contains functions that do all the standard set operations
  */
 export class SetOps {
+
+    static hasSpecialAction(a: Set<string>): boolean {
+        let b = Array.from(a);
+        if(b.some(element => Constants.isSpecialAction(element))) {
+            return true;
+        }
+        return false;
+    }
 
     static isEmpty(a: Set<any>): boolean {
         if(a.size === 0) return true;
