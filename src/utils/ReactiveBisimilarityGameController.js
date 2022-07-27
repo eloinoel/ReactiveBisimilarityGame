@@ -264,10 +264,42 @@ var ReactiveBisimilarityGame = /** @class */ (function () {
             }
             //TODO: LTS or this class should have generate moves function, to just call isMovePossible() upon 
         }
-        else {
+        else if (curPosition.activePlayer === GamePosition_1.Player.Defender) {
         }
-        var pos = new GamePosition_1.AttackerNode("TO", "DO");
-        return [pos];
+        return moves;
+    };
+    /**
+     * generates moves based on current position and edges in the lts
+     * these moves are potentially not possible and should be channeled into isMovePossible()-method
+     * @param curPosition
+     * @returns
+     */
+    ReactiveBisimilarityGame.prototype.generateMoves = function (curPosition) {
+        var moves = [];
+        //valid arguments
+        if (!this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
+            this.printError('possibleMoves: some process from given game position does not exist');
+            return moves;
+        }
+        if (curPosition instanceof GamePosition_1.AttackerNode) {
+            //symmetry move
+            moves.push(curPosition.invertProcesses());
+            //simulation challenges
+            var edges = this.lts.getActionsAndDestinations(curPosition.process1);
+            /* edges.forEach(
+                moves.push(new SimulationDefenderNode())
+            )  */
+        }
+        else if (curPosition instanceof GamePosition_1.RestrictedAttackerNode) {
+        }
+        else if (curPosition instanceof GamePosition_1.SimulationDefenderNode) {
+        }
+        else if (curPosition instanceof GamePosition_1.RestrictedSimulationDefenderNode) {
+        }
+        else {
+            this.printError('generateMoves: unknown game position type');
+        }
+        return moves;
     };
     return ReactiveBisimilarityGame;
 }());

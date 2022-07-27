@@ -138,6 +138,18 @@ var LTSController = /** @class */ (function () {
         }
         return new Set(actionList);
     };
+    LTSController.prototype.getActionsAndDestinations = function (node) {
+        var edgeList = [];
+        var edge = [];
+        var nodeObj = this.graph.getNode(node);
+        if (nodeObj != null) {
+            for (var i = 0; i < nodeObj.adjacent.length; i++) {
+                edge = [nodeObj.adjacent[i].edgeLabel, nodeObj.adjacent[i].node.data];
+                edgeList.push(edge);
+            }
+        }
+        return edgeList;
+    };
     /**
      * searches the entire graph for all actions and returns a set of all the non special ones
      * @returns

@@ -118,6 +118,7 @@ var Tests = /** @class */ (function () {
         console.log("set current to 3: ");
         console.log(lts.current);
         lts.graph.print();
+        console.log(lts.getActionsAndDestinations("0"));
     };
     Tests.prototype.testGraph = function () {
         var graph = new Graph_1.Graph(this.comparator0);
@@ -155,4 +156,5 @@ exports.Tests = Tests;
 //----------------------------------- Testing -----------------------------------
 var test = new Tests();
 //test.testSetOps();
-test.testReactiveBisimGame();
+//test.testReactiveBisimGame();
+test.testLTSController();

@@ -143,6 +143,20 @@ export class LTSController {
         return new Set<string>(actionList);
     }
 
+    getActionsAndDestinations(node: string): string[][] {
+        let edgeList = [];
+        let edge: string[] = [];
+        let nodeObj = this.graph.getNode(node);
+
+        if(nodeObj != null) {
+            for(let i = 0; i < nodeObj.adjacent.length; i++) {
+                edge = [nodeObj.adjacent[i].edgeLabel, nodeObj.adjacent[i].node.data as string] 
+                edgeList.push(edge);
+            }
+        }
+        return edgeList;
+    }
+
     /**
      * searches the entire graph for all actions and returns a set of all the non special ones
      * @returns 

@@ -127,6 +127,7 @@ export class Tests {
         console.log("set current to 3: ")
         console.log(lts.current);
         lts.graph.print();
+        console.log(lts.getActionsAndDestinations("0"));
     }
 
     testGraph() {
@@ -161,8 +162,10 @@ export class Tests {
         return 0;
     }
 }
-    //----------------------------------- Testing -----------------------------------
-    const test = new Tests();
 
-    //test.testSetOps();
-    test.testReactiveBisimGame();
+//----------------------------------- Testing -----------------------------------
+const test = new Tests();
+
+//test.testSetOps();
+test.testReactiveBisimGame();
+//test.testLTSController();

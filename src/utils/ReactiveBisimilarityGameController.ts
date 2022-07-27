@@ -251,7 +251,7 @@ export class ReactiveBisimilarityGame {
     }
 
     /**
-     * TODO:
+     * TODO: to test
      * good for debugging purposes
      * @param process 
      */
@@ -262,28 +262,125 @@ export class ReactiveBisimilarityGame {
             this.printError('possibleMoves: some process from given game position does not exist');
             return moves;
         }
-        if(curPosition.activePlayer === Player.Attacker) {
-            //symmetry move
-            if(this.isMovePossible(Constants.NO_ACTION, curPosition.invertProcesses(), this.environment, curPosition)) {
-                moves.push(curPosition.invertProcesses());
+
+        let potentialMoves = this.generateMoves(curPosition);
+
+        for(let i = 0; i < potentialMoves.length; i++) {
+            if(curPosition.activePlayer === Player.Attacker) {
+                //symmetry moves
+                if(potentialMoves[i] instanceof AttackerNode || potentialMoves[i] instanceof RestrictedAttackerNode) {
+                    if(this.isMovePossible(Constants.NO_ACTION, potentialMoves[i], this.environment, curPosition)) {
+                        moves.push(potentialMoves[i]);
+                    }
+                } else if(potentialMoves[i] instanceof SimulationDefenderNode || potentialMoves[i] instanceof RestrictedSimulationDefenderNode) {
+                    if(this.isMovePossible((potentialMoves[i] as SimulationDefenderNode).previousAction, potentialMoves[i], this.environment, curPosition)) {
+                        moves.push(potentialMoves[i]);
+                    }
+                } else {
+                    this.printError('isMovePossible: type of potential node illegal');
+                }
+            } else if(curPosition.activePlayer === Player.Defender) {
+                if(potentialMoves[i] instanceof SimulationDefenderNode || potentialMoves[i] instanceof RestrictedSimulationDefenderNode) {
+                    if(this.isMovePossible((curPosition as SimulationDefenderNode).previousAction, potentialMoves[i], this.environment, curPosition)) {
+                        moves.push(potentialMoves[i]);
+                    }
+                } else {
+                    this.printError('isMovePossible: type of potential node illegal');
+                }
             }
-            //other moves
-            let actions = this.lts.getInitialActions(curPosition.process1) //TODO: outgoing or initials
-            if(curPosition instanceof AttackerNode) {
-
-            } else if(curPosition instanceof RestrictedAttackerNode) {
-
-            }
-            //TODO: LTS or this class should have generate moves function, to just call isMovePossible() upon 
-
-        } else {
-
         }
 
-
-        let pos = new AttackerNode("TO", "DO");
-        return [pos];
+        return moves;
     } 
+
+    /**
+     * generates moves based on current position and edges in the lts
+     * these moves are potentially not possible and should be channeled into isMovePossible()-method
+     * to not float the returned moves with environment combinations, the maximal possible invironment is added
+     * @param curPosition 
+     * @returns 
+     */
+    private generateMoves(curPosition: GamePosition): GamePosition[] {
+        let moves: GamePosition[] = [];
+        let A = this.lts.getVisibleActions();
+
+        //valid arguments
+        if(!this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
+            this.printError('possibleMoves: some process from given game position does not exist');
+            return moves;
+        } 
+
+        if(curPosition instanceof AttackerNode) {
+            //symmetry move
+            moves.push(curPosition.invertProcesses());
+
+            let edges = this.lts.getActionsAndDestinations(curPosition.process1);   //[[actionLabel, destination], ...]
+            //get maximal environment to allow timeout
+            let maxEnvForTimeout = new Set(A);
+            for(let j = 0; j < edges.length; j++) {
+                if(!Constants.isSpecialAction(edges[j][0])) {
+                    maxEnvForTimeout.delete(edges[j][0]);
+                }
+            }
+
+            for(let i = 0; i < edges.length; i++) {
+                //simulation challenge
+                if(edges[i][0] !== Constants.TIMEOUT_ACTION && edges[i][0] !== Constants.NO_ACTION) {
+                    moves.push(new SimulationDefenderNode(edges[i][1], curPosition.process2, edges[i][0]));
+                
+                //timeout simulation challenge
+                } else if(edges[i][0] === Constants.TIMEOUT_ACTION) {
+                    moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, maxEnvForTimeout));
+                }
+            }
+        } else if(curPosition instanceof RestrictedAttackerNode) {
+            //restricted symmetry move
+            moves.push(curPosition.invertProcesses());
+
+            let edges = this.lts.getActionsAndDestinations(curPosition.process1);
+            //get maximal environment to allow timeout
+            let maxEnvForTimeout = new Set(A);
+            for(let j = 0; j < edges.length; j++) {
+                if(!Constants.isSpecialAction(edges[j][0])) {
+                    maxEnvForTimeout.delete(edges[j][0]);
+                }
+            }
+
+            for(let i = 0; i < edges.length; i++) {
+                //restricted simulation challenge
+                if(!Constants.isSpecialAction(edges[i][0])) {
+                    moves.push(new SimulationDefenderNode(edges[i][1], curPosition.process2, edges[i][0]));
+                
+                //invisible simulation challenge
+                } else if(edges[i][0] === Constants.HIDDEN_ACTION) {
+                    moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.HIDDEN_ACTION, curPosition.environment));
+                
+                //timeouted timeout simulation challenge
+                } else if(edges[i][0] === Constants.TIMEOUT_ACTION) {
+                    moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, maxEnvForTimeout));
+                }
+            }
+        } else if(curPosition instanceof SimulationDefenderNode) {
+            //simulation answer
+            let edges = this.lts.getActionsAndDestinations(curPosition.process2);
+            for(let i = 0; i < edges.length; i++) {
+                if(edges[i][0] === curPosition.previousAction) {
+                    moves.push(new AttackerNode(curPosition.process1, edges[i][1]));
+                }
+            }
+        } else if(curPosition instanceof RestrictedSimulationDefenderNode) {
+            //invisible simulation answer & timeout simulation answer
+            let edges = this.lts.getActionsAndDestinations(curPosition.process2);
+            for(let i = 0; i < edges.length; i++) {
+                if(edges[i][0] === curPosition.previousAction) {
+                    moves.push(new RestrictedAttackerNode(curPosition.process1, edges[i][1], curPosition.environment));
+                }
+            }
+        } else {
+            this.printError('generateMoves: unknown game position type')
+        }
+        return moves;
+    }
 
 
 }
