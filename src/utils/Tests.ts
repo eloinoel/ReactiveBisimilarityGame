@@ -26,9 +26,12 @@ export class Tests {
         game.resetEnvironment()
         console.log("Timeout action, env: {c}: " + game.isMovePossible(Constants.TIMEOUT_ACTION, new RestrictedSimulationDefenderNode("2", "0'", Constants.TIMEOUT_ACTION, new Set(["c"])), new Set(["c"])) + ", expected true");
         console.log("Timeout action, wrong nextNode: " + game.isMovePossible(Constants.TIMEOUT_ACTION, new SimulationDefenderNode("2", "0'", Constants.TIMEOUT_ACTION)) + ", expected false");
-        //game.performMove("b", new SimulationDefenderNode("P", "0'", "b"));
+        
         //game.performMove("b", new AttackerNode("P", "P'"));
-        //console.log("currents: " + lts.current);
+        console.log("possible moves:");
+        console.log(game.possibleMoves());
+        game.performMove("b", new SimulationDefenderNode("P", "0'", "b"));
+        console.log(game.possibleMoves());
 
         //game.isMovePossible("b", new RestrictedSimulationDefenderNode("P", "0'", "b", game.getEnvironment()));
         //TODO: Test with possibleMoves() function

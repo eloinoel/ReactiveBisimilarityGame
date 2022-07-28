@@ -255,7 +255,11 @@ export class ReactiveBisimilarityGame {
      * good for debugging purposes
      * @param process 
      */
-    possibleMoves(curPosition: GamePosition): GamePosition[] {
+    possibleMoves(curPosition?: GamePosition): GamePosition[] {
+        if(curPosition === undefined) {
+            curPosition = this.play[this.play.length - 1];
+        }
+
         let moves: GamePosition[] = []
 
         if(!this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
@@ -272,20 +276,21 @@ export class ReactiveBisimilarityGame {
                     if(this.isMovePossible(Constants.NO_ACTION, potentialMoves[i], this.environment, curPosition)) {
                         moves.push(potentialMoves[i]);
                     }
+                //all other moves
                 } else if(potentialMoves[i] instanceof SimulationDefenderNode || potentialMoves[i] instanceof RestrictedSimulationDefenderNode) {
                     if(this.isMovePossible((potentialMoves[i] as SimulationDefenderNode).previousAction, potentialMoves[i], this.environment, curPosition)) {
                         moves.push(potentialMoves[i]);
                     }
                 } else {
-                    this.printError('isMovePossible: type of potential node illegal');
+                    this.printError('possibleMoves: type of potential node illegal: ');
                 }
             } else if(curPosition.activePlayer === Player.Defender) {
-                if(potentialMoves[i] instanceof SimulationDefenderNode || potentialMoves[i] instanceof RestrictedSimulationDefenderNode) {
+                if(potentialMoves[i] instanceof AttackerNode || potentialMoves[i] instanceof RestrictedAttackerNode) {
                     if(this.isMovePossible((curPosition as SimulationDefenderNode).previousAction, potentialMoves[i], this.environment, curPosition)) {
                         moves.push(potentialMoves[i]);
                     }
                 } else {
-                    this.printError('isMovePossible: type of potential node illegal');
+                    this.printError('possibleMoves: type of potential node illegal: ' + potentialMoves[i]);
                 }
             }
         }

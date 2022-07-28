@@ -1,6 +1,6 @@
 import Phaser, { Scene } from 'phaser';
-
-import GameScene from './scenes/Game'
+import { Constants } from './utils/Constants';
+import MainMenuScene from './scenes/MainMenu'
 import PreloadScene from './scenes/Preloader'
 
 
@@ -12,15 +12,14 @@ const MIN_HEIGHT = 270
 const DEFAULT_WIDTH = 960
 const DEFAULT_HEIGHT = 540
 
+
 export default {
   type: Phaser.AUTO,
   parent: 'game',
-  backgroundColor: '#33A5E7',
-
-  
+  backgroundColor: Constants.COLORPACK_1.black,
 
   scale: {
-    mode: Phaser.Scale.ENVELOP, //Set to FIT otherwise if scaling of game objects doesnt work properly
+    mode: Phaser.Scale.FIT, //Set to FIT otherwise if scaling of game objects doesnt work properly
     //Game size
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
@@ -39,5 +38,8 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloadScene, GameScene]
+  scene: [PreloadScene, MainMenuScene],
+  render: {
+    pixelArt: true
+  }
 };
