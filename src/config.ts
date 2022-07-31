@@ -2,6 +2,7 @@ import Phaser, { Scene } from 'phaser';
 import { Constants } from './utils/Constants';
 import MainMenuScene from './scenes/MainMenu'
 import PreloadScene from './scenes/Preloader'
+import DemoScene from './scenes/DemoLevel';
 
 
 // Aspect Ratio 16:9
@@ -9,8 +10,8 @@ const MAX_WIDTH = 4096 //1920
 const MAX_HEIGHT = 2304 //1080
 const MIN_WIDTH = 480
 const MIN_HEIGHT = 270 
-const DEFAULT_WIDTH = 960
-const DEFAULT_HEIGHT = 540
+const DEFAULT_WIDTH = 1280
+const DEFAULT_HEIGHT = 800
 
 
 export default {
@@ -19,7 +20,7 @@ export default {
   backgroundColor: Constants.COLORPACK_1.black,
 
   scale: {
-    mode: Phaser.Scale.FIT, //Set to FIT otherwise if scaling of game objects doesnt work properly
+    mode: Phaser.Scale.NONE, //Set to FIT otherwise if scaling of game objects doesnt work properly
     //Game size
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
@@ -38,8 +39,9 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloadScene, MainMenuScene],
+  scene: [/* PreloadScene, MainMenuScene, */ DemoScene],
   render: {
-    pixelArt: true
+    pixelArt: true,
+    antialias: false,
   }
 };

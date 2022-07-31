@@ -1,0 +1,21 @@
+{"frames": {
+
+"GoldPeaberry.png":
+{
+	"frame": {"x":0,"y":0,"w":268,"h":368},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":268,"h":368},
+	"sourceSize": {"w":268,"h":368}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "GoldPeaberry.png",
+	"format": "RGBA8888",
+	"size": {"w":268,"h":368},
+	"scale": "1",
+	"normal_map": "GoldPeaberry_n.png",
+	"smartupdate": "$TexturePacker:SmartUpdate:de7022881e09abb9a187ce3283dbd786:f9b49315fe1966f6c4cf3571a28e28bf:97b78a796958f515358075b3bfac6854$"
+}
+}

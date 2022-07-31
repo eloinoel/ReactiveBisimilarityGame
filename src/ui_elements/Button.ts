@@ -1,11 +1,49 @@
-export class Button extends Phaser.GameObjects.Sprite {
+import { Constants } from "../utils/Constants";
 
-     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, outFrame: string, overFrame: string, downFrame: string) {
-        super(scene, x, y, texture);
+export class Button extends Phaser.GameObjects.Container {
+
+    private outImage: Phaser.GameObjects.Image;
+    private overImage: Phaser.GameObjects.Image;
+    private downImage: Phaser.GameObjects.Image;
+
+    private text: Phaser.GameObjects.Text;
+
+
+    constructor(scene: Phaser.Scene, x: number, y: number, outTexture: string, actionOnClick = () => {}, caption: string, overTexture?: string, downTexture?: string) {
+        super(scene, x, y);
+
+        this.outImage = scene.add.image(0, 0, outTexture);
+        if(overTexture === undefined) {
+            this.overImage = scene.add.image(0, 0, outTexture);
+        } else {
+            this.overImage = scene.add.image(0, 0, overTexture);
+        }
+        if(downTexture === undefined) {
+            this.downImage = scene.add.image(0, 0, outTexture);
+        } else {
+            this.downImage = scene.add.image(0, 0, downTexture);
+        }
+        this.text = scene.add.text(0, 0, caption, {fontFamily:'Monospace', color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
+        this.text.x = Math.round(this.text.x);
+        this.text.y = Math.round(this.text.y);
+
+        this.add(this.outImage);
+        this.add(this.overImage);
+        this.add(this.downImage);
+        this.add(this.text);
+
+        this.overImage.setVisible(false);
+        this.downImage.setVisible(false);
+
+
         scene.add.existing(this);
-        this.setFrame(outFrame).setInteractive();
 
-        /** make image buttons interactive
+        this.setSize(this.outImage.width, this.outImage.height);
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+        this.setInteractive();
+
+        /** make image button interactive
          * PointerEvents:
          *    pointerover - hovering
          *    pointerout - not hovering
@@ -13,17 +51,33 @@ export class Button extends Phaser.GameObjects.Sprite {
          *    pointerdown - just click
          */
         this.on('pointerover', () => {
-            this.setFrame(overFrame);
+            this.overImage.setVisible(true);
+            this.outImage.setVisible(false);
+            this.downImage.setVisible(false);
         })
         this.on('pointerdown', () => {
-            this.setFrame(downFrame);
+            this.overImage.setVisible(false);
+            this.outImage.setVisible(false);
+            this.downImage.setVisible(true);
         })
         this.on('pointerup', () => {
-            this.setFrame(overFrame);
+            this.overImage.setVisible(true);
+            this.outImage.setVisible(false);
+            this.downImage.setVisible(false);
             actionOnClick();
         })
         this.on('pointerout', () => {
-            this.setFrame(outFrame);
+            this.overImage.setVisible(false);
+            this.outImage.setVisible(true);
+            this.downImage.setVisible(false);
         })
     }
+}
+
+export class LtsStateButton extends Button {
+    
+    constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, caption: string) {
+        super(scene, x, y, "circle", actionOnClick, caption, "circle_over", "circle_down");
+    }
+
 }

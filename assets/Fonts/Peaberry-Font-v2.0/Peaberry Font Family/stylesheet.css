@@ -1,0 +1,39 @@
+@font-face {
+    font-family: 'Peaberry';
+    src: url('PeaberryMono.eot');
+    src: url('PeaberryMono.eot?#iefix') format('embedded-opentype'),
+        url('PeaberryMono.woff2') format('woff2'),
+        url('PeaberryMono.woff') format('woff'),
+        url('PeaberryMono.ttf') format('truetype'),
+        url('PeaberryMono.svg#PeaberryMono') format('svg');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Peaberry';
+    src: url('PeaberryDoublespace.eot');
+    src: url('PeaberryDoublespace.eot?#iefix') format('embedded-opentype'),
+        url('PeaberryDoublespace.woff2') format('woff2'),
+        url('PeaberryDoublespace.woff') format('woff'),
+        url('PeaberryDoublespace.ttf') format('truetype'),
+        url('PeaberryDoublespace.svg#PeaberryDoublespace') format('svg');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Peaberry';
+    src: url('PeaberryBase.eot');
+    src: url('PeaberryBase.eot?#iefix') format('embedded-opentype'),
+        url('PeaberryBase.woff2') format('woff2'),
+        url('PeaberryBase.woff') format('woff'),
+        url('PeaberryBase.ttf') format('truetype'),
+        url('PeaberryBase.svg#PeaberryBase') format('svg');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+

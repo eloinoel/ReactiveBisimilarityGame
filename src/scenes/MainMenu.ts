@@ -62,18 +62,8 @@ export default class MainMenu extends Phaser.Scene {
         hoverSprite.setVisible(false);
     });
     playButton.on("pointerup", () => {
-        
+        this.scene.start('DemoLevel');
     });
-
-
-    /* this.tweens.add({
-      targets: logo,
-      y: 350,
-      duration: 1500,
-      ease: 'Sine.inOut',
-      yoyo: true,
-      repeat: -1
-    }); */
   }
 
   /* update function is a loop that runs constantly */
