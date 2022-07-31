@@ -40,6 +40,7 @@ export default class MainMenu extends Phaser.Scene {
     this.sound.play("bg_music", {
         loop: true,
     })
+    this.sound.volume = 0;
     //this.sound.pauseOnBlur = false; //if music should keep playing when switching tab
 
 
@@ -61,7 +62,7 @@ export default class MainMenu extends Phaser.Scene {
         hoverSprite.setVisible(false);
     });
     playButton.on("pointerup", () => {
-
+        
     });
 
 
