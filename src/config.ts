@@ -11,7 +11,7 @@ const MAX_HEIGHT = 2304 //1080
 const MIN_WIDTH = 480
 const MIN_HEIGHT = 270 
 const DEFAULT_WIDTH = 1280
-const DEFAULT_HEIGHT = 800
+const DEFAULT_HEIGHT = 720
 
 
 export default {
@@ -39,7 +39,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [/* PreloadScene, MainMenuScene, */ DemoScene],
+  scene: [PreloadScene, MainMenuScene, DemoScene],
   render: {
     pixelArt: true,
     antialias: false,

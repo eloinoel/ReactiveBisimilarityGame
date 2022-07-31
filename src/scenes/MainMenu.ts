@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {
-    super('GameScene');
+    super('MainMenuScene');
   }
 
   /* preload function to add music and pictures into memory */
@@ -12,7 +12,7 @@ export default class MainMenu extends Phaser.Scene {
   /* create function is used to add the objects to the game */
   create() {
     //create images (z order), or use setDepth
-    this.add.image(0, 0, "title_bg").setOrigin(0);
+    this.add.image(0, 0, "title_bg").setOrigin(0).setDisplaySize(this.game.renderer.width, this.game.renderer.height);
 
     this.add.image(this.cameras.main.centerX, this.game.renderer.height * 0.2, 'logo').setDepth(1);
 
@@ -62,7 +62,7 @@ export default class MainMenu extends Phaser.Scene {
         hoverSprite.setVisible(false);
     });
     playButton.on("pointerup", () => {
-        this.scene.start('DemoLevel');
+        this.scene.start('DemoScene');
     });
   }
 
