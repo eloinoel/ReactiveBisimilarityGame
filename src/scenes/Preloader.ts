@@ -15,17 +15,17 @@ export default class Preloader extends Phaser.Scene {
                 color: 0xffffff
             }
         });
-        this.load.image("title_bg", "./assets/title_bg.jpg");
-        this.load.image("options_button", "./assets/options_button.png");
-        this.load.image("play_button", "./assets/play_button.png");
-        this.load.image("logo", "./assets/phaser3-logo.png");
+        this.load.image("title_bg", '/assets/title_bg.jpg');
+        this.load.image("options_button", '/assets/options_button.png');
+        this.load.image("play_button", '/assets/play_button.png');
+        this.load.image("logo", '/assets/phaser3-logo.png');
 
-        this.load.spritesheet("cat", "./assets/cat.png", {
+        this.load.spritesheet("cat", '/assets/cat.png', {
             frameHeight: 32,
             frameWidth: 32
         });
 
-        this.load.audio("bg_music", "./assets/placeholder.mp3");
+        this.load.audio("bg_music", '/assets/placeholder.mp3');
 
         
 
@@ -39,7 +39,7 @@ export default class Preloader extends Phaser.Scene {
         });
 
         for(let i = 0; i < 100; i++) {
-            this.load.image("logo", "./assets/phaser3-logo.png");
+            this.load.image("logo", '/assets/phaser3-logo.png');
         }
 
     }
