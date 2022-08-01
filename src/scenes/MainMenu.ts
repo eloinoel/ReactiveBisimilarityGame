@@ -6,8 +6,19 @@ export default class MainMenu extends Phaser.Scene {
   }
 
   /* preload function to add music and pictures into memory */
-  preload() {
-  }
+    preload() {
+        this.load.image("title_bg", 'assets/title_bg.jpg');
+        this.load.image("options_button", 'assets/options_button.png');
+        this.load.image("play_button", 'assets/play_button.png');
+        this.load.image("logo", 'assets/phaser3-logo.png');
+
+        this.load.spritesheet("cat", 'assets/cat.png', {
+            frameHeight: 32,
+            frameWidth: 32
+        });
+
+        this.load.audio("bg_music", 'assets/placeholder.mp3');
+    }
 
   /* create function is used to add the objects to the game */
   create() {

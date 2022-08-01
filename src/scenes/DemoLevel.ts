@@ -9,9 +9,9 @@ export default class DemoLevel extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("circle", '/assets/DemoScene/Circle03.png');
-        this.load.image("circle_over", '/assets/DemoScene/Circle02.png');
-        this.load.image("circle_down", '/assets/DemoScene/Circle01.png');
+        this.load.image("circle", 'assets/DemoScene/Circle03.png');
+        this.load.image("circle_over", 'assets/DemoScene/Circle02.png');
+        this.load.image("circle_down", 'assets/DemoScene/Circle01.png');
     }
 
     create() {
