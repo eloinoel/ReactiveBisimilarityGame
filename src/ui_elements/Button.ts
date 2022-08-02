@@ -14,14 +14,14 @@ export class Button extends Phaser.GameObjects.Container {
 
         this.outImage = scene.add.image(0, 0, outTexture);
         if(overTexture === undefined) {
-            this.overImage = scene.add.image(0, 0, outTexture);
+            this.overImage = scene.add.image(0, 0, outTexture).setDepth(1);
         } else {
-            this.overImage = scene.add.image(0, 0, overTexture);
+            this.overImage = scene.add.image(0, 0, overTexture).setDepth(1);
         }
         if(downTexture === undefined) {
-            this.downImage = scene.add.image(0, 0, outTexture);
+            this.downImage = scene.add.image(0, 0, outTexture).setDepth(1);
         } else {
-            this.downImage = scene.add.image(0, 0, downTexture);
+            this.downImage = scene.add.image(0, 0, downTexture).setDepth(1);
         }
         this.text = scene.add.text(0, 0, caption, {fontFamily:'Monospace', color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
         this.text.x = Math.round(this.text.x);
@@ -41,6 +41,7 @@ export class Button extends Phaser.GameObjects.Container {
         this.setSize(this.outImage.width, this.outImage.height);
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
+        this.setDepth(1);
         this.setInteractive();
 
         /** make image button interactive

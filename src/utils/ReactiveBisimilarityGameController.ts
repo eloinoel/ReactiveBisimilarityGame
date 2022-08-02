@@ -36,6 +36,8 @@ export class ReactiveBisimilarityGame {
             } else {
                 this.play.push(new AttackerNode(process1, process2));
             }
+        } else if (process1 === "" && process2 === "") {
+            return 1;
         } else {
             try {
                 throw new Error('Could not start new game: some of the processes do not exist.');
@@ -385,6 +387,16 @@ export class ReactiveBisimilarityGame {
             this.printError('generateMoves: unknown game position type')
         }
         return moves;
+    }
+
+    getCurrent(index: number): string {
+        if(index === 0 && this.lts.current.length > 0) {
+            return this.lts.current[0];
+        } else if (index === 1 && this.lts.current.length > 1) {
+            return this.lts.current[1];
+        } else {
+            return "";
+        }
     }
 
 

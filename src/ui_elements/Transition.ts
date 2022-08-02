@@ -11,9 +11,9 @@ export class Transition extends Phaser.GameObjects.Container {
     constructor(scene: Phaser.Scene, source_x: number, source_y: number, destination_x: number, destination_y: number, texture_tail: string, texture_middle: string, texture_head: string, caption: string = "", scale: number = 1.0) {
         super(scene, source_x, source_y);
 
-        this.tail_img = scene.add.image(0, 0, texture_tail);
-        this.middle_img = scene.add.image(0, 0, texture_middle);
-        this.head_img = scene.add.image(0, 0, texture_head);
+        this.tail_img = scene.add.image(0, 0, texture_tail).setDepth(1);
+        this.middle_img = scene.add.image(0, 0, texture_middle).setDepth(1);
+        this.head_img = scene.add.image(0, 0, texture_head).setDepth(1);
         
         /**
          * positioning math:
@@ -24,12 +24,13 @@ export class Transition extends Phaser.GameObjects.Container {
         */
         let v_12 = new Phaser.Math.Vector2(destination_x - source_x, destination_y - source_y);
         let c = new Phaser.Math.Vector2(source_x, source_y).add(v_12.scale(0.5)); 
-        let total_len = v_12.length();//TODO: - radius - Padding
+        let total_len = v_12.length();  //TODO: - radius - Padding
         let scale_to_v12_distance = total_len /(this.tail_img.width + this.head_img.width + this.middle_img.width)+ 0.02;
         let arrow_angle = Phaser.Math.RadToDeg(v_12.angle());
 
-        //position objects in container        
-        this.middle_img.x = - total_len/2
+        //position objects in container
+        //TODO: Scale middle_img length according to v_12 length
+        this.middle_img.x = - total_len/2;
         this.tail_img.x = (this.middle_img.x - (this.middle_img.width/2 + this.tail_img.width/2));
         this.head_img.x = (this.middle_img.x + (this.middle_img.width/2 + this.head_img.width/2));
 
@@ -49,10 +50,11 @@ export class Transition extends Phaser.GameObjects.Container {
         this.x = Math.round(c.x);
         this.y = Math.round(c.y);
         scene.add.existing(this);
+        this.setDepth(1);
 
         //scale and rotate container
         this.angle = arrow_angle;
-        this.scale = scale_to_v12_distance * scale;
+        this.scale = 0.2 * scale;
     
     }
 }
