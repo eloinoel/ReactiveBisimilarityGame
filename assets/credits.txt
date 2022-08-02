@@ -1,12 +1,8 @@
 Fantasy RPG character pack & Icons - franuka, https://franuka.itch.io/
-Wooden Font and GUI - Narik The Artist, https://nariktheartist.itch.io/
 UI_Buttons - https://blackdragon1727.itch.io/
 Pixeled UI - BetaDv, https://betadv.itch.io/
 Pixelart_book - Foxel Indie Dev, https://foxeldev.itch.io/
 2D_heart_animation - DonHellsing, https://donhellsing.itch.io/
-GUI_Essential_v1.0_[Free] - Crusenho, https://crusenho.itch.io/
-SimpleKeys - beamedeighth, https://beamedeighth.itch.io/
-
 
 Blue Witch - https://9e0.itch.io/witches-pack
 The Dawn parallax - https://saurabhkgp.itch.io/the-dawn-parallax-background
@@ -16,7 +12,6 @@ Free Pixel Art Hill - https://edermunizz.itch.io/free-pixel-art-hill
 Free-Horizontal-Game-Backgrounds - https://free-game-assets.itch.io/free-horizontal-game-backgrounds
 
 UI Assets pack - https://statoasty.itch.io/ui-assets-pack-srt
-Shikashi's Fantasy Icons Pack - https://cheekyinkling.itch.io/
 Wenrexa Interface UI KIT #4 - https://wenrexa.itch.io/ui-different02
 Wenrexa Assets GUI Dark Miko - https://wenrexa.itch.io/darkmiko
 Shapeforms Audio Free Sound Effects - https://shapeforms.itch.io/shapeforms-audio-free-sfx
