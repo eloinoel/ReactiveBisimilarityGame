@@ -4,7 +4,6 @@ import MainMenuScene from './scenes/MainMenu'
 import PreloadScene from './scenes/Preloader'
 import DemoScene from './scenes/DemoLevel';
 
-
 // Aspect Ratio 16:9
 const MAX_WIDTH = 4096 //1920
 const MAX_HEIGHT = 2304 //1080

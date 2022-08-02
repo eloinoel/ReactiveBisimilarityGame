@@ -37,7 +37,7 @@ export class Transition extends Phaser.GameObjects.Container {
         //let debug = scene.add.circle(c.x, c.y, 2, 0xFF2E63).setDepth(4);
 
         //add text
-        this.text = scene.add.text(0, 0, caption, {fontFamily:'Monospace', color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(35 * scale).setDepth(5);
+        this.text = scene.add.text(0, 0, caption, {fontFamily:'Monospace', color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale).setDepth(5);
         this.text.x = Math.round(c.x + v_12.x*0.5);
         this.text.y = Math.round(c.y);
 
