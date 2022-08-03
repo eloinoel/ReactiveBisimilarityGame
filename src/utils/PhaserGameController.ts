@@ -16,6 +16,7 @@ export class PhaserGameController {
     private scene: Phaser.Scene;
     private current_hightlights: Phaser.GameObjects.Arc[];
     private environment_text: Phaser.GameObjects.Text;
+    private current_position: Phaser.GameObjects.Text;
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -34,6 +35,7 @@ export class PhaserGameController {
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.current_hightlights = [];
         this.environment_text = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
+        this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
     }
 
     /**
@@ -71,7 +73,7 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
-            const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 1.0);
+            const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2);
         }
     }
 
@@ -100,6 +102,7 @@ export class PhaserGameController {
             }
         }
         this.createEnvironmentField();
+        this.createCurrentPositionField();
     }
 
     private createEnvironmentField() {
@@ -115,11 +118,45 @@ export class PhaserGameController {
         })
     }
 
-    //TODO:
+    //TODO: better parser to gather any chars except t and tau
     private setEnvironment(text: string) {
         //parse the given string and extract actions
-        console.log(text);
+        let arr = text.split(/(?!$)/u); 
+        let env = new Set<string>();
+        for(let i = 0; i < arr.length; i++) {
+            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122) {
+                env.add(arr[i].charAt(0))
+            }
+        }
+        this.game.setEnvironment(env);
         //update visualization
+        this.updateEnvironment(); //if some illegal characters are given
+    }
+
+    private updateEnvironment() {
+        this.environment_text.text = this.game.getEnvironmentString();
+    }
+
+    /**
+     * displays current game position on screen
+     */
+    private createCurrentPositionField() {
+        //game initialized
+        if(this.game.play.length !== 0) {
+            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 100);
+            const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily:'Monospace'}).setFontSize(20)
+            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.play[this.game.play.length - 1].toString(), {fontFamily:'Monospace'}).setFontSize(18);
+        }
+    }
+
+    /**
+     * TODO: call after every move
+     */
+    private updateCurrentPositionField() {
+        //game and textfield initialized
+        if(this.game.play.length !== 0 && this.current_position.text !== "") {
+            this.current_position.text = this.game.play[this.game.play.length - 1].toString();
+        }
     }
 
 

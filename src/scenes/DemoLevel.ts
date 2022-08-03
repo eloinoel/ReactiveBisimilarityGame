@@ -76,9 +76,6 @@ export default class DemoLevel extends Phaser.Scene {
         game_controller.addTransition("q6", "q8", "a");
 
         game_controller.startGame(this, "p0", "q0");
-
-        /**TODO: Write function that sets environment and call it from the text_edit callback */
-
     }
 
 }

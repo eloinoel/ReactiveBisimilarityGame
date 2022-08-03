@@ -15,6 +15,8 @@ export abstract class GamePosition {
     }
 
     abstract invertProcesses(): GamePosition;
+
+    abstract toString(): string;
 }
 
 export enum Player {
@@ -35,6 +37,10 @@ export class AttackerNode extends GamePosition {
         return new AttackerNode(this.process2, this.process1);
     }
 
+    toString(): string {
+        return "(" + this.process1 + "," + this.process2 + ")_a"
+    }
+
 }
 
 /**
@@ -52,6 +58,10 @@ export class SimulationDefenderNode extends GamePosition {
     invertProcesses(): GamePosition {
         return new SimulationDefenderNode(this.process2, this.process1, this.previousAction);
     }
+
+    toString(): string {
+        return "(" + this.previousAction + "," + this.process1 + "," + this.process2 + ")_d"
+    }
 }
 
 /**
@@ -67,6 +77,15 @@ export class RestrictedAttackerNode extends GamePosition {
 
     invertProcesses(): GamePosition {
         return new RestrictedAttackerNode(this.process2, this.process1, this.environment);
+    }
+
+    toString(): string {
+        let env_string = "{";
+        this.environment.forEach( elem => {
+            env_string = env_string.concat(elem);
+        })
+        env_string = env_string.concat("}");
+        return "(" + this.process1 + "," + env_string + "," + this.process2 + ")_a"
     }
 }
 
@@ -87,5 +106,14 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
 
     invertProcesses(): GamePosition {
         return new RestrictedSimulationDefenderNode(this.process2, this.process1, this.previousAction, this.environment);
+    }
+
+    toString(): string {
+        let env_string = "{";
+        this.environment.forEach( elem => {
+            env_string = env_string.concat(elem);
+        })
+        env_string = env_string.concat("}");
+        return "(" + this.previousAction + ", " +  this.process1 + "," + env_string + "," + this.process2 + ")_d"
     }
 }

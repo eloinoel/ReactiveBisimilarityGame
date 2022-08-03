@@ -254,7 +254,7 @@ export class ReactiveBisimilarityGame {
         let env = Array.from(this.environment).sort();
         let str = "";
         for(let i = 0; i < env.length - 1; i++) {
-            str = str.concat(String(env[i]), ", ");
+            str = str.concat(String(env[i]), ",");
         }
         str = str.concat(String(env[env.length - 1]));
         return str;
