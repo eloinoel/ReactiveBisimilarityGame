@@ -40,7 +40,7 @@ export default {
   },
   scene: [/* PreloadScene, MainMenuScene, */ DemoScene],
   render: {
-    pixelArt: true,
-    antialias: false,
+    //pixelArt: true,
+    //antialias: false,
   }
 };

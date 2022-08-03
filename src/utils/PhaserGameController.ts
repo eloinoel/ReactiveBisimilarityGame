@@ -4,6 +4,7 @@ import { LTSController } from "./LTSController";
 import { LtsStateButton } from '../ui_elements/Button';
 import { Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
+import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 
 export class PhaserGameController {
     game: ReactiveBisimilarityGame;
@@ -14,6 +15,7 @@ export class PhaserGameController {
     private states: Map<string, LtsStateButton>;
     private scene: Phaser.Scene;
     private current_hightlights: Phaser.GameObjects.Arc[];
+    private environment_text: Phaser.GameObjects.Text;
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -31,6 +33,7 @@ export class PhaserGameController {
         let lts = new LTSController();
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.current_hightlights = [];
+        this.environment_text = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
     }
 
     /**
@@ -93,12 +96,31 @@ export class PhaserGameController {
                 this.current_hightlights[1] = this.scene.add.circle(p1_button.x, p1_button.y, 36).setDepth(0);
                 this.current_hightlights[1].setStrokeStyle(4,  0xFF2E63);
             } else {
-                this.printError("startGame: " + p0 + " is not in states list.");
+                this.printError("startGame: " + p1 + " is not in states list.");
             }
         }
+        this.createEnvironmentField();
     }
 
-    
+    private createEnvironmentField() {
+        //let test = prompt("Enter Environment", "a, b, c") //ALTERNATIVE OPTION
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 50);
+        const description = this.scene.add.text(pos.x, pos.y, "Environment: ", {fontFamily:'Monospace'}).setFontSize(20)
+        this.environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily:'Monospace', fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
+        let textEdit = new TextEdit(this.environment_text);
+        this.environment_text.setInteractive().on('pointerup', () => {
+            textEdit.open(undefined, (text_obj) => {
+                this.setEnvironment((text_obj as Phaser.GameObjects.Text).text);
+            })
+        })
+    }
+
+    //TODO:
+    private setEnvironment(text: string) {
+        //parse the given string and extract actions
+        console.log(text);
+        //update visualization
+    }
 
 
     /**

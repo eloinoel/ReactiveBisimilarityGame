@@ -232,19 +232,32 @@ export class ReactiveBisimilarityGame {
     /**
      * The environment can change at any time
      * @param newEnv new Environment
+     * @returns -1 if the given env contained illegal actions
      */
-    setEnvironment(newEnv: Set<string>) {
+    setEnvironment(newEnv: Set<string>): number {
         if(!newEnv.has(Constants.HIDDEN_ACTION) && !newEnv.has(Constants.NO_ACTION) && !newEnv.has(Constants.TIMEOUT_ACTION)) {
             let tmp = SetOps.toArray(newEnv).sort();
             this.environment = new Set(tmp);
             console.log("Environment was set to {" + SetOps.toArray(this.environment) + "}.");
+            return 0;
         } else {
             this.printError('setEnvironment: Error: some illegal action in given environment');
+            return -1
         }
     }
 
     getEnvironment(): Set<string> {
         return this.environment;
+    }
+
+    getEnvironmentString(): string {
+        let env = Array.from(this.environment).sort();
+        let str = "";
+        for(let i = 0; i < env.length - 1; i++) {
+            str = str.concat(String(env[i]), ", ");
+        }
+        str = str.concat(String(env[env.length - 1]));
+        return str;
     }
 
     resetEnvironment() {

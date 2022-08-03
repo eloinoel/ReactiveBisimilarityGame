@@ -17,13 +17,6 @@ export default class DemoLevel extends Phaser.Scene {
         this.load.image("arrow_tail", 'assets/DemoScene/right-arrow_tail.png');
         this.load.image("arrow_middle", 'assets/DemoScene/right-arrow_middle.png');
         this.load.image("arrow_head", 'assets/DemoScene/right-arrow_head.png');
-
-        this.load.scenePlugin({
-            key: 'rexuiplugin',
-            url: 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
-		    sceneKey: 'rexUI'
-        })
-        this.load.plugin('rextexteditplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js', true)
     }
 
     create() {
@@ -85,18 +78,6 @@ export default class DemoLevel extends Phaser.Scene {
         game_controller.startGame(this, "p0", "q0");
 
         /**TODO: Write function that sets environment and call it from the text_edit callback */
-        //let test = prompt("Enter Environment", "a, b, c")
-        const text = this.add.text(450, 300, 'Environment: ', {fontFamily:'Monospace', fixedWidth: 150, fixedHeight: 36});
-        let data = 'a';
-        let text_edit = new TextEdit(text);
-        text.setInteractive().on('pointerdown', () => {
-            text_edit.open(undefined, (text_obj) => {
-                data = (text_obj as Phaser.GameObjects.Text).text;
-            });
-        });
-        
-
-
 
     }
 
