@@ -6,7 +6,7 @@ export class Button extends Phaser.GameObjects.Container {
     private overImage: Phaser.GameObjects.Image;
     private downImage: Phaser.GameObjects.Image;
 
-    private text: Phaser.GameObjects.Text;
+    text: Phaser.GameObjects.Text;
 
 
     constructor(scene: Phaser.Scene, x: number, y: number, outTexture: string, actionOnClick = () => {}, caption: string, overTexture?: string, downTexture?: string) {

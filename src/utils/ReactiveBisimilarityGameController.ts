@@ -187,6 +187,7 @@ export class ReactiveBisimilarityGame {
         let process2Index = this.lts.getCurrentIndexOf(curPosition.process2);
         if(process1Index === -1 || process2Index === -1) {
             this.printError('performMove: current states from LTS differ from current game position.');
+            return -1;
         }
         this.lts.setCurrentState(nextPosition.process1, process1Index);
         this.lts.setCurrentState(nextPosition.process2, process2Index);

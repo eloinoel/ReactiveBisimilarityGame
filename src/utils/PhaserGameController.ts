@@ -5,6 +5,7 @@ import { LtsStateButton } from '../ui_elements/Button';
 import { Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
+import { AttackerNode, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 
 export class PhaserGameController {
     game: ReactiveBisimilarityGame;
@@ -49,10 +50,10 @@ export class PhaserGameController {
     addState(name: string, lts_num:number, row: number, column: number) {
         this.game.lts.addState(name);
         if(lts_num === 0) {
-            const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {console.log(name)}, name).setScale(0.5);
+            const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
             this.states.set(name, p0);
         } else if(lts_num === 1) {
-            const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {console.log(name)}, name).setScale(0.5);
+            const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
             this.states.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
@@ -118,13 +119,27 @@ export class PhaserGameController {
         })
     }
 
+    private updateHightlights() {
+        let cur0 = this.game.getCurrent(0);
+        let cur0_btn = this.states.get(cur0);
+        if(cur0_btn !== undefined) {
+            this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
+        }
+
+        let cur1 = this.game.getCurrent(1);
+        let cur1_btn = this.states.get(cur1);
+        if(cur1_btn !== undefined) {
+            this.current_hightlights[1].setPosition(cur1_btn.x, cur1_btn.y);
+        }
+    }
+
     //TODO: better parser to gather any chars except t and tau
     private setEnvironment(text: string) {
         //parse the given string and extract actions
         let arr = text.split(/(?!$)/u); 
         let env = new Set<string>();
         for(let i = 0; i < arr.length; i++) {
-            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122) {
+            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
                 env.add(arr[i].charAt(0))
             }
         }
@@ -156,6 +171,71 @@ export class PhaserGameController {
         //game and textfield initialized
         if(this.game.play.length !== 0 && this.current_position.text !== "") {
             this.current_position.text = this.game.play[this.game.play.length - 1].toString();
+        }
+    }
+
+    /**
+     * TODO: does not work when multiple edges with some different label go to same destination, instead of buttons use clickable edges
+     * @param clicked_btn 
+     * @returns 
+     */
+    doMove(next_process: string) {
+        let cur_pos = this.game.play[this.game.play.length - 1];
+        let moves = this.game.possibleMoves();
+        let next_position;
+        let action;
+
+        if(moves.length === 0) {
+            this.printError("doMove: no possible moves from current position")
+            //TODO: display visual feedback
+            return;
+        }
+
+        if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
+            next_position = moves.filter((position) => (position.process1 === next_process));  //TODO: also test transition label
+            if(next_position.length === 0) {
+                this.printError("doMove: no possible move to process " + next_process);
+                return;
+            }
+            action = (next_position[0] as SimulationDefenderNode).previousAction;
+        } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+            next_position = moves.filter((position) => (position.process2 === next_process));  //TODO: also test transition label
+            if(next_position.length === 0) {
+                this.printError("doMove: no possible move to process " + next_process);
+                return
+            }
+            action = cur_pos.previousAction;
+        } else {
+            this.printError("doMove: current position type unknown");
+            //TODO: display visual feedback
+            return;
+        }
+
+
+        if(this.game.performMove(action, next_position[0]) === -1) {
+            TODO:
+            console.log("move not possible: " + action + ", " + next_position.toString());
+            return;
+        } else {
+            this.updateCurrentPositionField();
+            this.updateHightlights();
+        }
+
+        //check if the game is over
+        moves = this.game.possibleMoves();
+        cur_pos = this.game.play[this.game.play.length - 1];
+
+        if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
+            //only symmetry move, TODO: better check for symmetry moves, this allows bugs
+            if(moves.length === 1) {
+                this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5);
+            }
+        } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+            if(moves.length === 0) {
+                this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(0).setOrigin(0.5);
+            }
+        } else {
+            this.printError("doMove: next position type unknown");
         }
     }
 
