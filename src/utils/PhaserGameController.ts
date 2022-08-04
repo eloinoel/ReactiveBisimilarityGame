@@ -180,6 +180,7 @@ export class PhaserGameController {
      * @returns 
      */
     doMove(next_process: string) {
+        this.updateEnvironment();
         let cur_pos = this.game.play[this.game.play.length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
@@ -213,12 +214,13 @@ export class PhaserGameController {
 
 
         if(this.game.performMove(action, next_position[0]) === -1) {
-            TODO:
+            //TODO: display visual feedback
             console.log("move not possible: " + action + ", " + next_position.toString());
             return;
         } else {
             this.updateCurrentPositionField();
             this.updateHightlights();
+            this.updateEnvironment();
         }
 
         //check if the game is over
@@ -227,12 +229,17 @@ export class PhaserGameController {
 
         if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
             //only symmetry move, TODO: better check for symmetry moves, this allows bugs
+            //TODO: the attacker can still change environment and win the game
             if(moves.length === 1) {
-                this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5);
+                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                    wintext.destroy();
+                });
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
             if(moves.length === 0) {
-                this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(0).setOrigin(0.5);
+                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                    wintext.destroy();
+                });
             }
         } else {
             this.printError("doMove: next position type unknown");

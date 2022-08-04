@@ -24,7 +24,7 @@ export class Transition extends Phaser.GameObjects.Container {
         */
         let v_12 = new Phaser.Math.Vector2(destination_x - source_x, destination_y - source_y);
         let c = new Phaser.Math.Vector2(source_x, source_y).add(v_12.clone().scale(0.5)); 
-        let total_len = v_12.length();  //TODO: - radius - Padding
+        let total_len = v_12.length()- 60;  //TODO: - radius - Padding
 
 
         let arrow_angle = Phaser.Math.RadToDeg(v_12.angle());
@@ -38,7 +38,6 @@ export class Transition extends Phaser.GameObjects.Container {
         let tail_len = this.tail_img.width * scale;
 
         let mid_len_after_scale = (total_len - head_len - tail_len);
-        let head_len_after_scale = (total_len - mid_len - tail_len);
         let scale_factor = mid_len_after_scale / mid_len;
         this.middle_img.scaleX = scale_factor;
 

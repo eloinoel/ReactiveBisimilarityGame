@@ -257,7 +257,9 @@ export class ReactiveBisimilarityGame {
         for(let i = 0; i < env.length - 1; i++) {
             str = str.concat(String(env[i]), ",");
         }
-        str = str.concat(String(env[env.length - 1]));
+        if(env.length > 1) {
+            str = str.concat(String(env[env.length - 1]));
+        }
         return str;
     }
 
@@ -268,6 +270,7 @@ export class ReactiveBisimilarityGame {
 
     /**
      * TODO: to test
+     * TODO: does put an action into possible moves for empty environments even when performing timeout action
      * good for debugging purposes
      * @param process 
      */
