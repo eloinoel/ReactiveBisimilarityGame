@@ -180,7 +180,7 @@ export class PhaserGameController {
      * @returns 
      */
     doMove(next_process: string) {
-        this.updateEnvironment();
+        //this.updateEnvironment();
         let cur_pos = this.game.play[this.game.play.length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
@@ -220,7 +220,7 @@ export class PhaserGameController {
         } else {
             this.updateCurrentPositionField();
             this.updateHightlights();
-            this.updateEnvironment();
+            //this.updateEnvironment();
         }
 
         //check if the game is over
@@ -243,7 +243,7 @@ export class PhaserGameController {
             }
         } else {
             this.printError("doMove: next position type unknown");
-        }
+        } 
     }
 
 
