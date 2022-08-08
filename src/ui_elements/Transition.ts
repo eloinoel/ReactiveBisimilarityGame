@@ -1,3 +1,4 @@
+import { Vector } from "matter";
 import { Constants } from "../utils/Constants";
 
 export class Transition extends Phaser.GameObjects.Container {
@@ -55,7 +56,7 @@ export class Transition extends Phaser.GameObjects.Container {
             this.middle_img.scaleX = scale_factor;
 
             //position objects in container
-            this.middle_img.x = 0 - this.head_img.width/2
+            this.middle_img.x = 0 - this.head_img.width/2 + padding/5; //+ padding/5 to add a little more space at the beginning
             //translate in x-direction by target_mid_len/2, then revert scale of the container and finally translate by head_img_width to offset the origin
             this.head_img.x = this.middle_img.x + target_mid_len/(2*scale) + this.head_img.width/2;
             this.tail_img.x = this.middle_img.x - target_mid_len/(2*scale) - this.tail_img.width/2;
@@ -98,6 +99,7 @@ export class Transition extends Phaser.GameObjects.Container {
         let arrow_angle = Phaser.Math.RadToDeg(v_12.angle());
         this.angle = arrow_angle;
         this.scale = scale;
+
     
     }
 }

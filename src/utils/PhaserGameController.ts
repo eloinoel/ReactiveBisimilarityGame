@@ -6,6 +6,7 @@ import { Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 import { AttackerNode, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
+import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 
 export class PhaserGameController {
     game: ReactiveBisimilarityGame;
@@ -18,6 +19,7 @@ export class PhaserGameController {
     private current_hightlights: Phaser.GameObjects.Arc[];
     private environment_text: Phaser.GameObjects.Text;
     private current_position: Phaser.GameObjects.Text;
+    private possible_moves_text: Phaser.GameObjects.Container;
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -37,6 +39,7 @@ export class PhaserGameController {
         this.current_hightlights = [];
         this.environment_text = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
+        this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0);
     }
 
     /**
@@ -104,6 +107,7 @@ export class PhaserGameController {
         }
         this.createEnvironmentField();
         this.createCurrentPositionField();
+        this.createPossibleMovesField();
     }
 
     private createEnvironmentField() {
@@ -172,6 +176,14 @@ export class PhaserGameController {
         if(this.game.play.length !== 0 && this.current_position.text !== "") {
             this.current_position.text = this.game.play[this.game.play.length - 1].toString();
         }
+    }
+
+    createPossibleMovesField() {
+        //TODO: get possible moves string
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 150);
+        this.scene.add.text(pos.x, pos.y, "Possible Moves: ", {fontFamily:'Monospace'}).setFontSize(20)
+        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "blabl blbllb jsdkvhsd hsdvkjhsdjkfvhs hkvjshkjdshvkjs dv sdhjkic hsdk hfkjsdh fkjsdh fkjsdhkj fhsdkj fhkjsdh fkjsdh fkjsdh fkjfhsdk jfhsdjk fhkjsdh fkjsdh fkjsdh fkjsdh fkjsdhjk fhsdkj fhsdkj fhksjdh fkjsdh fkjsdh fkjsdh fkjsdh kjfsdh kfjdh");
+        
     }
 
     /**
