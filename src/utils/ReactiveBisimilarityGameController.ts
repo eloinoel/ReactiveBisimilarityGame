@@ -315,7 +315,43 @@ export class ReactiveBisimilarityGame {
         }
 
         return moves;
-    } 
+    }
+
+    /**
+     * 
+     * @param curPosition 
+     * @param charactersPerLine default is 0, if > 0 the function will break line after a move if it exceeds the specified amount of characters
+     * @param breakAfterMoves set to true if you want a linebreak after every move
+     * @returns 
+     */
+    getPossibleMovesString(curPosition?: GamePosition, charactersPerLine: number = 0, breakAfterMoves: boolean = false): string {
+        let text = "";
+        let moves;
+        if(curPosition !== undefined) {
+            moves = this.possibleMoves(curPosition);
+        } else {
+            moves = this.possibleMoves();
+        }
+        
+        let counter = 0;
+        for(let i = 0; i < moves.length - 1; i++) {
+            if((charactersPerLine > 0 && counter >= charactersPerLine) || (breakAfterMoves && i !== 0)) {
+                counter = 0;
+                text = text.concat("\n");
+            }
+            let m = moves[i].toString();
+            text = text.concat(m, ", ");
+            counter += m.length + 2;
+        }
+        if(moves.length > 0) {
+            if((charactersPerLine > 0 && counter >= charactersPerLine) || (breakAfterMoves && moves.length > 1)) {
+                counter = 0;
+                text = text.concat("\n");
+            }
+            text = text.concat(moves[moves.length - 1].toString());
+        }
+        return text;
+    }
 
     /**
      * generates moves based on current position and edges in the lts

@@ -23,7 +23,7 @@ export class Button extends Phaser.GameObjects.Container {
         } else {
             this.downImage = scene.add.image(0, 0, downTexture).setDepth(1);
         }
-        this.text = scene.add.text(0, 0, caption, {fontFamily:'Monospace', color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
+        this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
         this.text.x = Math.round(this.text.x);
         this.text.y = Math.round(this.text.y);
 

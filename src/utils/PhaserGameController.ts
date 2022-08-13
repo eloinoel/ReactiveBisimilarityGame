@@ -19,7 +19,7 @@ export class PhaserGameController {
     private current_hightlights: Phaser.GameObjects.Arc[];
     private environment_text: Phaser.GameObjects.Text;
     private current_position: Phaser.GameObjects.Text;
-    private possible_moves_text: Phaser.GameObjects.Container;
+    private possible_moves_text: ScrollableTextArea;
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -39,7 +39,7 @@ export class PhaserGameController {
         this.current_hightlights = [];
         this.environment_text = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
-        this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0);
+        this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
     }
 
     /**
@@ -87,104 +87,14 @@ export class PhaserGameController {
      * @param p1 name of second process
      */
     startGame(scene: Phaser.Scene, p0: string, p1: string) {
-        if(this.game.startNewGame(p0, p1) === 0) {
-            //highlight current processes
-            let p0_button = this.states.get(p0);
-            if(p0_button !== undefined) {
-                this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
-                this.current_hightlights[0].setStrokeStyle(4,  0xFF2E63);
-            } else {
-                this.printError("startGame: " + p0 + " is not in states list.");
-            }
-
-            let p1_button = this.states.get(p1)
-            if(p1_button !== undefined) {
-                this.current_hightlights[1] = this.scene.add.circle(p1_button.x, p1_button.y, 36).setDepth(0);
-                this.current_hightlights[1].setStrokeStyle(4,  0xFF2E63);
-            } else {
-                this.printError("startGame: " + p1 + " is not in states list.");
-            }
-        }
+        this.createHighlights(p0, p1);
         this.createEnvironmentField();
         this.createCurrentPositionField();
         this.createPossibleMovesField();
     }
 
-    private createEnvironmentField() {
-        //let test = prompt("Enter Environment", "a, b, c") //ALTERNATIVE OPTION
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 50);
-        const description = this.scene.add.text(pos.x, pos.y, "Environment: ", {fontFamily:'Monospace'}).setFontSize(20)
-        this.environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily:'Monospace', fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
-        let textEdit = new TextEdit(this.environment_text);
-        this.environment_text.setInteractive().on('pointerup', () => {
-            textEdit.open(undefined, (text_obj) => {
-                this.setEnvironment((text_obj as Phaser.GameObjects.Text).text);
-            })
-        })
-    }
+    
 
-    private updateHightlights() {
-        let cur0 = this.game.getCurrent(0);
-        let cur0_btn = this.states.get(cur0);
-        if(cur0_btn !== undefined) {
-            this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
-        }
-
-        let cur1 = this.game.getCurrent(1);
-        let cur1_btn = this.states.get(cur1);
-        if(cur1_btn !== undefined) {
-            this.current_hightlights[1].setPosition(cur1_btn.x, cur1_btn.y);
-        }
-    }
-
-    //TODO: better parser to gather any chars except t and tau
-    private setEnvironment(text: string) {
-        //parse the given string and extract actions
-        let arr = text.split(/(?!$)/u); 
-        let env = new Set<string>();
-        for(let i = 0; i < arr.length; i++) {
-            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
-                env.add(arr[i].charAt(0))
-            }
-        }
-        this.game.setEnvironment(env);
-        //update visualization
-        this.updateEnvironment(); //if some illegal characters are given
-    }
-
-    private updateEnvironment() {
-        this.environment_text.text = this.game.getEnvironmentString();
-    }
-
-    /**
-     * displays current game position on screen
-     */
-    private createCurrentPositionField() {
-        //game initialized
-        if(this.game.play.length !== 0) {
-            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 100);
-            const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily:'Monospace'}).setFontSize(20)
-            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.play[this.game.play.length - 1].toString(), {fontFamily:'Monospace'}).setFontSize(18);
-        }
-    }
-
-    /**
-     * TODO: call after every move
-     */
-    private updateCurrentPositionField() {
-        //game and textfield initialized
-        if(this.game.play.length !== 0 && this.current_position.text !== "") {
-            this.current_position.text = this.game.play[this.game.play.length - 1].toString();
-        }
-    }
-
-    createPossibleMovesField() {
-        //TODO: get possible moves string
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 150);
-        this.scene.add.text(pos.x, pos.y, "Possible Moves: ", {fontFamily:'Monospace'}).setFontSize(20)
-        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "blabl blbllb jsdkvhsd hsdvkjhsdjkfvhs hkvjshkjdshvkjs dv sdhjkic hsdk hfkjsdh fkjsdh fkjsdhkj fhsdkj fhkjsdh fkjsdh fkjsdh fkjfhsdk jfhsdjk fhkjsdh fkjsdh fkjsdh fkjsdh fkjsdhjk fhsdkj fhsdkj fhksjdh fkjsdh fkjsdh fkjsdh fkjsdh kjfsdh kfjdh");
-        
-    }
 
     /**
      * TODO: does not work when multiple edges with some different label go to same destination, instead of buttons use clickable edges
@@ -232,32 +142,168 @@ export class PhaserGameController {
         } else {
             this.updateCurrentPositionField();
             this.updateHightlights();
-            //this.updateEnvironment();
+            this.updateEnvironment();
+            this.updatePossibleMovesField();
         }
 
-        //check if the game is over
-        moves = this.game.possibleMoves();
+        //TODO: check if the game is over
+        /* moves = this.game.possibleMoves();
         cur_pos = this.game.play[this.game.play.length - 1];
 
         if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
             //only symmetry move, TODO: better check for symmetry moves, this allows bugs
             //TODO: the attacker can still change environment and win the game
             if(moves.length === 1) {
-                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
                     wintext.destroy();
                 });
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
             if(moves.length === 0) {
-                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily:'Monospace', color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
                     wintext.destroy();
                 });
             }
         } else {
             this.printError("doMove: next position type unknown");
-        } 
+        }  */
     }
 
+    /************************************* UTILITY AND DEBUG *************************************/
+
+    //TODO: better parser to gather any chars except t and tau
+    /**
+     * set the game logic's environment from a string
+     * @param text 
+     */
+    private setEnvironment(text: string) {
+        //parse the given string and extract actions
+        let arr = text.split(/(?!$)/u); //split at every character
+        let env = new Set<string>();
+        for(let i = 0; i < arr.length; i++) {
+            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
+                env.add(arr[i].charAt(0))
+            }
+        }
+        this.game.setEnvironment(env);
+        //update visualization
+        this.updateEnvironment(); //if some illegal characters are given
+        this.updatePossibleMovesField();
+    }
+
+    /**
+     * display visual hightlights of current game state
+     * @param p0 
+     * @param p1 
+     */
+    private createHighlights(p0: string, p1: string) {
+        if(this.game.startNewGame(p0, p1) === 0) {
+            //highlight current processes
+            let p0_button = this.states.get(p0);
+            if(p0_button !== undefined) {
+                this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
+                this.current_hightlights[0].setStrokeStyle(4,  0xFF2E63);
+            } else {
+                this.printError("startGame: " + p0 + " is not in states list.");
+            }
+
+            let p1_button = this.states.get(p1)
+            if(p1_button !== undefined) {
+                this.current_hightlights[1] = this.scene.add.circle(p1_button.x, p1_button.y, 36).setDepth(0);
+                this.current_hightlights[1].setStrokeStyle(4,  0xFF2E63);
+            } else {
+                this.printError("startGame: " + p1 + " is not in states list.");
+            }
+        }
+    }
+
+    /**
+     * creates Text Input Box for the games environment
+     */
+    private createEnvironmentField() {
+        //let test = prompt("Enter Environment", "a, b, c") //ALTERNATIVE OPTION
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 50);
+        const description = this.scene.add.text(pos.x, pos.y, "Environment: ", {fontFamily: Constants.textStyle}).setFontSize(20)
+        this.environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily: Constants.textStyle, fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
+        let textEdit = new TextEdit(this.environment_text);
+        this.environment_text.setInteractive().on('pointerup', () => {
+            textEdit.open(undefined, (text_obj) => {
+                this.setEnvironment((text_obj as Phaser.GameObjects.Text).text);
+            })
+        })
+    }
+
+    /**
+     * displays current game position on screen
+     */
+    private createCurrentPositionField() {
+        //game initialized
+        if(this.game.play.length !== 0) {
+            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 100);
+            const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily: Constants.textStyle}).setFontSize(20)
+            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.play[this.game.play.length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
+        }
+    }
+
+    /**
+     * displays possibles next states in the game
+     */
+    private createPossibleMovesField() {
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 150);
+        this.scene.add.text(pos.x, pos.y, "Possible Moves: ", {fontFamily: Constants.textStyle}).setFontSize(20);
+        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "");
+        this.updatePossibleMovesField();
+    }
+
+    /**
+     * game and environment_text should be initialized
+     */
+    private updateEnvironment() {
+        if(this.game.play.length !== 0) {
+            this.environment_text.text = this.game.getEnvironmentString();
+        } else {
+            this.printError("game not initialized")
+        }
+    }
+
+    /**
+     * game and current_position have to be initialized
+     */
+    private updateCurrentPositionField() {
+        //game and textfield initialized
+        if(this.game.play.length !== 0 && this.current_position.text !== "") {
+            this.current_position.text = this.game.play[this.game.play.length - 1].toString();
+        } else {
+            this.printError("game not initialized")
+        }
+    }
+
+    /**
+     * game and possible_moves_text have to be initialized
+     */
+    private updatePossibleMovesField() {
+        if(this.game.play.length !== 0) {
+            let moves = this.game.getPossibleMovesString(undefined, undefined, true);
+            this.possible_moves_text.updatePanel(moves);
+        } else {
+            this.printError("game not initialized")
+        }
+    }
+
+    /**
+     * game should be initialized
+     */
+    private updateHightlights() {
+        let cur0 = this.game.getCurrent(0);
+        let cur0_btn = this.states.get(cur0);
+        let cur1 = this.game.getCurrent(1);
+        let cur1_btn = this.states.get(cur1);
+
+        if(cur0_btn !== undefined && cur1_btn !== undefined) {
+            this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
+            this.current_hightlights[1].setPosition(cur1_btn.x, cur1_btn.y);
+        }
+    }
 
     /**
      * 

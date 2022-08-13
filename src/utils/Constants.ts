@@ -21,5 +21,23 @@ export class Constants {
     static COLORS_RED = {c1: "#311D3F", c2: "#522546", c3: "#88304E", c4: "#E23E57"}; //purple, mat purple, dark red, red
     static COLORPACK_2 = {c1: "#48466D", c2: "#3D84A8", c3: "#46CDCF", c4: "#ABEDD8"}; //dull purple, dull blue, blue, light blue --> weird magic colors
     static COLORS_GREEN = {c1: "#1FAB89", c2: "#62D2A2", c3: "#9DF3C4", c4: "#D7FBE8"}; //dark to bright
+    static textStyle = "Monospace";
+
+    /**
+     * 
+     * @param color should be a string starting with '#'
+     */
+    static convertColorToNumber(color: string): number {
+        let number = -1;
+        if(color.startsWith('#')) {
+            let strings = color.split('#');
+            let tmp = "0x" + strings[1];
+            number = Number(tmp);
+        } else {
+            console.log("convertColorToNumber: wrong color string format")
+            return -1;
+        }
+        return number;
+    }
 } 
 
