@@ -7,7 +7,6 @@ export default class MainMenu extends Phaser.Scene {
 
   /* preload function to add music and pictures into memory */
     preload() {
-        this.load.image("title_bg", 'assets/title_bg.jpg');
         this.load.image("options_button", 'assets/options_button.png');
         this.load.image("play_button", 'assets/play_button.png');
         this.load.image("logo", 'assets/phaser3-logo.png');
@@ -22,9 +21,6 @@ export default class MainMenu extends Phaser.Scene {
 
   /* create function is used to add the objects to the game */
   create() {
-    //create images (z order), or use setDepth
-    this.add.image(0, 0, "title_bg").setOrigin(0).setDisplaySize(this.game.renderer.width, this.game.renderer.height);
-
     this.add.image(this.cameras.main.centerX, this.game.renderer.height * 0.2, 'logo').setDepth(1);
 
     let playButton = this.add.image(this.game.renderer.width / 2, this.game.renderer.height / 2, 'play_button').setDepth(1);

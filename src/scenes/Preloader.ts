@@ -3,7 +3,7 @@
 export default class Preloader extends Phaser.Scene {
 
     constructor() {
-        super('PreloadScene');
+        super('PreloaderScene');
     }
 
     /**

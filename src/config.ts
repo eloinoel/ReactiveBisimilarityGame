@@ -1,8 +1,9 @@
-import Phaser, { Scene } from 'phaser';
+import Phaser from 'phaser';
 import { Constants } from './utils/Constants';
 import MainMenuScene from './scenes/MainMenu'
-import PreloadScene from './scenes/Preloader'
+import PreloaderScene from './scenes/Preloader'
 import DemoScene from './scenes/DemoLevel';
+import ParallaxScene from './scenes/Parallax'
 
 // Aspect Ratio 16:9
 const MAX_WIDTH = 4096 //1920
@@ -38,7 +39,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [/*PreloadScene, MainMenuScene,*/ DemoScene],
+  scene: [ParallaxScene, PreloaderScene, MainMenuScene, DemoScene],
   render: {
     //pixelArt: true,
     //antialias: false,
