@@ -40,7 +40,6 @@ export default class MainMenu extends BaseScene {
         this.sound.volume = 0;
         //this.sound.pauseOnBlur = false; //if music should keep playing when switching tab
 
-
         /** make image buttons interactive
          * PointerEvents:
          *    pointerover - hovering
@@ -60,10 +59,25 @@ export default class MainMenu extends BaseScene {
         });
         playButton.on("pointerup", () => {
             playButton.scale = 1;
+            playButton.disableInteractive();
             this.fade(false, () => {
                 this.scene.stop('ParallaxScene');
                 this.scene.start('DemoScene');
             }, 500)
+        });
+
+        options_button.setInteractive();
+        options_button.on("pointerover", () => {
+            options_button.scale = 1.1;
+        });
+        options_button.on("pointerout", () => {
+            options_button.scale = 1;
+        });
+        options_button.on("pointerdown", () => {
+            options_button.scale = 0.9;
+        });
+        options_button.on("pointerup", () => {
+            options_button.scale = 1.1;
         });
         //this.cameras.main.fadeIn(1000)
     }
