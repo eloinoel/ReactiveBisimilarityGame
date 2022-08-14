@@ -1,7 +1,8 @@
 import 'phaser'
+import BaseScene from './BaseScene';
 
-export default class Parallax extends Phaser.Scene {
-    images!: Phaser.GameObjects.TileSprite[];
+export default class Parallax extends BaseScene {
+    private images!: Phaser.GameObjects.TileSprite[];
 
 
     constructor() {
@@ -21,7 +22,6 @@ export default class Parallax extends Phaser.Scene {
 
     /* create function is used to add the objects to the game */
     create() {
-
         this.images = [];
         this.images[0] = this.add.tileSprite(0, 0, 0, 0, "parallax0").setOrigin(0, 0).setScrollFactor(0, 1);
         this.images[1] = this.add.tileSprite(0, 0, 0, 0, "parallax1").setOrigin(0, 0).setScrollFactor(0, 1);
@@ -36,7 +36,9 @@ export default class Parallax extends Phaser.Scene {
             this.images[i].scale = scaleY;
         }
         this.scene.launch('PreloaderScene');
+        this.fade(true, undefined , 500);
     }
+        
 
     /* update function is a loop that runs constantly */
     update(time: number, delta: number): void {

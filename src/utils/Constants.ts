@@ -23,6 +23,8 @@ export class Constants {
     static COLORS_GREEN = {c1: "#1FAB89", c2: "#62D2A2", c3: "#9DF3C4", c4: "#D7FBE8"}; //dark to bright
     static textStyle = "Monospace";
 
+    static camFadeSpeed = 500;
+
     /**
      * 
      * @param color should be a string starting with '#'

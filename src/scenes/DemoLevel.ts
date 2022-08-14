@@ -4,8 +4,9 @@ import { Constants } from '../utils/Constants';
 import { ReactiveBisimilarityGame } from '../utils/ReactiveBisimilarityGameController';
 import { PhaserGameController } from '../utils/PhaserGameController';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
+import BaseScene from './BaseScene';
 
-export default class DemoLevel extends Phaser.Scene {
+export default class DemoLevel extends BaseScene {
     constructor() {
         super('DemoScene');
     }
@@ -18,10 +19,15 @@ export default class DemoLevel extends Phaser.Scene {
         this.load.image("arrow_middle", 'assets/DemoScene/right-arrow_middle.png');
         this.load.image("arrow_head", 'assets/DemoScene/right-arrow_head.png');
         this.load.image("panel", 'assets/DemoScene/Panel02.png')
+        this.load.image("background_demo", 'assets/dark_blue_sky.jpg')
 
     }
 
     create() {
+        this.cameras.main.fadeIn(Constants.camFadeSpeed);
+
+        let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
+        bg.scale = this.renderer.width / bg.width;
         this.setupLTS();
     }
 

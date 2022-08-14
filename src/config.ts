@@ -17,7 +17,7 @@ const DEFAULT_HEIGHT = 720
 export default {
   type: Phaser.AUTO,
   parent: 'game',
-  backgroundColor: Constants.COLORPACK_1.black,
+  backgroundColor: '#0',
 
   scale: {
     mode: Phaser.Scale.NONE, //Set to FIT otherwise if scaling of game objects doesnt work properly
