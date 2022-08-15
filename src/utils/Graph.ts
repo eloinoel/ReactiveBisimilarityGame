@@ -206,8 +206,18 @@ export class Node <T>{
         return node;
     }
 
-    hasEdge(destination: T, edgeLabel: string): boolean {
-        return this.adjacent.some(edge => edge.node.data == destination && edge.edgeLabel == edgeLabel);
+    /**
+     * if edgeLabel is not given, function will return true if node has any edge to destination
+     * @param destination 
+     * @param edgeLabel 
+     * @returns 
+     */
+    hasEdge(destination: T, edgeLabel?: string): boolean {
+        if(edgeLabel === undefined) {
+            return this.adjacent.some(edge => edge.node.data == destination);
+        } else {
+            return this.adjacent.some(edge => edge.node.data == destination && edge.edgeLabel == edgeLabel);
+        }
     }
 
     getType<T>(type: T): string {

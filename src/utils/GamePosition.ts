@@ -17,6 +17,18 @@ export abstract class GamePosition {
     abstract invertProcesses(): GamePosition;
 
     abstract toString(): string;
+
+    /**
+     * 
+     * @param otherPosition 
+     * @returns returns true if @otherPosition is a symmetric position to this
+     */
+    isSymmetryMove(otherPosition: GamePosition) : boolean {
+        if(otherPosition.process1 === this.process2 && otherPosition.process2 === this.process1) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export enum Player {
@@ -81,8 +93,15 @@ export class RestrictedAttackerNode extends GamePosition {
 
     toString(): string {
         let env_string = "{";
+        let i = 0;
         this.environment.forEach( elem => {
-            env_string = env_string.concat(elem);
+            //last element
+            if(i == this.environment.size - 1) {
+                env_string = env_string.concat(elem);
+            } else {
+                env_string = env_string.concat(elem, ",");
+            }
+            i++;
         })
         env_string = env_string.concat("}");
         return "(" + this.process1 + ", " + env_string + ", " + this.process2 + ")_a"
@@ -110,8 +129,15 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
 
     toString(): string {
         let env_string = "{";
+        let i = 0;
         this.environment.forEach( elem => {
-            env_string = env_string.concat(elem);
+            //last element
+            if(i == this.environment.size - 1) {
+                env_string = env_string.concat(elem);
+            } else {
+                env_string = env_string.concat(elem, ",");
+            }
+            i++;
         })
         env_string = env_string.concat("}");
         return "(" + this.previousAction + ", " +  this.process1 + ", " + env_string + ", " + this.process2 + ")_d"

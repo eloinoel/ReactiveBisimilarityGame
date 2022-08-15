@@ -1,9 +1,6 @@
 import Phaser from 'phaser';
-import { LTSController } from '../utils/LTSController';
 import { Constants } from '../utils/Constants';
-import { ReactiveBisimilarityGame } from '../utils/ReactiveBisimilarityGameController';
 import { PhaserGameController } from '../utils/PhaserGameController';
-import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 import BaseScene from './BaseScene';
 
 export default class DemoLevel extends BaseScene {
@@ -24,7 +21,7 @@ export default class DemoLevel extends BaseScene {
     }
 
     create() {
-        this.cameras.main.fadeIn(Constants.camFadeSpeed);
+        this.fade(true);
 
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;

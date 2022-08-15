@@ -73,15 +73,10 @@ export class LTSController {
 
         //graph has node
         if(node != null) {
-            //state isn't already current
-            if(!this.current.some((element) => state == element)) {
-                if(index !== undefined) {
-                    this.current[index] = state;
-                } else {
-                    this.current[0] = state
-                }
+            if(index !== undefined) {
+                this.current[index] = state;
             } else {
-                return -1;
+                this.current[0] = state
             }
         } else {
             try {
@@ -225,9 +220,17 @@ export class LTSController {
         return false;
     }
 
-    hasTransition(source: string, destination: string, edgeLabel: string): boolean {
+    /**
+     * if @edgeLabel is undefined, function will return true if @source has any edge to @destination
+     * @param source 
+     * @param destination 
+     * @param edgeLabel 
+     * @returns 
+     */
+    hasTransition(source: string, destination: string, edgeLabel?: string): boolean {
         let node1 = this.graph.getNode(source);
         if(node1 != null) {
+            //if edgeLabel is undefined, hasEdge will return true if source has any edge to destination
             if(node1.hasEdge(destination, edgeLabel)) {
                 return true;
             }

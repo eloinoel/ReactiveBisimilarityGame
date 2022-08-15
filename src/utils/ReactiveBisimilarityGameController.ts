@@ -74,12 +74,12 @@ export class ReactiveBisimilarityGame {
         }
         
         //check if processes of positions exist in LTS
-        if(curPosition == null || curPosition.process1 == null || curPosition.process2 == null 
+        if(curPosition === undefined || curPosition == null || curPosition.process1 == null || curPosition.process2 == null 
         || !this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
             //this.printError('False: curPosition not viable'); //TODO: delete debug
             return false;
         }
-        if(nextPosition == null || nextPosition.process1 == null || !this.lts.hasState(nextPosition.process1)
+        if(nextPosition === undefined || nextPosition == null || nextPosition.process1 == null || !this.lts.hasState(nextPosition.process1)
         || nextPosition.process2 == null || !this.lts.hasState(nextPosition.process2)) {
             //this.printError('False: nextPosition not viable'); //TODO: delete debug
             return false;
@@ -91,7 +91,7 @@ export class ReactiveBisimilarityGame {
             //this.printError('isMovePossible: curPosition AttackerNode if case'); //TODO: delete debug
             //console.log("outgoing actions: " + SetOps.toArray(this.lts.getOutgoingActions(curPosition.process1))); //TODO: delete debug
             //symmetry move
-            if(action === Constants.NO_ACTION) {
+            if(action === Constants.NO_ACTION && curPosition.isSymmetryMove(nextPosition)) {
                 //this.printError('isMovePossible: Empty Action if case'); //TODO: delete debug
                 return true;
             //does process1 have the action it is supposed to execute
@@ -166,7 +166,7 @@ export class ReactiveBisimilarityGame {
 
     /**
      * perform a move in the current play
-     * @param action 
+     * @param action can be undefined if symmetry
      * @param nextPosition 
      * @param curPosition 
      * @returns -1 if the move could not be carried out
@@ -238,6 +238,10 @@ export class ReactiveBisimilarityGame {
     setEnvironment(newEnv: Set<string>): number {
         if(!newEnv.has(Constants.HIDDEN_ACTION) && !newEnv.has(Constants.NO_ACTION) && !newEnv.has(Constants.TIMEOUT_ACTION)) {
             let tmp = SetOps.toArray(newEnv).sort();
+            //add new actions to A
+            for(let i = 0; i < tmp.length; i++) {
+                this.lts.addVisibleActionToA(tmp[i]);
+            }
             this.environment = new Set(tmp);
             console.log("Environment was set to {" + SetOps.toArray(this.environment) + "}.");
             return 0;

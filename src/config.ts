@@ -39,7 +39,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [ParallaxScene, PreloaderScene, MainMenuScene, DemoScene],
+  scene: [/* ParallaxScene, PreloaderScene, MainMenuScene, */ DemoScene],
   render: {
     //pixelArt: true,
     //antialias: false,

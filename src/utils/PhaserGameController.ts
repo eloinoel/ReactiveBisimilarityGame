@@ -10,16 +10,18 @@ import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 
 export class PhaserGameController {
     game: ReactiveBisimilarityGame;
-    private left_coordinates: Phaser.Math.Vector2; //coordinate
-    private right_coordinates: Phaser.Math.Vector2;
-    private offset_between_vertices: Phaser.Math.Vector2;
+    private game_initialized: boolean;
 
-    private states: Map<string, LtsStateButton>;
-    private scene: Phaser.Scene;
-    private current_hightlights: Phaser.GameObjects.Arc[];
-    private environment_text: Phaser.GameObjects.Text;
-    private current_position: Phaser.GameObjects.Text;
-    private possible_moves_text: ScrollableTextArea;
+    private left_coordinates: Phaser.Math.Vector2; //coordinates of first lts
+    private right_coordinates: Phaser.Math.Vector2; //coordinates of second lts to compare
+    private offset_between_vertices: Phaser.Math.Vector2; //distance between vertices
+
+    private stateBtns: Map<string, LtsStateButton>; //map from state names to visual buttons references
+    private scene: Phaser.Scene;    
+    private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
+    private environment_text: Phaser.GameObjects.Text;  //text object displaying the current environment
+    private current_position: Phaser.GameObjects.Text;  //text object displaying current game position 
+    private possible_moves_text: ScrollableTextArea; //panel object displaying all possible moves
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -33,13 +35,14 @@ export class PhaserGameController {
         this.right_coordinates = right_coordinates;
         this.offset_between_vertices = offset_between_vertices;
         this.scene = scene;
-        this.states = new Map<string, LtsStateButton>();
+        this.stateBtns = new Map<string, LtsStateButton>();
         let lts = new LTSController();
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.current_hightlights = [];
         this.environment_text = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
+        this.game_initialized = false;
     }
 
     /**
@@ -54,10 +57,10 @@ export class PhaserGameController {
         this.game.lts.addState(name);
         if(lts_num === 0) {
             const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
-            this.states.set(name, p0);
+            this.stateBtns.set(name, p0);
         } else if(lts_num === 1) {
             const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
-            this.states.set(name, q0);
+            this.stateBtns.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
         }
@@ -72,8 +75,8 @@ export class PhaserGameController {
      * @param action 
      */
     addTransition(p0: string, p1: string, action: string) {
-        let p0_button = this.states.get(p0);
-        let p1_button = this.states.get(p1);
+        let p0_button = this.stateBtns.get(p0);
+        let p1_button = this.stateBtns.get(p1);
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
@@ -87,26 +90,30 @@ export class PhaserGameController {
      * @param p1 name of second process
      */
     startGame(scene: Phaser.Scene, p0: string, p1: string) {
-        this.createHighlights(p0, p1);
-        this.createEnvironmentField();
-        this.createCurrentPositionField();
-        this.createPossibleMovesField();
+        if(this.game.startNewGame(p0, p1) === 0) {
+            this.game_initialized = true;
+            this.createHighlights(p0, p1);
+            this.createEnvironmentField();
+            this.createCurrentPositionField();
+            this.createPossibleMovesField();
+        }
     }
 
     
 
 
     /**
-     * TODO: does not work when multiple edges with some different label go to same destination, instead of buttons use clickable edges
-     * @param clicked_btn 
+     * does not work when multiple edges with some different label go to same destination
+     * TODO: doMove with edges
+     * @param next_process
      * @returns 
      */
-    doMove(next_process: string) {
+    doMove(next_process: string, isSymmetryMove: boolean = false) {
         //this.updateEnvironment();
         let cur_pos = this.game.play[this.game.play.length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
-        let action;
+        let action: string = Constants.NO_ACTION;
 
         if(moves.length === 0) {
             this.printError("doMove: no possible moves from current position")
@@ -114,13 +121,25 @@ export class PhaserGameController {
             return;
         }
 
+        // cautious when using this in the next if case
+        if(!this.game.lts.hasTransition(cur_pos.process1, next_process)) {
+            isSymmetryMove = true;
+        }
+
         if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
-            next_position = moves.filter((position) => (position.process1 === next_process));  //TODO: also test transition label
+            if(isSymmetryMove) {
+                next_position = moves.filter((position) => (cur_pos.isSymmetryMove(position) && position.process1 === next_process));
+                action = Constants.NO_ACTION;
+            } else {
+                next_position = moves.filter((position) => (position.process1 === next_process));  //TODO: also test transition label
+                if(!(next_position.length === 0)) {
+                    action = (next_position[0] as SimulationDefenderNode).previousAction;
+                }
+            }
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
                 return;
             }
-            action = (next_position[0] as SimulationDefenderNode).previousAction;
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
             next_position = moves.filter((position) => (position.process2 === next_process));  //TODO: also test transition label
             if(next_position.length === 0) {
@@ -133,7 +152,6 @@ export class PhaserGameController {
             //TODO: display visual feedback
             return;
         }
-
 
         if(this.game.performMove(action, next_position[0]) === -1) {
             //TODO: display visual feedback
@@ -187,7 +205,7 @@ export class PhaserGameController {
         }
         this.game.setEnvironment(env);
         //update visualization
-        this.updateEnvironment(); //if some illegal characters are given
+        this.updateEnvironment(); //if some illegal characters are given, reset to previous
         this.updatePossibleMovesField();
     }
 
@@ -197,22 +215,22 @@ export class PhaserGameController {
      * @param p1 
      */
     private createHighlights(p0: string, p1: string) {
-        if(this.game.startNewGame(p0, p1) === 0) {
+        if(this.game_initialized) {
             //highlight current processes
-            let p0_button = this.states.get(p0);
+            let p0_button = this.stateBtns.get(p0);
             if(p0_button !== undefined) {
                 this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
-                this.current_hightlights[0].setStrokeStyle(4,  0xFF2E63);
+                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1));
             } else {
-                this.printError("startGame: " + p0 + " is not in states list.");
+                this.printError("startGame: " + p0 + " is not in stateBtns list.");
             }
 
-            let p1_button = this.states.get(p1)
+            let p1_button = this.stateBtns.get(p1)
             if(p1_button !== undefined) {
                 this.current_hightlights[1] = this.scene.add.circle(p1_button.x, p1_button.y, 36).setDepth(0);
-                this.current_hightlights[1].setStrokeStyle(4,  0xFF2E63);
+                this.current_hightlights[1].setStrokeStyle(4,  Constants.convertColorToNumber(Constants.COLORS_RED.c4));
             } else {
-                this.printError("startGame: " + p1 + " is not in states list.");
+                this.printError("startGame: " + p1 + " is not in stateBtns list.");
             }
         }
     }
@@ -221,7 +239,6 @@ export class PhaserGameController {
      * creates Text Input Box for the games environment
      */
     private createEnvironmentField() {
-        //let test = prompt("Enter Environment", "a, b, c") //ALTERNATIVE OPTION
         let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 50);
         const description = this.scene.add.text(pos.x, pos.y, "Environment: ", {fontFamily: Constants.textStyle}).setFontSize(20)
         this.environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily: Constants.textStyle, fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
@@ -246,7 +263,7 @@ export class PhaserGameController {
     }
 
     /**
-     * displays possibles next states in the game
+     * displays possibles next stateBtns in the game
      */
     private createPossibleMovesField() {
         let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 150);
@@ -295,9 +312,9 @@ export class PhaserGameController {
      */
     private updateHightlights() {
         let cur0 = this.game.getCurrent(0);
-        let cur0_btn = this.states.get(cur0);
+        let cur0_btn = this.stateBtns.get(cur0);
         let cur1 = this.game.getCurrent(1);
-        let cur1_btn = this.states.get(cur1);
+        let cur1_btn = this.stateBtns.get(cur1);
 
         if(cur0_btn !== undefined && cur1_btn !== undefined) {
             this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
