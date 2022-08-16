@@ -110,7 +110,7 @@ export class PhaserGameController {
      */
     doMove(next_process: string, isSymmetryMove: boolean = false) {
         //this.updateEnvironment();
-        let cur_pos = this.game.play[this.game.play.length - 1];
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
         let action: string = Constants.NO_ACTION;
@@ -255,10 +255,10 @@ export class PhaserGameController {
      */
     private createCurrentPositionField() {
         //game initialized
-        if(this.game.play.length !== 0) {
+        if(this.game.getPlay().length !== 0) {
             let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 100);
             const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily: Constants.textStyle}).setFontSize(20)
-            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.play[this.game.play.length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
+            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.getPlay()[this.game.getPlay().length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
         }
     }
 
@@ -276,7 +276,7 @@ export class PhaserGameController {
      * game and environment_text should be initialized
      */
     private updateEnvironment() {
-        if(this.game.play.length !== 0) {
+        if(this.game.getPlay().length !== 0) {
             this.environment_text.text = this.game.getEnvironmentString();
         } else {
             this.printError("game not initialized")
@@ -288,8 +288,8 @@ export class PhaserGameController {
      */
     private updateCurrentPositionField() {
         //game and textfield initialized
-        if(this.game.play.length !== 0 && this.current_position.text !== "") {
-            this.current_position.text = this.game.play[this.game.play.length - 1].toString();
+        if(this.game.getPlay().length !== 0 && this.current_position.text !== "") {
+            this.current_position.text = this.game.getPlay()[this.game.getPlay().length - 1].toString();
         } else {
             this.printError("game not initialized")
         }
@@ -299,7 +299,7 @@ export class PhaserGameController {
      * game and possible_moves_text have to be initialized
      */
     private updatePossibleMovesField() {
-        if(this.game.play.length !== 0) {
+        if(this.game.getPlay().length !== 0) {
             let moves = this.game.getPossibleMovesString(undefined, undefined, true);
             this.possible_moves_text.updatePanel(moves);
         } else {

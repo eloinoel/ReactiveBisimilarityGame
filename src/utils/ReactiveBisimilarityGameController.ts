@@ -7,7 +7,7 @@ export class ReactiveBisimilarityGame {
 
     lts: LTSController; //lts for the game to be played on
     /** contains history of all game moves, last element is the current position */
-    play: GamePosition[];
+    private play: GamePosition[];
     /** set of currently possible actions, can be triggered to change at any time*/
     private environment: Set<string>;
     /** if true, the game will be reactive bisimilar */
@@ -54,11 +54,8 @@ export class ReactiveBisimilarityGame {
                 this.play.push(new AttackerNode(process1, process2));
             }
         } else {
-            try {
-                throw new Error('Could not start new game: some of the processes do not exist.');
-            } catch (error) {
-                console.log(error);
-            }
+
+            console.log('Could not start new game: called with illegal process names');
             return -1;
         }
         return 0;
@@ -83,7 +80,7 @@ export class ReactiveBisimilarityGame {
         }
 
         //check if action is viable
-        if(!Constants.isSpecialAction(action) && (!environment?.has(action) || !A.has(action))) {  //empty action means symmetry move
+        if(this.reactive && !Constants.isSpecialAction(action) && ((!environment?.has(action) || !A.has(action)))) {  //empty action means symmetry move
             //this.printError('False: action not viable');    //TODO: delete debug
             return false;
         }
@@ -222,7 +219,6 @@ export class ReactiveBisimilarityGame {
      * @returns -1 if the move could not be carried out
      */
     performMove(action: string, nextPosition: GamePosition): number {
-
         //check if move is possible
         let curPosition = this.play[this.play.length - 1];
         let legalMove = this.isMovePossible(action, nextPosition, this.environment, curPosition);
@@ -250,6 +246,47 @@ export class ReactiveBisimilarityGame {
         return 0;
     }
 
+    /**
+     * enable (true) or disable (false) the reactive bisimilarity game
+     * @param reactive
+     * @returns 0 if no problem occured, -1 otherwise 
+     */
+    setReactive(reactive: boolean): number {
+        if(reactive) {
+            this.reactive = true;
+            return 0;
+        } else {
+            //uninitialized
+            if(this.play.length === 0 || (this.play[this.play.length - 1] instanceof AttackerNode || this.play[this.play.length - 1] instanceof SimulationDefenderNode)) {
+                this.reactive = false;
+                return 0;
+            } else if(this.play[this.play.length - 1] instanceof RestrictedAttackerNode || this.play[this.play.length - 1] instanceof RestrictedSimulationDefenderNode) {
+                this.printError("setReactive: Can't disable reactive nature because current game position is restrictive.");
+                return -1;
+            } else {
+                this.printError("setReactive: current position is illegal");
+                return -1;
+            }
+        }
+    }
+
+    /**
+     * enable (true) or disable (false) bisimilarity in the game, if @reactive is set to true, the game will be bisimilar either way
+     * @param bisimilar
+     * @returns 0 if no problem occured, -1 otherwise 
+     */
+     setBisimilar(bisimilar: boolean) {
+        if(bisimilar) {
+            this.reactive = true;
+        } else {
+            //uninitialized
+            this.reactive = false;
+        }
+    }
+
+    getPlay(): GamePosition[] {
+        return this.play;
+    }
 
     /**
      * 
