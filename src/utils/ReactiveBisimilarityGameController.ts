@@ -275,13 +275,16 @@ export class ReactiveBisimilarityGame {
      * @param bisimilar
      * @returns 0 if no problem occured, -1 otherwise 
      */
-     setBisimilar(bisimilar: boolean) {
-        if(bisimilar) {
-            this.reactive = true;
-        } else {
-            //uninitialized
-            this.reactive = false;
-        }
+    setBisimilar(bisimilar: boolean) {
+        this.bisimilar = bisimilar;
+    }
+
+    isReactive() {
+        return this.reactive;
+    }
+
+    isBisimilar() {
+        return this.bisimilar;
     }
 
     getPlay(): GamePosition[] {
