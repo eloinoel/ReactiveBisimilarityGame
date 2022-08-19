@@ -4,7 +4,7 @@ import { Constants } from '../utils/Constants';
 
 export default class LevelMap extends BaseScene {
     private zoomTime = 1000;
-    private zoomAmount = 0.3;
+    private zoomAmount = 0.4;
     
     constructor() {
         super('LevelMapScene');
