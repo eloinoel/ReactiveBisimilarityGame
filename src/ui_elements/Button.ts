@@ -23,6 +23,7 @@ export class Button extends Phaser.GameObjects.Container {
         } else {
             this.downImage = scene.add.image(0, 0, downTexture).setDepth(1);
         }
+
         this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
         this.text.x = Math.round(this.text.x);
         this.text.y = Math.round(this.text.y);
@@ -79,6 +80,76 @@ export class LtsStateButton extends Button {
     
     constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, caption: string) {
         super(scene, x, y, "circle", actionOnClick, caption, "circle_over", "circle_down");
+    }
+}
+
+/**
+ * uses one Tilesprites
+ */
+export class LevelSelectionButton extends Phaser.GameObjects.Container {
+
+    private texture: Phaser.GameObjects.Sprite;
+    private clickTexture: Phaser.GameObjects.Sprite;
+    text: Phaser.GameObjects.Text;
+    
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, caption: string = "", fontSize = 25) {
+        super(scene, x, y);
+
+        this.texture = scene.add.sprite(0, 0, texture, 0).setScale(1.5);
+        this.clickTexture = scene.add.sprite(0, 0, texture, 1).setScale(1.5);
+
+        this.text = scene.add.text(0, -fontSize - 3, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(fontSize);
+        this.text.setStroke('#000000', 3)
+        this.text.x = Math.round(this.text.x);
+        this.text.y = Math.round(this.text.y);
+
+        this.add(this.texture);
+        this.add(this.clickTexture);
+        this.add(this.text);
+        this.clickTexture.setVisible(false);
+
+
+        scene.add.existing(this);
+        
+        this.setSize(this.texture.width, this.texture.height);
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+        this.setDepth(1);
+        this.setInteractive();
+
+        /** make image button interactive
+         * PointerEvents:
+         *    pointerover - hovering
+         *    pointerout - not hovering
+         *    pointerup - click and release
+         *    pointerdown - just click
+         */
+         this.on('pointerover', () => {
+            this.texture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
+            this.clickTexture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
+            this.clickTexture.setVisible(false);
+            this.text.scale = 1.05;
+        })
+        this.on('pointerdown', () => {
+            this.texture.setVisible(false);
+            this.clickTexture.setVisible(true);
+            this.text.scale = 0.95;
+        })
+        this.on('pointerup', () => {
+            this.texture.setVisible(true);
+            this.clickTexture.setVisible(false);
+            this.text.scale = 1.05;
+            actionOnClick();
+            this.disableInteractive()
+        })
+        this.on('pointerout', () => {
+            this.texture.clearTint();
+            this.clickTexture.clearTint();
+            this.texture.setVisible(true);
+            this.clickTexture.setVisible(false);
+            this.text.scale = 1;
+        })
+
     }
 
 }

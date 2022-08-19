@@ -4,6 +4,7 @@ import MainMenuScene from './scenes/MainMenu'
 import PreloaderScene from './scenes/Preloader'
 import DemoScene from './scenes/DemoLevel';
 import ParallaxScene from './scenes/Parallax'
+import LevelMapScene from './scenes/LevelMap'
 
 // Aspect Ratio 16:9
 const MAX_WIDTH = 4096 //1920
@@ -39,7 +40,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [/* ParallaxScene, PreloaderScene, MainMenuScene, */ DemoScene],
+  scene: [ParallaxScene, PreloaderScene, MainMenuScene, LevelMapScene, DemoScene],
   render: {
     //pixelArt: true,
     //antialias: false,

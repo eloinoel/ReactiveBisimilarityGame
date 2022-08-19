@@ -77,7 +77,12 @@ export default class MainMenu extends BaseScene {
             options_button.scale = 0.9;
         });
         options_button.on("pointerup", () => {
-            options_button.scale = 1.1;
+            options_button.scale = 1;
+            options_button.disableInteractive();
+            this.fade(false, () => {
+                this.scene.stop('ParallaxScene');
+                this.scene.start('LevelMapScene');
+            }, 500)
         });
         //this.cameras.main.fadeIn(1000)
     }
