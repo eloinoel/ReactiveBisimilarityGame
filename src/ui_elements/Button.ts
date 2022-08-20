@@ -90,6 +90,7 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
 
     private texture: Phaser.GameObjects.Sprite;
     private clickTexture: Phaser.GameObjects.Sprite;
+    private btnClicked = false;
     text: Phaser.GameObjects.Text;
     
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, caption: string = "", fontSize = 25) {
@@ -97,9 +98,10 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
 
         this.texture = scene.add.sprite(0, 0, texture, 0).setScale(1.5);
         this.clickTexture = scene.add.sprite(0, 0, texture, 1).setScale(1.5);
+        console.log(window.devicePixelRatio);
 
         this.text = scene.add.text(0, -fontSize - 3, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(fontSize);
-        this.text.setStroke('#000000', 3)
+        this.text.setStroke('#000000', 3).setScale(0.9, 0.9).setResolution(2);
         this.text.x = Math.round(this.text.x);
         this.text.y = Math.round(this.text.y);
 
@@ -125,29 +127,35 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
          *    pointerdown - just click
          */
          this.on('pointerover', () => {
-            this.texture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
-            this.clickTexture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
+            //this.texture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
+            this.texture.scale = this.texture.scale + 0.1;
+            this.clickTexture.scale = this.clickTexture.scale + 0.1;
+            //this.clickTexture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
             this.clickTexture.setVisible(false);
-            this.text.scale = 1.05;
+            this.text.scale = 0.95;
         })
         this.on('pointerdown', () => {
             this.texture.setVisible(false);
             this.clickTexture.setVisible(true);
-            this.text.scale = 0.95;
+            this.text.scale = 0.85;
         })
         this.on('pointerup', () => {
             this.texture.setVisible(true);
             this.clickTexture.setVisible(false);
-            this.text.scale = 1.05;
-            actionOnClick();
-            this.disableInteractive()
+            this.text.scale = 0.95;
+            if(!this.btnClicked) {
+                this.btnClicked = true;
+                actionOnClick();
+            }
         })
         this.on('pointerout', () => {
-            this.texture.clearTint();
-            this.clickTexture.clearTint();
+            //this.texture.clearTint();
+            //this.clickTexture.clearTint();
+            this.texture.scale = this.texture.scale - 0.1;
+            this.clickTexture.scale = this.clickTexture.scale - 0.1;
             this.texture.setVisible(true);
             this.clickTexture.setVisible(false);
-            this.text.scale = 1;
+            this.text.scale = 0.9;
         })
 
     }

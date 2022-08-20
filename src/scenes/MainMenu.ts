@@ -3,6 +3,7 @@ import BaseScene from './BaseScene';
 import { Constants } from "../utils/Constants";
 export default class MainMenu extends BaseScene {
     private toFadeIn!: Phaser.GameObjects.Image[];
+    private clickedBtn = false; //to not allow clicking button errors while fading scene out
 
     constructor() {
         super('MainMenuScene');
@@ -47,6 +48,7 @@ export default class MainMenu extends BaseScene {
          *    pointerup - click and release
          *    pointerdown - just click
          */
+
         playButton.setInteractive();
         playButton.on("pointerover", () => {
             playButton.scale = 1.1;
@@ -55,15 +57,18 @@ export default class MainMenu extends BaseScene {
             playButton.scale = 1;
         });
         playButton.on("pointerdown", () => {
-            playButton.scale = 0.9;
+            playButton.scale = 0.95;
         });
         playButton.on("pointerup", () => {
-            playButton.scale = 1;
-            playButton.disableInteractive();
-            this.fade(false, () => {
-                this.scene.stop('ParallaxScene');
-                this.scene.start('DemoScene');
-            }, 500)
+            playButton.scale = 1.1;
+            if(!this.clickedBtn) { 
+                this.clickedBtn = true;
+                this.fade(false, () => {
+                    this.scene.stop('ParallaxScene');
+                    this.scene.start('DemoScene');
+                }, 500);
+            }
+            
         });
 
         options_button.setInteractive();
@@ -74,17 +79,19 @@ export default class MainMenu extends BaseScene {
             options_button.scale = 1;
         });
         options_button.on("pointerdown", () => {
-            options_button.scale = 0.9;
+            options_button.scale = 0.95;
         });
         options_button.on("pointerup", () => {
-            options_button.scale = 1;
-            options_button.disableInteractive();
-            this.fade(false, () => {
-                this.scene.stop('ParallaxScene');
-                this.scene.start('LevelMapScene');
-            }, 500)
+            options_button.scale = 1.1;
+            if(!this.clickedBtn) { 
+                this.clickedBtn = true;
+                this.fade(false, () => {
+                    this.scene.stop('ParallaxScene');
+                    this.scene.start('LevelMapScene');
+                }, 500)
+            }
+            
         });
-        //this.cameras.main.fadeIn(1000)
     }
 
     /* update function is a loop that runs constantly */
