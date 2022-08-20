@@ -5,6 +5,7 @@ import { Constants } from '../utils/Constants';
 export default class LevelMap extends BaseScene {
     private zoomTime = 1000;
     private zoomAmount = 0.4;
+    private levelObjects: LevelSelectionButton[] = [];
     
     constructor() {
         super('LevelMapScene');
@@ -14,6 +15,8 @@ export default class LevelMap extends BaseScene {
         this.load.image("world_map", 'assets/LevelMap/LevelMap.png');
         this.load.image("world_map_blur", 'assets/LevelMap/LevelMap_blur.png');
         this.load.spritesheet("blue_button", 'assets/LevelMap/blue_button.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("orange_button", 'assets/LevelMap/orange_button.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("red_button", 'assets/LevelMap/red_button.png', {frameWidth: 16, frameHeight: 16});
     }
 
     create() {
@@ -36,20 +39,24 @@ export default class LevelMap extends BaseScene {
         //fade scene in
         this.fade(true);
 
-        //TODO: Serif Font for titles
+        //UI Buttons
 
         //simulation
-        let simText = this.add.text(600, this.renderer.height - 150, "Simulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4);
-        let lvl1_btn = new LevelSelectionButton(this, 350, this.renderer.height - 70, "blue_button", () => {console.log("click")}, "Level 1");
-        let lvl2_btn = new LevelSelectionButton(this, 160, this.renderer.height - 150, "blue_button", () => {console.log("click")}, "Level 2");
-        let lvl3_btn = new LevelSelectionButton(this, 350, this.renderer.height - 210, "blue_button", () => {console.log("click")}, "Level 3");
-        let lvl4_btn = new LevelSelectionButton(this, 520, this.renderer.height - 290, "blue_button", () => {console.log("click")}, "Level 4");
+        let simText = this.add.text(600, this.renderer.height - 150, "Simulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
+        this.levelObjects.push(new LevelSelectionButton(this, 350, this.renderer.height - 70, "blue_button", () => {console.log("click")}, "Level 1"));
+        this.levelObjects.push(new LevelSelectionButton(this, 160, this.renderer.height - 150, "blue_button", () => {console.log("click")}, "Level 2").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 350, this.renderer.height - 210, "blue_button", () => {console.log("click")}, "Level 3").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 520, this.renderer.height - 290, "blue_button", () => {console.log("click")}, "Level 4").disable());
 
-        //TODO: bisimulation
-        let bisimText = this.add.text(200, 50, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4);
+        //bisimulation
+        let bisimText = this.add.text(290, 40, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
+        this.levelObjects.push(new LevelSelectionButton(this, 270, this.renderer.height/2 + 45, "orange_button", () => {console.log("click")}, "Level 5").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 200, this.renderer.height/2 - 50, "orange_button", () => {console.log("click")}, "Level 6").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 300, 201, "orange_button", () => {console.log("click")}, "Level 7").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 150, 130, "orange_button", () => {console.log("click")}, "Level 8").disable());
 
         //TODO: reactive bisimulation
-        let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4);
+        let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
         
     }
 

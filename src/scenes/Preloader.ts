@@ -10,28 +10,15 @@ export default class Preloader extends Phaser.Scene {
      * preload stuff
      */
     preload(): void {
-        let loadingBar = this.add.graphics({
-            fillStyle: {
-                color: 0xffffff
-            }
-        });
-        
-
-        
+        this.load.image("ui_home_button", 'assets/UI/Menu\ Buttons/Square\ Buttons/Square Buttons/Home\ Square\ Button.png');
+        this.load.image("ui_info_button", 'assets/UI/Menu\ Buttons/Square\ Buttons/Square Buttons/Info\ Square\ Button.png');
+        this.load.image("ui_redo_button", 'assets/UI/Menu\ Buttons/Square\ Buttons/Square Buttons/Return\ Square\ Button.png');
+        this.load.image("ui_back_button", 'assets/UI/Menu\ Buttons/Square\ Buttons/Square Buttons/Back\ Square\ Button.png');
 
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()
         */
-        //ugly loading bar
-        this.load.on("progress", (percent: number) => {
-            loadingBar.fillRect(this.game.renderer.width/4, this.game.renderer.height / 2, this.game.renderer.width * percent * (0.5), 50);
-        });
-
-        //load
-        /* for(let i = 0; i < 100; i++) {
-            this.load.image("logo", '/assets/phaser3-logo.png');
-        } */
 
     }
 

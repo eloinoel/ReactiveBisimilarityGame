@@ -9,7 +9,7 @@ export class Button extends Phaser.GameObjects.Container {
     text: Phaser.GameObjects.Text;
 
 
-    constructor(scene: Phaser.Scene, x: number, y: number, outTexture: string, actionOnClick = () => {}, caption: string, overTexture?: string, downTexture?: string) {
+    constructor(scene: Phaser.Scene, x: number, y: number, outTexture: string, actionOnClick = () => {}, caption: string = "", overTexture?: string, downTexture?: string) {
         super(scene, x, y);
 
         this.outImage = scene.add.image(0, 0, outTexture);
@@ -91,6 +91,7 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
     private texture: Phaser.GameObjects.Sprite;
     private clickTexture: Phaser.GameObjects.Sprite;
     private btnClicked = false;
+    private disableAlpha = 0.4;
     text: Phaser.GameObjects.Text;
     
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, caption: string = "", fontSize = 25) {
@@ -157,7 +158,22 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
             this.clickTexture.setVisible(false);
             this.text.scale = 0.9;
         })
+    }
 
+    disable() {
+        this.disableInteractive();
+        this.texture.alpha = this.disableAlpha;
+        this.clickTexture.alpha = this.disableAlpha;
+        this.text.alpha = this.disableAlpha;
+        return this;
+    }
+
+    enable() {
+        this.setInteractive();
+        this.texture.alpha = 1;
+        this.clickTexture.alpha = 1;
+        this.text.alpha = 1
+        return this;
     }
 
 }

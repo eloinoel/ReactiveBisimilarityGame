@@ -65,7 +65,7 @@ export default class MainMenu extends BaseScene {
                 this.clickedBtn = true;
                 this.fade(false, () => {
                     this.scene.stop('ParallaxScene');
-                    this.scene.start('DemoScene');
+                    this.scene.start('LevelMapScene');
                 }, 500);
             }
             
@@ -87,10 +87,9 @@ export default class MainMenu extends BaseScene {
                 this.clickedBtn = true;
                 this.fade(false, () => {
                     this.scene.stop('ParallaxScene');
-                    this.scene.start('LevelMapScene');
+                    this.scene.start('DemoScene');
                 }, 500)
             }
-            
         });
     }
 
