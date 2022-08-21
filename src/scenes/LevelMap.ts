@@ -6,6 +6,8 @@ export default class LevelMap extends BaseScene {
     private zoomTime = 1000;
     private zoomAmount = 0.4;
     private levelObjects: LevelSelectionButton[] = [];
+    private curLevelBtn!: LevelSelectionButton;
+    private pulseTween!: Phaser.Tweens.Tween;
     
     constructor() {
         super('LevelMapScene');
@@ -57,6 +59,25 @@ export default class LevelMap extends BaseScene {
 
         //TODO: reactive bisimulation
         let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
+    
+        //current lvl pulse effect
+        this.curLevelBtn = this.levelObjects[0];    //TODO:
+        if(this.curLevelBtn !== undefined) {
+            this.pulseTween = this.tweens.add({
+                targets: this.curLevelBtn,
+                duration: 800,
+                scale: 1.15,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1
+            })
+        }
+        this.curLevelBtn.on('pointerover', () => {
+            this.pulseTween.pause();
+        })
+        this.curLevelBtn.on('pointerout', () => {
+            this.pulseTween.resume();
+        })
     }
 
     update(time: number, delta: number): void {
