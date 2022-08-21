@@ -19,6 +19,7 @@ export default class MainMenu extends BaseScene {
 
   /* create function is used to add the objects to the game */
     create() {
+        this.clickedBtn = false;
 
         this.toFadeIn = []
 
@@ -63,7 +64,7 @@ export default class MainMenu extends BaseScene {
             playButton.scale = 1.1;
             if(!this.clickedBtn) { 
                 this.clickedBtn = true;
-                this.cameras.main.shake(50, 0.001);
+                //this.cameras.main.shake(Constants.camFadeSpeed, 0.0009);
                 this.fade(false, () => {
                     this.scene.stop('ParallaxScene');
                     this.scene.start('LevelMapScene');

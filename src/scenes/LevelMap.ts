@@ -1,4 +1,4 @@
-import { Button, LevelSelectionButton } from '../ui_elements/Button';
+import { Button, LevelSelectionButton, UI_Button } from '../ui_elements/Button';
 import BaseScene from './BaseScene';
 import { Constants } from '../utils/Constants';
 
@@ -42,6 +42,9 @@ export default class LevelMap extends BaseScene {
         this.fade(true);
 
         //UI Buttons
+        let backBtn = new UI_Button(this, Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
+                this.scene.start("ParallaxScene");
+        })}, "Back")
 
         //simulation
         let simText = this.add.text(600, this.renderer.height - 150, "Simulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
@@ -51,7 +54,7 @@ export default class LevelMap extends BaseScene {
         this.levelObjects.push(new LevelSelectionButton(this, 520, this.renderer.height - 290, "blue_button", () => {console.log("click")}, "Level 4").disable());
 
         //bisimulation
-        let bisimText = this.add.text(290, 40, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
+        let bisimText = this.add.text(360, 70, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
         this.levelObjects.push(new LevelSelectionButton(this, 270, this.renderer.height/2 + 45, "orange_button", () => {console.log("click")}, "Level 5").disable());
         this.levelObjects.push(new LevelSelectionButton(this, 200, this.renderer.height/2 - 50, "orange_button", () => {console.log("click")}, "Level 6").disable());
         this.levelObjects.push(new LevelSelectionButton(this, 300, 201, "orange_button", () => {console.log("click")}, "Level 7").disable());

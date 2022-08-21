@@ -21,8 +21,11 @@ export class Constants {
     static COLORS_RED = {c1: "#311D3F", c2: "#522546", c3: "#88304E", c4: "#E23E57"}; //purple, mat purple, dark red, red
     static COLORPACK_2 = {c1: "#48466D", c2: "#3D84A8", c3: "#46CDCF", c4: "#ABEDD8"}; //dull purple, dull blue, blue, light blue --> weird magic colors
     static COLORS_GREEN = {c1: "#1FAB89", c2: "#62D2A2", c3: "#9DF3C4", c4: "#D7FBE8"}; //dark to bright
+    static COLOR_BORDEAUX = Phaser.Display.Color.GetColor(200, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).g, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).b);
+    
     static textStyle = "Monospace";
-
+    static UI_height = 40;
+    static UI_offset = 60;
     static camFadeSpeed = 500;
 
     /**

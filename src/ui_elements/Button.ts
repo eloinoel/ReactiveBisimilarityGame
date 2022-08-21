@@ -132,7 +132,7 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
             this.clickTexture.scale = this.clickTexture.scale + 0.1;
             //this.clickTexture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
             this.clickTexture.setVisible(false);
-            this.text.scale = 0.95;
+            this.text.scale = 1;
         })
         this.on('pointerdown', () => {
             this.texture.setVisible(false);
@@ -142,7 +142,7 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
         this.on('pointerup', () => {
             this.texture.setVisible(true);
             this.clickTexture.setVisible(false);
-            this.text.scale = 0.95;
+            this.text.scale = 1;
             if(!this.btnClicked) {
                 this.btnClicked = true;
                 actionOnClick();
@@ -175,4 +175,73 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
         return this;
     }
 
+}
+
+/**
+ * Button class for UI Buttons with one texture, eg. the home button, performs actionOnClick only once
+ */
+export class UI_Button extends Phaser.GameObjects.Container {
+
+    private image: Phaser.GameObjects.Image;
+    private clickedBtn = false;
+
+
+    text: Phaser.GameObjects.Text;
+
+
+    constructor(scene: Phaser.Scene, x: number, texture: string, actionOnClick = () => {}, caption: string = "") {
+        super(scene, x, Constants.UI_height);
+
+        this.image = scene.add.image(0, 0, texture);
+        this.setSize(this.image.width, this.image.height);
+        this.scale = 0.2
+
+        this.text = scene.add.text(0, 35/this.scale, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30/this.scale).setResolution(2);
+
+        this.add(this.image);
+        this.add(this.text);
+        scene.add.existing(this);
+
+
+
+        this.image.setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+        this.setDepth(1);
+        this.setInteractive();
+
+        /** make image button interactive
+         * PointerEvents:
+         *    pointerover - hovering
+         *    pointerout - not hovering
+         *    pointerup - click and release
+         *    pointerdown - just click
+         */
+        this.on('pointerover', () => {
+            this.image.setTint(Constants.COLOR_BORDEAUX);
+            this.text.setTint(Constants.COLOR_BORDEAUX);
+            this.image.scale = 1
+            this.text.scale = 1
+        })
+        this.on('pointerdown', () => {
+            this.image.setTint(Phaser.Display.Color.GetColor(220, Phaser.Display.Color.ColorToRGBA(Constants.COLOR_BORDEAUX).g + 20, Phaser.Display.Color.ColorToRGBA(Constants.COLOR_BORDEAUX).b + 20));
+            this.text.setTint(Phaser.Display.Color.GetColor(220, Phaser.Display.Color.ColorToRGBA(Constants.COLOR_BORDEAUX).g + 20, Phaser.Display.Color.ColorToRGBA(Constants.COLOR_BORDEAUX).b + 20));
+            this.image.scale = 0.9
+            this.text.scale = 0.9
+        })
+        this.on('pointerup', () => {
+            this.image.setTint(Constants.COLOR_BORDEAUX);
+            this.text.setTint(Constants.COLOR_BORDEAUX);
+            if(!this.clickedBtn) {
+                this.clickedBtn = true;
+                actionOnClick();
+            }
+            this.image.scale = 1
+            this.text.scale = 1
+        })
+        this.on('pointerout', () => {
+            this.image.setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+            this.text.setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+            this.image.scale = 1
+            this.text.scale = 1
+        })
+    }
 }

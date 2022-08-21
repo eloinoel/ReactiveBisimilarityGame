@@ -35,8 +35,9 @@ export default class Parallax extends BaseScene {
             let scaleY = this.renderer.height / this.images[i].height;
             this.images[i].scale = scaleY;
         }
-        this.scene.launch('PreloaderScene');
-        this.fade(true, undefined , 500);
+
+        this.fade(true, undefined, 500);
+        this.scene.launch("MainMenuScene");
     }
         
 

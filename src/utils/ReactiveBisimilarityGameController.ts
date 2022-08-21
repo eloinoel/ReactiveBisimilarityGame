@@ -14,6 +14,7 @@ export class ReactiveBisimilarityGame {
     private reactive: boolean;
     /** if true and @reactive is false, the game will be bisimilar */
     private bisimilar: boolean;
+    
 
 
     /**
@@ -54,8 +55,6 @@ export class ReactiveBisimilarityGame {
                 this.play.push(new AttackerNode(process1, process2));
             }
         } else {
-
-            console.log('Could not start new game: called with illegal process names');
             return -1;
         }
         return 0;
@@ -548,7 +547,7 @@ export class ReactiveBisimilarityGame {
                 moves.push(curPosition.invertProcesses());
     
                 let edges = this.lts.getActionsAndDestinations(curPosition.process1);
-                
+
                 //get maximal environment to allow timeout
                 /* let maxEnvForTimeout = new Set(A);
                 for(let j = 0; j < edges.length; j++) {

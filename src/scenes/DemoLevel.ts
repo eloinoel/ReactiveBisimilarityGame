@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Constants } from '../utils/Constants';
 import { PhaserGameController } from '../utils/PhaserGameController';
 import BaseScene from './BaseScene';
+import { UI_Button } from '../ui_elements/Button';
 
 export default class DemoLevel extends BaseScene {
     constructor() {
@@ -25,6 +26,11 @@ export default class DemoLevel extends BaseScene {
 
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
+
+        let backBtn = new UI_Button(this, Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
+            this.scene.start("ParallaxScene");
+    })}, "Back")
+
         this.setupLTS();
     }
 
