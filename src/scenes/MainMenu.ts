@@ -31,7 +31,7 @@ export default class MainMenu extends BaseScene {
         this.toFadeIn.push(options_button);
 
         for(let i = 0; i < this.toFadeIn.length; i++) {
-            this.fadeImage(this.toFadeIn[i]);
+            this.fadeImage(this.toFadeIn[i], i*100);
         }
 
         //create audio
@@ -63,6 +63,7 @@ export default class MainMenu extends BaseScene {
             playButton.scale = 1.1;
             if(!this.clickedBtn) { 
                 this.clickedBtn = true;
+                this.cameras.main.shake(50, 0.001);
                 this.fade(false, () => {
                     this.scene.stop('ParallaxScene');
                     this.scene.start('LevelMapScene');

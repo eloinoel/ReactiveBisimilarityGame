@@ -470,7 +470,12 @@ export class ReactiveBisimilarityGame {
     /**
      * generates moves based on current position and edges in the lts
      * these moves are potentially not possible and should be channeled into isMovePossible()-method
-     * to not float the returned moves with environment combinations, the maximal possible invironment is added
+     * 
+     * 
+                * README: only generating one restricted move for the current environment
+                * This is theoretically not correct as one could choose any environment that allows a timeout in a state
+                * But calculating all permutations and throwing them into the isMovePossible()-method could technically explode the time complexity of the game
+     * 
      * @param curPosition 
      * @returns 
      */
@@ -517,13 +522,16 @@ export class ReactiveBisimilarityGame {
                 moves.push(curPosition.invertProcesses());
     
                 let edges = this.lts.getActionsAndDestinations(curPosition.process1);   //[[actionLabel, destination], ...]
+                
                 //get maximal environment to allow timeout
-                let maxEnvForTimeout = new Set(A);
+                /* let maxEnvForTimeout = new Set(A);
                 for(let j = 0; j < edges.length; j++) {
                     if(!Constants.isSpecialAction(edges[j][0])) {
                         maxEnvForTimeout.delete(edges[j][0]);
                     }
-                }
+                } */
+
+                
     
                 for(let i = 0; i < edges.length; i++) {
                     //simulation challenge
@@ -532,7 +540,7 @@ export class ReactiveBisimilarityGame {
                     
                     //timeout simulation challenge
                     } else if(edges[i][0] === Constants.TIMEOUT_ACTION) {
-                        moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, maxEnvForTimeout));
+                        moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, /* maxEnvForTimeout */ new Set(this.environment)));
                     }
                 }
             } else if(curPosition instanceof RestrictedAttackerNode) {
@@ -540,13 +548,14 @@ export class ReactiveBisimilarityGame {
                 moves.push(curPosition.invertProcesses());
     
                 let edges = this.lts.getActionsAndDestinations(curPosition.process1);
+                
                 //get maximal environment to allow timeout
-                let maxEnvForTimeout = new Set(A);
+                /* let maxEnvForTimeout = new Set(A);
                 for(let j = 0; j < edges.length; j++) {
                     if(!Constants.isSpecialAction(edges[j][0])) {
                         maxEnvForTimeout.delete(edges[j][0]);
                     }
-                }
+                } */
     
                 for(let i = 0; i < edges.length; i++) {
                     //restricted simulation challenge
@@ -559,7 +568,7 @@ export class ReactiveBisimilarityGame {
                     
                     //timeouted timeout simulation challenge
                     } else if(edges[i][0] === Constants.TIMEOUT_ACTION) {
-                        moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, maxEnvForTimeout));
+                        moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, /* maxEnvForTimeout */ new Set(this.environment)));
                     }
                 }
             } else if(curPosition instanceof SimulationDefenderNode) {

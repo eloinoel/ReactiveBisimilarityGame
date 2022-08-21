@@ -99,7 +99,6 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
 
         this.texture = scene.add.sprite(0, 0, texture, 0).setScale(1.5);
         this.clickTexture = scene.add.sprite(0, 0, texture, 1).setScale(1.5);
-        console.log(window.devicePixelRatio);
 
         this.text = scene.add.text(0, -fontSize - 3, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(fontSize);
         this.text.setStroke('#000000', 3).setScale(0.9, 0.9).setResolution(2);

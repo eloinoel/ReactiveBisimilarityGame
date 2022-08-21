@@ -56,8 +56,7 @@ export default class LevelMap extends BaseScene {
         this.levelObjects.push(new LevelSelectionButton(this, 150, 130, "orange_button", () => {console.log("click")}, "Level 8").disable());
 
         //TODO: reactive bisimulation
-        let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
-        
+        let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
     }
 
     update(time: number, delta: number): void {
