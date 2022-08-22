@@ -10,14 +10,6 @@ export default class DemoLevel extends BaseScene {
     }
 
     preload() {
-        this.load.image("circle", 'assets/DemoScene/Circle03.png');
-        this.load.image("circle_over", 'assets/DemoScene/Circle02.png');
-        this.load.image("circle_down", 'assets/DemoScene/Circle01.png');
-        this.load.image("arrow_tail", 'assets/DemoScene/right-arrow_tail.png');
-        this.load.image("arrow_middle", 'assets/DemoScene/right-arrow_middle.png');
-        this.load.image("arrow_head", 'assets/DemoScene/right-arrow_head.png');
-        this.load.image("panel", 'assets/DemoScene/Panel02.png')
-        this.load.image("background_demo", 'assets/dark_blue_sky.jpg')
 
     }
 

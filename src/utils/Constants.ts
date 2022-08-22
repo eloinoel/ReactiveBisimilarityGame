@@ -1,3 +1,4 @@
+
 /**
  * class storing all the constants
  */
@@ -24,9 +25,21 @@ export class Constants {
     static COLOR_BORDEAUX = Phaser.Display.Color.GetColor(200, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).g, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).b);
     
     static textStyle = "Monospace";
-    static UI_height = 40;
+    static UI_height = 60;
     static UI_offset = 60;
     static camFadeSpeed = 500;
+
+    // Aspect Ratio 16:9
+    static MAX_WIDTH = 4096 //1920
+    static MAX_HEIGHT = 2304 //1080
+    static MIN_WIDTH = 480
+    static MIN_HEIGHT = 270 
+    static DEFAULT_WIDTH = 1280
+    static DEFAULT_HEIGHT = 720
+
+    static first_coordinates = new Phaser.Math.Vector2(this.DEFAULT_WIDTH/4 + 50, this.DEFAULT_HEIGHT/4);
+    static second_coordinates = new Phaser.Math.Vector2(this.DEFAULT_WIDTH*3/4 - 50, this.DEFAULT_HEIGHT/4);
+    static lts_xy_offset = new Phaser.Math.Vector2(this.DEFAULT_WIDTH/12, this.DEFAULT_WIDTH/9.5);
 
     /**
      * 

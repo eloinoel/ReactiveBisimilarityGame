@@ -196,8 +196,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
         this.setSize(this.image.width, this.image.height);
         this.scale = 0.2
 
-        this.text = scene.add.text(0, 35/this.scale, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30/this.scale).setResolution(2);
-
+        this.text = scene.add.text(0, 40/this.scale, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30/this.scale).setResolution(2);
         this.add(this.image);
         this.add(this.text);
         scene.add.existing(this);

@@ -3,7 +3,7 @@ import BaseScene from './BaseScene';
 import { Constants } from '../utils/Constants';
 
 export default class LevelMap extends BaseScene {
-    private zoomTime = 1000;
+    private zoomTime = 600;
     private zoomAmount = 0.4;
     private levelObjects: LevelSelectionButton[] = [];
     private curLevelBtn!: LevelSelectionButton;
@@ -43,15 +43,17 @@ export default class LevelMap extends BaseScene {
 
         //UI Buttons
         let backBtn = new UI_Button(this, Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
+                //this.pulseTween.stop();
                 this.scene.start("ParallaxScene");
         })}, "Back")
 
+        this.levelObjects = [];
         //simulation
         let simText = this.add.text(600, this.renderer.height - 150, "Simulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
-        this.levelObjects.push(new LevelSelectionButton(this, 350, this.renderer.height - 70, "blue_button", () => {console.log("click")}, "Level 1"));
-        this.levelObjects.push(new LevelSelectionButton(this, 160, this.renderer.height - 150, "blue_button", () => {console.log("click")}, "Level 2").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 350, this.renderer.height - 210, "blue_button", () => {console.log("click")}, "Level 3").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 520, this.renderer.height - 290, "blue_button", () => {console.log("click")}, "Level 4").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 350, this.renderer.height - 70, "blue_button", () => {this.fade(false, () => {this.scene.start("Sim_Level1")})}, "Level 1"));
+        this.levelObjects.push(new LevelSelectionButton(this, 160, this.renderer.height - 150, "blue_button", () => {this.fade(false, () => {this.scene.start("Sim_Level2")})}, "Level 2"));
+        this.levelObjects.push(new LevelSelectionButton(this, 350, this.renderer.height - 210, "blue_button", () => {this.fade(false, () => {this.scene.start("Sim_Level3")})}, "Level 3"));
+        this.levelObjects.push(new LevelSelectionButton(this, 520, this.renderer.height - 290, "blue_button", () => {this.fade(false, () => {this.scene.start("Sim_Level4")})}, "Level 4"));
 
         //bisimulation
         let bisimText = this.add.text(360, 70, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
@@ -65,6 +67,7 @@ export default class LevelMap extends BaseScene {
     
         //current lvl pulse effect
         this.curLevelBtn = this.levelObjects[0];    //TODO:
+        
         if(this.curLevelBtn !== undefined) {
             this.pulseTween = this.tweens.add({
                 targets: this.curLevelBtn,
@@ -75,12 +78,6 @@ export default class LevelMap extends BaseScene {
                 loop: -1
             })
         }
-        this.curLevelBtn.on('pointerover', () => {
-            this.pulseTween.pause();
-        })
-        this.curLevelBtn.on('pointerout', () => {
-            this.pulseTween.resume();
-        })
     }
 
     update(time: number, delta: number): void {

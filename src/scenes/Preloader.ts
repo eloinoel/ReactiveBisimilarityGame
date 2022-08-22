@@ -10,6 +10,7 @@ export default class Preloader extends Phaser.Scene {
      * preload stuff
      */
     preload(): void {
+        //UI
         this.load.image("ui_home_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/home.png");
         this.load.image("ui_info_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/info_2.png");
         this.load.image("ui_musicon_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/music_on.png");
@@ -17,6 +18,19 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("ui_settings_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/settings_3.png");
         this.load.image("ui_replay_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/replay.png");
         this.load.image("ui_leftarrow_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/cursor_left.png");
+
+        //LTS
+        this.load.image("circle", 'assets/DemoScene/Circle03.png');
+        this.load.image("circle_over", 'assets/DemoScene/Circle02.png');
+        this.load.image("circle_down", 'assets/DemoScene/Circle01.png');
+        this.load.image("arrow_tail", 'assets/DemoScene/right-arrow_tail.png');
+        this.load.image("arrow_middle", 'assets/DemoScene/right-arrow_middle.png');
+        this.load.image("arrow_head", 'assets/DemoScene/right-arrow_head.png');
+        this.load.image("panel", 'assets/DemoScene/Panel02.png')
+
+        //background
+        this.load.image("background_demo", 'assets/dark_blue_sky.jpg');
+        
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()
