@@ -5,6 +5,7 @@ import PreloaderScene from './scenes/Preloader'
 import DemoScene from './scenes/DemoLevel';
 import ParallaxScene from './scenes/Parallax'
 import LevelMapScene from './scenes/LevelMap'
+import GUIScene from './scenes/GUIScene';
 import Level1 from './scenes/SimulationLevels/Level1';
 import Level2 from './scenes/SimulationLevels/Level2';
 import Level3 from './scenes/SimulationLevels/Level3';
@@ -36,7 +37,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloaderScene, /* ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene,*/ Level1, Level2 , Level3, Level4],
+  scene: [PreloaderScene, /* ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene, */ Level1, Level2 , Level3, Level4, GUIScene],
   render: {
     //pixelArt: true,
     //antialias: false,

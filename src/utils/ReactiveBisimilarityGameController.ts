@@ -255,7 +255,6 @@ export class ReactiveBisimilarityGame {
             this.reactive = true;
             return 0;
         } else {
-            //uninitialized
             if(this.play.length === 0 || (this.play[this.play.length - 1] instanceof AttackerNode || this.play[this.play.length - 1] instanceof SimulationDefenderNode)) {
                 this.reactive = false;
                 return 0;

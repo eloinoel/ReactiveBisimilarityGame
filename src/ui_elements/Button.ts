@@ -194,7 +194,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
 
         this.image = scene.add.image(0, 0, texture);
         this.setSize(this.image.width, this.image.height);
-        this.scale = 0.2
+        this.scale = 0.4
 
         this.text = scene.add.text(x, Constants.UI_height + 40, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white }).setOrigin(0.5).setFontSize(30).setResolution(2).setStroke('#9a9a9a', 2);
         this.add(this.image);
@@ -203,7 +203,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
 
 
 
-        this.image.setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+        this.image.setTintFill(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
         this.setDepth(1);
         this.setInteractive();
 

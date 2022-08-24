@@ -11,13 +11,13 @@ export default class Preloader extends Phaser.Scene {
      */
     preload(): void {
         //UI
-        this.load.image("ui_home_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/home.png");
-        this.load.image("ui_info_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/info_2.png");
-        this.load.image("ui_musicon_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/music_on.png");
-        this.load.image("ui_musicoff_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/music_off.png");
-        this.load.image("ui_settings_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/settings_3.png");
-        this.load.image("ui_replay_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/replay.png");
-        this.load.image("ui_leftarrow_btn", "assets/UI/Iconsforgamesgameassetpack/icons_256/cursor_left.png");
+        this.load.image("ui_home_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/home.png");
+        this.load.image("ui_info_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/info_2.png");
+        this.load.image("ui_musicon_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/music_on.png");
+        this.load.image("ui_musicoff_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/music_off.png");
+        this.load.image("ui_settings_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/settings_3.png");
+        this.load.image("ui_replay_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/replay.png");
+        this.load.image("ui_leftarrow_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cursor_left.png");
 
         //LTS
         this.load.image("circle", 'assets/DemoScene/Circle03.png');

@@ -18,13 +18,7 @@ export default class Level1 extends BaseScene {
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
 
-        let homeBtn = new UI_Button(this, this.renderer.width - 2* Constants.UI_offset, "ui_home_btn", () => {this.fade(false, () => {
-            this.scene.start("ParallaxScene");
-        })}, "Home");
-
-        let backBtn = new UI_Button(this, 2*Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
-            this.scene.start("LevelMapScene");
-        })}, "Back");
+        this.scene.launch("GUIScene", { otherRunningScene: this })
 
         this.setupLTS();
     }
@@ -35,7 +29,7 @@ export default class Level1 extends BaseScene {
 
     private setupLTS(): void {
 
-        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates.add(new Phaser.Math.Vector2(0, 50)), Constants.second_coordinates.add(new Phaser.Math.Vector2(0, 50)))
+        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates.clone().add(new Phaser.Math.Vector2(0, 50)), Constants.second_coordinates.clone().add(new Phaser.Math.Vector2(0, 50)))
 
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);

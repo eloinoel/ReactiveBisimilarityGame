@@ -18,13 +18,7 @@ export default class Level4 extends BaseScene {
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
 
-        let homeBtn = new UI_Button(this, this.renderer.width - 2* Constants.UI_offset, "ui_home_btn", () => {this.fade(false, () => {
-            this.scene.start("ParallaxScene");
-        })}, "Home");
-
-        let backBtn = new UI_Button(this, 2*Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
-            this.scene.start("LevelMapScene");
-        })}, "Back");
+        this.scene.launch("GUIScene", { otherRunningScene: this })
 
         this.setupLTS();
     }
