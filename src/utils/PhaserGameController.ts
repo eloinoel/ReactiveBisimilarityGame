@@ -5,7 +5,7 @@ import { LtsStateButton } from '../ui_elements/Button';
 import { Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
-import { AttackerNode, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
+import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 
 export class PhaserGameController {
@@ -173,29 +173,23 @@ export class PhaserGameController {
                 this.updateEnvironment();
             }
             this.updatePossibleMovesField();
+
+            //check if the game is over
+            moves = this.game.possibleMoves();
+            cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+
+            if(cur_pos.activePlayer === Player.Attacker) {
+                //in the reactive bisimulation game the defender cannot get stuck as he always has a symmetry move
+            //Defender is stuck
+            } else if(cur_pos.activePlayer === Player.Defender) {
+                if(moves.length === 0) {
+                    //TODO: Show Points and Congratulation
+                    let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                        wintext.destroy();
+                    });
+                }
+            }
         }
-
-        //TODO: check if the game is over
-        /* moves = this.game.possibleMoves();
-        cur_pos = this.game.play[this.game.play.length - 1];
-
-        if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
-            //only symmetry move, TODO: better check for symmetry moves, this allows bugs
-            //TODO: the attacker can still change environment and win the game
-            if(moves.length === 1) {
-                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
-                    wintext.destroy();
-                });
-            }
-        } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-            if(moves.length === 0) {
-                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
-                    wintext.destroy();
-                });
-            }
-        } else {
-            this.printError("doMove: next position type unknown");
-        }  */
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
