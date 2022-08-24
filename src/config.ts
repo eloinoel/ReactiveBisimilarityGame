@@ -37,7 +37,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloaderScene, /* ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene, */ Level1, Level2 , Level3, Level4, GUIScene],
+  scene: [PreloaderScene, ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene, Level1, Level2 , Level3, Level4, GUIScene],
   render: {
     //pixelArt: true,
     //antialias: false,
