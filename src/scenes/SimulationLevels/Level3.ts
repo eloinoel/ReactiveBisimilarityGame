@@ -57,6 +57,6 @@ export default class Level3 extends BaseScene {
         game_controller.addTransition("q1", "q3", "a");
         game_controller.addTransition("q2", "q4", "b");
 
-        game_controller.startGame(this, "p0", "q0");
+        game_controller.startGame(this, "p0", "q0", false, false);
     }
 }

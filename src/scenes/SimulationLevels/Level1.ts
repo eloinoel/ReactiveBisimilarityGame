@@ -35,7 +35,7 @@ export default class Level1 extends BaseScene {
 
     private setupLTS(): void {
 
-        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates)
+        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates.add(new Phaser.Math.Vector2(0, 50)), Constants.second_coordinates.add(new Phaser.Math.Vector2(0, 50)))
 
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);
@@ -57,6 +57,6 @@ export default class Level1 extends BaseScene {
         game_controller.addTransition("q1", "q3", "a");
         game_controller.addTransition("q0", "q2", "a");
 
-        game_controller.startGame(this, "p0", "q0");
+        game_controller.startGame(this, "p0", "q0", false, false);
     }
 }
