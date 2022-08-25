@@ -2,9 +2,9 @@ import BaseScene from "../BaseScene";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 
-export default class Level2 extends BaseScene {
+export default class Level5 extends BaseScene {
     constructor() {
-        super('Sim_Level2');
+        super('Bisim_Level5');
     }
 
     preload() {
@@ -33,23 +33,23 @@ export default class Level2 extends BaseScene {
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);
         game_controller.addState("p2", 0, 1, 1);
-        game_controller.addState("p3", 0, 2, 0);
+        game_controller.addState("p3", 0, 2, -2);
+        game_controller.addState("p4", 0, 2, 0);
 
         game_controller.addTransition("p0", "p1", "a");
         game_controller.addTransition("p0", "p2", "a");
         game_controller.addTransition("p1", "p3", "a");
-        game_controller.addTransition("p2", "p3", "b");
+        game_controller.addTransition("p1", "p4", "b");
 
         game_controller.addState("q0", 1, 0, 0);
-        game_controller.addState("q1", 1, 1, -1);
-        game_controller.addState("q2", 1, 1, 1);
-        game_controller.addState("q3", 1, 2, 0);
+        game_controller.addState("q1", 1, 1, 0);
+        game_controller.addState("q2", 1, 2, -1);
+        game_controller.addState("q3", 1, 2, 1);
 
         game_controller.addTransition("q0", "q1", "a");
-        game_controller.addTransition("q0", "q2", "a");
-        game_controller.addTransition("q1", "q3", "a");
-        game_controller.addTransition("q2", "q3", "a");
+        game_controller.addTransition("q1", "q2", "a");
+        game_controller.addTransition("q1", "q3", "b");
 
-        game_controller.startGame(this, "p0", "q0", false, false);
+        game_controller.startGame(this, "p0", "q0", false, true);
     }
 }

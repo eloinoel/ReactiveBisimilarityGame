@@ -84,8 +84,8 @@ export class PhaserGameController {
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
             if(p0 === p1) {
-                this.scene.add.image(p0_button.x - 60, p0_button.y, "ui_replay_btn").setScale(0.3).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.blue));
-                this.scene.add.text(p0_button.x - 60, p0_button.y, action).setFontSize(25).setOrigin(0.5);
+                this.scene.add.image(p0_button.x - 60, p0_button.y, "ui_replay_btn").setScale(0.45).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.blue));
+                this.scene.add.text(p0_button.x - 60, p0_button.y, action, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setFontSize(25).setOrigin(0.5);
             } else {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
             }
@@ -184,7 +184,7 @@ export class PhaserGameController {
             } else if(cur_pos.activePlayer === Player.Defender) {
                 if(moves.length === 0) {
                     //TODO: Show Points and Congratulation
-                    let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                    let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
                         wintext.destroy();
                     });
                 }

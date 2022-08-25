@@ -10,6 +10,9 @@ import Level1 from './scenes/SimulationLevels/Level1';
 import Level2 from './scenes/SimulationLevels/Level2';
 import Level3 from './scenes/SimulationLevels/Level3';
 import Level4 from './scenes/SimulationLevels/Level4';
+import Level5 from './scenes/BisimulationLevels/Level5';
+import Level6 from './scenes/BisimulationLevels/Level6';
+import Level7 from './scenes/BisimulationLevels/Level7';
 
 
 export default {
@@ -37,7 +40,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloaderScene, ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene, Level1, Level2 , Level3, Level4, GUIScene],
+  scene: [PreloaderScene, ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene, Level1, Level2 , Level3, Level4, Level5, Level6, Level7, GUIScene],
   render: {
     //pixelArt: true,
     //antialias: false,
