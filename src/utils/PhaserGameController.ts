@@ -262,7 +262,7 @@ export class PhaserGameController {
      * creates Text Input Box for the games environment
      */
     private createEnvironmentField() {
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 100);
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 150);
 
         const description = this.scene.add.text(pos.x, pos.y, "Environment: ", {fontFamily: Constants.textStyle}).setFontSize(20)
         let environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily: Constants.textStyle, fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
@@ -281,7 +281,7 @@ export class PhaserGameController {
     private createCurrentPositionField() {
         //game initialized
         if(this.game.getPlay().length !== 0) {
-            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 150);
+            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 200);
             const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily: Constants.textStyle}).setFontSize(20)
             this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.getPlay()[this.game.getPlay().length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
         }
@@ -291,7 +291,7 @@ export class PhaserGameController {
      * displays possibles next stateBtns in the game
      */
     private createPossibleMovesField() {
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 200);
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 250);
         this.scene.add.text(pos.x, pos.y, "Possible Moves: ", {fontFamily: Constants.textStyle}).setFontSize(20);
         this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250);
         this.updatePossibleMovesField();

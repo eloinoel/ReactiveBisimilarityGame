@@ -1,10 +1,11 @@
 import BaseScene from "../BaseScene";
+import { UI_Button } from "../../ui_elements/Button";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 
-export default class Level2 extends BaseScene {
+export default class Level1_4 extends BaseScene {
     constructor() {
-        super('Sim_Level2');
+        super('Sim_Level4');
     }
 
     preload() {
@@ -31,24 +32,25 @@ export default class Level2 extends BaseScene {
         let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates)
 
         game_controller.addState("p0", 0, 0, 0);
-        game_controller.addState("p1", 0, 1, -1);
-        game_controller.addState("p2", 0, 1, 1);
-        game_controller.addState("p3", 0, 2, 0);
+        game_controller.addState("p1", 0, 1, 0);
+
 
         game_controller.addTransition("p0", "p1", "a");
-        game_controller.addTransition("p0", "p2", "a");
-        game_controller.addTransition("p1", "p3", "a");
-        game_controller.addTransition("p2", "p3", "b");
+        game_controller.addTransition("p1", "p0", "a");
+        game_controller.addTransition("p0", "p0", "b");
+        game_controller.addTransition("p1", "p1", "b");
 
-        game_controller.addState("q0", 1, 0, 0);
-        game_controller.addState("q1", 1, 1, -1);
-        game_controller.addState("q2", 1, 1, 1);
-        game_controller.addState("q3", 1, 2, 0);
+        game_controller.addState("q0", 1, 0, -1);
+        game_controller.addState("q1", 1, 0, 1);
+        game_controller.addState("q2", 1, 1, -1);
+        game_controller.addState("q3", 1, 1, 1);
 
-        game_controller.addTransition("q0", "q1", "a");
         game_controller.addTransition("q0", "q2", "a");
-        game_controller.addTransition("q1", "q3", "a");
-        game_controller.addTransition("q2", "q3", "a");
+        game_controller.addTransition("q3", "q1", "a");
+        game_controller.addTransition("q0", "q1", "b");
+        game_controller.addTransition("q1", "q0", "b");
+        game_controller.addTransition("q2", "q3", "b");
+        game_controller.addTransition("q3", "q2", "b");
 
         game_controller.startGame(this, "p0", "q0", false, false);
     }

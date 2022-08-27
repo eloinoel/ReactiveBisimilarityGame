@@ -6,13 +6,14 @@ import DemoScene from './scenes/DemoLevel';
 import ParallaxScene from './scenes/Parallax'
 import LevelMapScene from './scenes/LevelMap'
 import GUIScene from './scenes/GUIScene';
-import Level1 from './scenes/SimulationLevels/Level1';
-import Level2 from './scenes/SimulationLevels/Level2';
-import Level3 from './scenes/SimulationLevels/Level3';
-import Level4 from './scenes/SimulationLevels/Level4';
-import Level5 from './scenes/BisimulationLevels/Level5';
-import Level6 from './scenes/BisimulationLevels/Level6';
-import Level7 from './scenes/BisimulationLevels/Level7';
+import Level1_1 from './scenes/SimulationLevels/Level1_1';
+import Level1_2 from './scenes/SimulationLevels/Level1_2';
+import Level1_3 from './scenes/SimulationLevels/Level1_3';
+import Level1_4 from './scenes/SimulationLevels/Level1_4';
+import Level2_1 from './scenes/BisimulationLevels/Level2_1';
+import Level2_2 from './scenes/BisimulationLevels/Level2_2';
+import Level2_3 from './scenes/BisimulationLevels/Level2_3';
+import Level3_1 from './scenes/ReactiveBisimulationLevels/Level3_1';
 
 
 export default {
@@ -40,7 +41,7 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloaderScene, ParallaxScene,  MainMenuScene, LevelMapScene, DemoScene, Level1, Level2 , Level3, Level4, Level5, Level6, Level7, GUIScene],
+  scene: [PreloaderScene, /* ParallaxScene, MainMenuScene, */ LevelMapScene, DemoScene, Level1_1, Level1_2, Level1_3, Level1_4, Level2_1, Level2_2, Level2_3, Level3_1, GUIScene],
   render: {
     //pixelArt: true,
     //antialias: false,

@@ -2,9 +2,9 @@ import BaseScene from "../BaseScene";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 
-export default class Level7 extends BaseScene {
+export default class Level2_3 extends BaseScene {
     constructor() {
-        super('Bisim_Level7');
+        super('Bisim_Level3');
     }
 
     preload() {
