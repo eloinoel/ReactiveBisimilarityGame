@@ -29,7 +29,7 @@ export default class Level3_1 extends BaseScene {
     private setupLTS(): void {
 
         let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates)
-
+        
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);
         game_controller.addState("p2", 0, 1, 1);
@@ -37,7 +37,7 @@ export default class Level3_1 extends BaseScene {
         game_controller.addState("p4", 0, 2, 2);
 
         game_controller.addTransition("p0", "p1", "a");
-        game_controller.addTransition("p0", "p2", Constants.TIMEOUT_ACTION);
+        game_controller.addTransition("p0", "p2", "b");
         game_controller.addTransition("p2", "p3", "a");
         game_controller.addTransition("p2", "p4", "b");
 
@@ -48,10 +48,11 @@ export default class Level3_1 extends BaseScene {
         game_controller.addState("q4", 1, 2, 2);
 
         game_controller.addTransition("q0", "q1", "a");
-        game_controller.addTransition("q0", "q2", Constants.TIMEOUT_ACTION);
+        game_controller.addTransition("q0", "q2", "b");
         game_controller.addTransition("q2", "q3", "a");
         game_controller.addTransition("q2", "q4", "a");
 
         game_controller.startGame(this, "p0", "q0", true, true);
+        game_controller.setEnvironment("")
     }
 }

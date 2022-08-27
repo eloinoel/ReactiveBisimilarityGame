@@ -1,7 +1,7 @@
 import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 import Phaser from 'phaser';
 import { LTSController } from "./LTSController";
-import { LtsStateButton } from '../ui_elements/Button';
+import { LtsStateButton, Simple_Button } from '../ui_elements/Button';
 import { Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
@@ -22,6 +22,7 @@ export class PhaserGameController {
     private environment_container: Phaser.GameObjects.Container;  //text object displaying the current environment
     private current_position: Phaser.GameObjects.Text;  //text object displaying current game position 
     private possible_moves_text: ScrollableTextArea; //panel object displaying all possible moves
+    private switch_button: Phaser.GameObjects.Container;
 
     debug: boolean; //TODO:
 
@@ -44,6 +45,7 @@ export class PhaserGameController {
         this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
+        this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.game_initialized = false;
         this.debug = false;
     }
@@ -109,6 +111,10 @@ export class PhaserGameController {
             }
             this.createCurrentPositionField();
             this.createPossibleMovesField();
+            this.createSwitchButton();
+            if(!(reactive || bisimilar)) {
+                this.switch_button.setVisible(false);
+            }
         }
     }
 
@@ -161,6 +167,9 @@ export class PhaserGameController {
             //TODO: display visual feedback
             return;
         }
+        if(next_position.length > 1) {
+            console.log("doMove: multiple moves are possible for given arguments, TODO: implement strategy to choose correct one");
+        }
 
         if(this.game.performMove(action, next_position[0]) === -1) {
             //TODO: display visual feedback
@@ -202,10 +211,17 @@ export class PhaserGameController {
      */
     setGameMode(reactive = true, bisimilar = true) {
         //TODO: visual feedback if not possible
-        if(this.game.setReactive(reactive) === 0) {
-            this.environment_container.setVisible(reactive);
+        let react = this.game.setReactive(reactive);
+        let bisim = this.game.setBisimilar(bisimilar);
+        
+        this.environment_container.setVisible(this.game.isReactive());
+
+        if(!(this.game.isBisimilar() || this.game.isReactive())) {
+            this.switch_button.setVisible(false);
+        } else {
+            this.switch_button.setVisible(true);
         }
-        this.game.setBisimilar(bisimilar);
+        
     }
 
     //TODO: better parser to gather any chars except t and tau
@@ -213,20 +229,20 @@ export class PhaserGameController {
      * set the game logic's environment from a string
      * @param text 
      */
-    private setEnvironment(text: string) {
+    setEnvironment(text: string) {
         if(this.game.isReactive()) {
             //parse the given string and extract actions
-        let arr = text.split(/(?!$)/u); //split at every character
-        let env = new Set<string>();
-        for(let i = 0; i < arr.length; i++) {
-            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
-                env.add(arr[i].charAt(0))
+            let arr = text.split(/(?!$)/u); //split at every character
+            let env = new Set<string>();
+            for(let i = 0; i < arr.length; i++) {
+                if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
+                    env.add(arr[i].charAt(0))
+                }
             }
-        }
-        this.game.setEnvironment(env);
-        //update visualization
-        this.updateEnvironment(); //if some illegal characters are given, reset to previous
-        this.updatePossibleMovesField();
+            this.game.setEnvironment(env);
+            //update visualization
+            this.updateEnvironment(); //if some illegal characters are given, reset to previous
+            this.updatePossibleMovesField();
         } else {
             this.printError("setEnvironment: was called but game is not reactive");
         }
@@ -256,6 +272,15 @@ export class PhaserGameController {
                 this.printError("startGame: " + p1 + " is not in stateBtns list.");
             }
         }
+    }
+
+    /**
+     * symmetry move button
+     */
+    private createSwitchButton() {
+        this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2 -100, "ui_swap_btn", () => {
+            this.doMove(this.game.getCurrent(1), true);
+        }).setScale(0.2);
     }
 
     /**

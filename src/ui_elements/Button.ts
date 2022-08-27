@@ -189,7 +189,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
     text: Phaser.GameObjects.Text;
 
 
-    constructor(scene: Phaser.Scene, x: number, texture: string, actionOnClick = () => {}, caption: string = "") {
+    constructor(scene: Phaser.Scene, x: number, texture: string, actionOnClick = () => {}, caption: string = "", disableAfterClick = true) {
         super(scene, x, Constants.UI_height);
 
         this.image = scene.add.image(0, 0, texture);
@@ -229,7 +229,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
         this.on('pointerup', () => {
             this.image.setTint(Constants.COLOR_BORDEAUX);
             this.text.setTint(Constants.COLOR_BORDEAUX);
-            if(!this.clickedBtn) {
+            if(!this.clickedBtn || !disableAfterClick) {
                 this.clickedBtn = true;
                 actionOnClick();
             }
@@ -239,6 +239,64 @@ export class UI_Button extends Phaser.GameObjects.Container {
         this.on('pointerout', () => {
             this.image.setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
             this.text.setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+            this.image.scale = 1
+            this.text.scale = 1
+        })
+    }
+}
+
+/**
+ * Button class for UI Buttons with one texture, eg. the home button, performs actionOnClick only once
+ */
+ export class Simple_Button extends Phaser.GameObjects.Container {
+
+    private image: Phaser.GameObjects.Image;
+    private clickedBtn = false;
+
+    text: Phaser.GameObjects.Text;
+
+
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, caption: string = "", disableAfterClick = false) {
+        super(scene, x, y);
+
+        this.image = scene.add.image(0, 0, texture);
+        this.setSize(this.image.width, this.image.height);
+
+        this.text = scene.add.text(x, Constants.UI_height + 40, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
+        this.add(this.image);
+        //this.add(this.text);
+        scene.add.existing(this);
+
+
+
+        this.setDepth(1);
+        this.setInteractive();
+
+        /** make image button interactive
+         * PointerEvents:
+         *    pointerover - hovering
+         *    pointerout - not hovering
+         *    pointerup - click and release
+         *    pointerdown - just click
+         */
+         this.on('pointerover', () => {
+            this.image.scale = 1.05
+            this.text.scale = 1.05
+        })
+        this.on('pointerdown', () => {
+            this.image.scale = 0.95
+            this.text.scale = 0.95
+            this.image.tint
+        })
+        this.on('pointerup', () => {
+            if(!this.clickedBtn || !disableAfterClick) {
+                this.clickedBtn = true;
+                actionOnClick();
+            }
+            this.image.scale = 1.05
+            this.text.scale = 1.05
+        })
+        this.on('pointerout', () => {
             this.image.scale = 1
             this.text.scale = 1
         })

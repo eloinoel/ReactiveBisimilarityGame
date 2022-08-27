@@ -38,7 +38,7 @@ export default class GUIScene extends BaseScene {
         let infoyBtn = new UI_Button(this, this.renderer.width - 2* Constants.UI_offset, "ui_info_btn", () => {
             //TODO:Display Popup
             console.log("TODO: display rules popup")
-        }, "Rules");
+        }, "Rules", false);
 
         let buttons = [];
         buttons.push(homeBtn, backBtn, replayBtn, infoyBtn);

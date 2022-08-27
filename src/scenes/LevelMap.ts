@@ -62,7 +62,7 @@ export default class LevelMap extends BaseScene {
         this.levelObjects.push(new LevelSelectionButton(this, 120, 170, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level_3")})}, "Level 2.3"));
         this.levelObjects.push(new LevelSelectionButton(this, 290, 200, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level_4")})}, "Level 2.4").disable());
 
-        //TODO: reactive bisimulation
+        //reactive bisimulation
         let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
         this.levelObjects.push(new LevelSelectionButton(this, 440, 130, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level1")})}, "Level 3.1"));
         this.levelObjects.push(new LevelSelectionButton(this, 540, 240, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level2")})}, "Level 3.2").disable());

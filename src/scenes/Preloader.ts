@@ -18,6 +18,7 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("ui_settings_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/settings_3.png");
         this.load.image("ui_replay_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/replay.png");
         this.load.image("ui_leftarrow_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cursor_left.png");
+        this.load.image("ui_swap_btn", "assets/switch.png")
 
         //LTS
         this.load.image("circle", 'assets/DemoScene/Circle03.png');
