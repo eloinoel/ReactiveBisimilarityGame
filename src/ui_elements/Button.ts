@@ -280,8 +280,8 @@ export class UI_Button extends Phaser.GameObjects.Container {
          *    pointerdown - just click
          */
          this.on('pointerover', () => {
-            this.image.scale = 1.05
-            this.text.scale = 1.05
+            this.image.scale = 1.1
+            this.text.scale = 1.1
         })
         this.on('pointerdown', () => {
             this.image.scale = 0.95
@@ -293,8 +293,8 @@ export class UI_Button extends Phaser.GameObjects.Container {
                 this.clickedBtn = true;
                 actionOnClick();
             }
-            this.image.scale = 1.05
-            this.text.scale = 1.05
+            this.image.scale = 1.1
+            this.text.scale = 1.1
         })
         this.on('pointerout', () => {
             this.image.scale = 1
