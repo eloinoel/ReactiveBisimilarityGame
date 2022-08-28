@@ -77,7 +77,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         let title = new Label(scene, {
             height: 30,
             orientation: 'x',
-            text: scene.add.text(0, 0, data.name).setResolution(2),
+            text: scene.add.text(0, 0, data.name, {fontStyle: 'bold'}).setResolution(2),
         });
 
         let sizer = new Sizer(scene, {
