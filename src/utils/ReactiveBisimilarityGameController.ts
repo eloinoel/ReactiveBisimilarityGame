@@ -351,7 +351,7 @@ export class ReactiveBisimilarityGame {
         if(this.reactive === false) {
             this.printError("getEnvironment: method was called but game is not reactive.");
         }
-        return this.environment;
+        return new Set(this.environment);
     }
 
     getEnvironmentString(): string {
