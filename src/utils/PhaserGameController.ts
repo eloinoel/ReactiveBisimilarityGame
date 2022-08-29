@@ -248,6 +248,7 @@ export class PhaserGameController {
             //update visualization
             this.updateEnvironment(); //if some illegal characters are given, reset to previous
             this.updatePossibleMovesField();
+            this.environment_panel.update();
         } else {
             this.printError("setEnvironment: was called but game is not reactive");
         }
@@ -264,7 +265,7 @@ export class PhaserGameController {
             let p0_button = this.stateBtns.get(p0);
             if(p0_button !== undefined) {
                 this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
-                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1));
+                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2));
             } else {
                 this.printError("startGame: " + p0 + " is not in stateBtns list.");
             }
@@ -287,7 +288,7 @@ export class PhaserGameController {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game.lts.getVisibleActions()).disable().enable();
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game);
     }
 
     /**
