@@ -14,7 +14,10 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private possibleActions;
     private curEnvironment;
     private game;
-    //private caption: Phaser.GameObjects.Text;
+
+    private enabled = true;
+    private activated = true;
+    private disabledAlpha = 0.4;
 
     constructor(scene: Phaser.Scene, x: number, y: number, game: ReactiveBisimilarityGame) {
         super(scene, x, y);
@@ -42,6 +45,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      * enable all buttons to be clickable
     */ 
     enable() {
+        this.enabled = true;
         this.sizer.setInteractive();
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
@@ -54,10 +58,11 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      * disable all buttons to not be clickable
      */
     disable() {
+        this.enabled = false;
         this.sizer.disableInteractive()
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
-            (list[i] as Label).setAlpha(0.7)
+            (list[i] as Label).setAlpha(this.disabledAlpha)
         }
         return this;
     }
@@ -67,6 +72,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      * @returns 
      */
     makeVisible() {
+        this.activated = true;
         this.caption.setVisible(true);
         this.sizer.setVisible(true);
         return this;
@@ -77,6 +83,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      * @returns 
      */
     makeInvisible() {
+        this.activated = false;
         this.caption.setVisible(false);
         this.sizer.setVisible(false);
         return this;
@@ -128,7 +135,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             let label = new Label(this.scene, {
                 width: 40, height: 40,
                 background: this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)))
-                 : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(0.5)),
+                 : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(this.disabledAlpha)),
                 text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
                 space: {
                     left: 5,
@@ -191,6 +198,14 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                     (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(0.5);
                 }
             });
+        
+            //if update call, restore previous settings
+            if(!this.enabled) {
+                this.disable();
+            }
+            if(!this.activated) {
+                this.makeInvisible();
+            }
     }
 
     /**

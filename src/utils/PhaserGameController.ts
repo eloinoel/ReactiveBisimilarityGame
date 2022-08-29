@@ -288,7 +288,7 @@ export class PhaserGameController {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game);
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game).disable();
     }
 
     /**
