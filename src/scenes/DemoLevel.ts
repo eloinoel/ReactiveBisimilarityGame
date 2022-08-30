@@ -32,9 +32,9 @@ export default class DemoLevel extends BaseScene {
 
     private setupLTS(): void {
 
-        let first_coordinates = new Phaser.Math.Vector2(this.game.renderer.width/4 - 50, 100);
-        let second_coordinates = new Phaser.Math.Vector2(this.game.renderer.width*2/4 + 50, 100);
-        let xy_offset = new Phaser.Math.Vector2(115, 140);
+        let first_coordinates = Constants.first_coordinates;
+        let second_coordinates = Constants.second_coordinates;
+        let xy_offset = Constants.lts_xy_offset;
 
         let game_controller = new PhaserGameController(this, xy_offset, first_coordinates, second_coordinates)
 

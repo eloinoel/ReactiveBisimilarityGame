@@ -6,6 +6,7 @@ export class ScrollableTextArea extends Phaser.GameObjects.Container {
     private text: string;
     private panel: ScrollablePanel;
     private fontSize: number;
+    private description: Phaser.GameObjects.Text;
     
     constructor(scene: Phaser.Scene, x_pos: number, y_pos: number, texture?: string, text: string = "", fontSize: number = 20, texture_over?: string, texture_click?: string, width = 370, height = 400) {
         super(scene, Math.round(x_pos), Math.round(y_pos));
@@ -13,6 +14,7 @@ export class ScrollableTextArea extends Phaser.GameObjects.Container {
 
         this.text = text;
         this.fontSize = fontSize;
+        this.description = scene.add.text(x_pos, y_pos - 40, "Possible Moves: ", {fontFamily: Constants.textStyle}).setFontSize(20);
 
 
         //add text
@@ -85,5 +87,13 @@ export class ScrollableTextArea extends Phaser.GameObjects.Container {
         return this.panel;
     }
 
+    makeInvisible() {
+        this.panel.setVisible(false);
+        this.description.setVisible(false);
+    }
 
+    makeVisible() {
+        this.panel.setVisible(true);
+        this.description.setVisible(true);
+    }
 }

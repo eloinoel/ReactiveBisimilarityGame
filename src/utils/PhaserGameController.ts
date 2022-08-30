@@ -21,7 +21,7 @@ export class PhaserGameController {
     private scene: Phaser.Scene;    
     private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
     private environment_container!: Phaser.GameObjects.Container;  //text object displaying the current environment
-    private current_position!: Phaser.GameObjects.Text;  //text object displaying current game position 
+    private current_position!: Phaser.GameObjects.Container;  //text object displaying current game position 
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
@@ -118,6 +118,11 @@ export class PhaserGameController {
             this.createPossibleMovesField();
             if(!(reactive || bisimilar)) {
                 this.switch_button.setVisible(false);
+            }
+            if(!this.debug) {
+                this.environment_container.setVisible(false);
+                this.current_position.setVisible(false);
+                this.possible_moves_text.makeInvisible();
             }
         }
     }
@@ -315,8 +320,10 @@ export class PhaserGameController {
         //game initialized
         if(this.game.getPlay().length !== 0) {
             let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 200);
-            const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily: Constants.textStyle}).setFontSize(20)
-            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.getPlay()[this.game.getPlay().length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
+            
+            let description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily: Constants.textStyle}).setFontSize(20)
+            let position_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getPlay()[this.game.getPlay().length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
+            this.current_position = this.scene.add.container(0, 0, [position_text, description]);
         }
     }
 
@@ -325,7 +332,6 @@ export class PhaserGameController {
      */
     private createPossibleMovesField() {
         let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 250);
-        this.scene.add.text(pos.x, pos.y, "Possible Moves: ", {fontFamily: Constants.textStyle}).setFontSize(20);
         this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250);
         this.updatePossibleMovesField();
     }
@@ -351,8 +357,8 @@ export class PhaserGameController {
      */
     private updateCurrentPositionField() {
         //game and textfield initialized
-        if(this.game.getPlay().length !== 0 && this.current_position.text !== "") {
-            this.current_position.text = this.game.getPlay()[this.game.getPlay().length - 1].toString();
+        if(this.game.getPlay().length !== 0 && this.current_position.getAll().length === 2) {
+            (this.current_position.first as Phaser.GameObjects.Text).text = this.game.getPlay()[this.game.getPlay().length - 1].toString();
         } else {
             this.printError("game not initialized")
         }
