@@ -1,15 +1,16 @@
 import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 import Phaser from 'phaser';
 import { LTSController } from "./LTSController";
-import { LtsStateButton } from '../ui_elements/Button';
+import { LtsStateButton, Simple_Button } from '../ui_elements/Button';
 import { Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
-import { AttackerNode, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
+import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
+import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
 
 export class PhaserGameController {
-    game: ReactiveBisimilarityGame;
+    private game: ReactiveBisimilarityGame;
     private game_initialized: boolean;
 
     private left_coordinates: Phaser.Math.Vector2; //coordinates of first lts
@@ -19,9 +20,13 @@ export class PhaserGameController {
     private stateBtns: Map<string, LtsStateButton>; //map from state names to visual buttons references
     private scene: Phaser.Scene;    
     private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
-    private environment_text: Phaser.GameObjects.Text;  //text object displaying the current environment
-    private current_position: Phaser.GameObjects.Text;  //text object displaying current game position 
-    private possible_moves_text: ScrollableTextArea; //panel object displaying all possible moves
+    private environment_container!: Phaser.GameObjects.Container;  //text object displaying the current environment
+    private current_position!: Phaser.GameObjects.Text;  //text object displaying current game position 
+    private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
+    private switch_button!: Phaser.GameObjects.Container;
+    private environment_panel!: EnvironmentPanel;
+
+    debug: boolean; //TODO: for diplaying possible moves, position etc
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -30,7 +35,7 @@ export class PhaserGameController {
      * @param left_coordinates 
      * @param right_coordinates 
      */
-    constructor(scene: Phaser.Scene, offset_between_vertices = new Phaser.Math.Vector2(115, 140), left_coordinates = new Phaser.Math.Vector2(400, 200), right_coordinates = new Phaser.Math.Vector2(800, 200)) {
+    constructor(scene: Phaser.Scene, offset_between_vertices = Constants.lts_xy_offset, left_coordinates = Constants.first_coordinates, right_coordinates = Constants.second_coordinates) {
         this.left_coordinates = left_coordinates;
         this.right_coordinates = right_coordinates;
         this.offset_between_vertices = offset_between_vertices;
@@ -39,10 +44,13 @@ export class PhaserGameController {
         let lts = new LTSController();
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.current_hightlights = [];
-        this.environment_text = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
+        /* this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
+        this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
+        this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
+        this.debug = false;
     }
 
     /**
@@ -80,7 +88,12 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
-            const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+            if(p0 === p1) {
+                this.scene.add.image(p0_button.x - 60, p0_button.y, "ui_replay_btn").setScale(0.45).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.blue));
+                this.scene.add.text(p0_button.x - 60, p0_button.y, action, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setFontSize(25).setOrigin(0.5);
+            } else {
+                const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+            }
         }
     }
 
@@ -89,18 +102,25 @@ export class PhaserGameController {
      * @param p0 name of first process
      * @param p1 name of second process
      */
-    startGame(scene: Phaser.Scene, p0: string, p1: string) {
+    startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true) {
         if(this.game.startNewGame(p0, p1) === 0) {
+            this.createEnvironmentField();
+            this.game.setReactive(reactive) //order with createEnvironmentField is important
+            this.game.setBisimilar(bisimilar);
             this.game_initialized = true;
             this.createHighlights(p0, p1);
-            this.createEnvironmentField();
+            this.createReactiveElements();
+            if(!reactive) {
+                this.environment_container.setVisible(false);
+                this.environment_panel.setVisible(false);
+            }
             this.createCurrentPositionField();
             this.createPossibleMovesField();
+            if(!(reactive || bisimilar)) {
+                this.switch_button.setVisible(false);
+            }
         }
     }
-
-    
-
 
     /**
      * does not work when multiple edges with some different label go to same destination
@@ -109,8 +129,7 @@ export class PhaserGameController {
      * @returns 
      */
     doMove(next_process: string, isSymmetryMove: boolean = false) {
-        //this.updateEnvironment();
-        let cur_pos = this.game.play[this.game.play.length - 1];
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
         let action: string = Constants.NO_ACTION;
@@ -152,6 +171,9 @@ export class PhaserGameController {
             //TODO: display visual feedback
             return;
         }
+        if(next_position.length > 1) {
+            console.log("doMove: multiple moves are possible for given arguments, TODO: implement strategy to choose correct one");
+        }
 
         if(this.game.performMove(action, next_position[0]) === -1) {
             //TODO: display visual feedback
@@ -160,54 +182,77 @@ export class PhaserGameController {
         } else {
             this.updateCurrentPositionField();
             this.updateHightlights();
-            this.updateEnvironment();
+            if(this.game.isReactive()) {
+                this.updateEnvironment();
+            }
             this.updatePossibleMovesField();
+
+            //check if the game is over
+            moves = this.game.possibleMoves();
+            cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+
+            if(cur_pos.activePlayer === Player.Attacker) {
+                //in the reactive bisimulation game the defender cannot get stuck as he always has a symmetry move
+            //Defender is stuck
+            } else if(cur_pos.activePlayer === Player.Defender) {
+                if(moves.length === 0) {
+                    //TODO: Show Points and Congratulation
+                    let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                        wintext.destroy();
+                    });
+                }
+            }
         }
-
-        //TODO: check if the game is over
-        /* moves = this.game.possibleMoves();
-        cur_pos = this.game.play[this.game.play.length - 1];
-
-        if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
-            //only symmetry move, TODO: better check for symmetry moves, this allows bugs
-            //TODO: the attacker can still change environment and win the game
-            if(moves.length === 1) {
-                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The defender won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(70).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
-                    wintext.destroy();
-                });
-            }
-        } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-            if(moves.length === 0) {
-                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 2}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
-                    wintext.destroy();
-                });
-            }
-        } else {
-            this.printError("doMove: next position type unknown");
-        }  */
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
+
+    /**
+     * TODO: check if switching game mode is possible in current game state
+     * if @reactive = true, @bisimilar is not checked in the internal game engine
+     * @param reactive 
+     * @param bisimilar 
+     */
+    setGameMode(reactive = true, bisimilar = true) {
+        //TODO: visual feedback if not possible
+        let react = this.game.setReactive(reactive);
+        let bisim = this.game.setBisimilar(bisimilar);
+        
+        this.environment_container.setVisible(this.game.isReactive());
+        this.environment_panel.setVisible(this.game.isReactive());
+
+        if(!(this.game.isBisimilar() || this.game.isReactive())) {
+            this.switch_button.setVisible(false);
+        } else {
+            this.switch_button.setVisible(true);
+        }
+        
+    }
 
     //TODO: better parser to gather any chars except t and tau
     /**
      * set the game logic's environment from a string
      * @param text 
      */
-    private setEnvironment(text: string) {
-        //parse the given string and extract actions
-        let arr = text.split(/(?!$)/u); //split at every character
-        let env = new Set<string>();
-        for(let i = 0; i < arr.length; i++) {
-            if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
-                env.add(arr[i].charAt(0))
+    setEnvironment(text: string) {
+        if(this.game.isReactive()) {
+            //parse the given string and extract actions
+            let arr = text.split(/(?!$)/u); //split at every character
+            let env = new Set<string>();
+            for(let i = 0; i < arr.length; i++) {
+                if(arr[i].charCodeAt(0) >= 97 && arr[i].charCodeAt(0) <= 122 && arr[i] !== "t") {
+                    env.add(arr[i].charAt(0))
+                }
             }
+            this.game.setEnvironment(env);
+            //update visualization
+            this.updateEnvironment(); //if some illegal characters are given, reset to previous
+            this.updatePossibleMovesField();
+            this.environment_panel.updatePanel();
+        } else {
+            this.printError("setEnvironment: was called but game is not reactive");
         }
-        this.game.setEnvironment(env);
-        //update visualization
-        this.updateEnvironment(); //if some illegal characters are given, reset to previous
-        this.updatePossibleMovesField();
-    }
+    } 
 
     /**
      * display visual hightlights of current game state
@@ -220,7 +265,7 @@ export class PhaserGameController {
             let p0_button = this.stateBtns.get(p0);
             if(p0_button !== undefined) {
                 this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
-                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1));
+                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2));
             } else {
                 this.printError("startGame: " + p0 + " is not in stateBtns list.");
             }
@@ -236,14 +281,27 @@ export class PhaserGameController {
     }
 
     /**
+     * symmetry move button
+     */
+    private createReactiveElements() {
+        this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2 -100, "ui_swap_btn", () => {
+            this.doMove(this.game.getCurrent(1), true);
+        }).setScale(0.15);
+
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game);
+    }
+
+    /**
      * creates Text Input Box for the games environment
      */
     private createEnvironmentField() {
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 50);
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 150);
+
         const description = this.scene.add.text(pos.x, pos.y, "Environment: ", {fontFamily: Constants.textStyle}).setFontSize(20)
-        this.environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily: Constants.textStyle, fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
-        let textEdit = new TextEdit(this.environment_text);
-        this.environment_text.setInteractive().on('pointerup', () => {
+        let environment_text = this.scene.add.text(pos.x + 140, pos.y, this.game.getEnvironmentString(), {fontFamily: Constants.textStyle, fixedWidth: 150, fixedHeight: 36}).setFontSize(20);
+        this.environment_container = this.scene.add.container(0, 0, [environment_text, description]);
+        let textEdit = new TextEdit(environment_text);
+        environment_text.setInteractive().on('pointerup', () => {
             textEdit.open(undefined, (text_obj) => {
                 this.setEnvironment((text_obj as Phaser.GameObjects.Text).text);
             })
@@ -255,10 +313,10 @@ export class PhaserGameController {
      */
     private createCurrentPositionField() {
         //game initialized
-        if(this.game.play.length !== 0) {
-            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 100);
+        if(this.game.getPlay().length !== 0) {
+            let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 200);
             const description = this.scene.add.text(pos.x, pos.y, "Position: ", {fontFamily: Constants.textStyle}).setFontSize(20)
-            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.play[this.game.play.length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
+            this.current_position = this.scene.add.text(pos.x + 140, pos.y, this.game.getPlay()[this.game.getPlay().length - 1].toString(), {fontFamily: Constants.textStyle}).setFontSize(18);
         }
     }
 
@@ -266,18 +324,23 @@ export class PhaserGameController {
      * displays possibles next stateBtns in the game
      */
     private createPossibleMovesField() {
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 2.8 / 4, 150);
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 250);
         this.scene.add.text(pos.x, pos.y, "Possible Moves: ", {fontFamily: Constants.textStyle}).setFontSize(20);
-        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "");
+        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250);
         this.updatePossibleMovesField();
     }
 
     /**
+     * updates visual representation of the game's environment
      * game and environment_text should be initialized
      */
     private updateEnvironment() {
-        if(this.game.play.length !== 0) {
-            this.environment_text.text = this.game.getEnvironmentString();
+        if(this.game.getPlay().length !== 0) {
+            if(this.environment_container.getAll().length === 2) {
+                (this.environment_container.first as Phaser.GameObjects.Text).text = this.game.getEnvironmentString();
+            } else {
+                this.printError("updateEnvironment: environment_field not initialized")
+            }
         } else {
             this.printError("game not initialized")
         }
@@ -288,8 +351,8 @@ export class PhaserGameController {
      */
     private updateCurrentPositionField() {
         //game and textfield initialized
-        if(this.game.play.length !== 0 && this.current_position.text !== "") {
-            this.current_position.text = this.game.play[this.game.play.length - 1].toString();
+        if(this.game.getPlay().length !== 0 && this.current_position.text !== "") {
+            this.current_position.text = this.game.getPlay()[this.game.getPlay().length - 1].toString();
         } else {
             this.printError("game not initialized")
         }
@@ -299,7 +362,7 @@ export class PhaserGameController {
      * game and possible_moves_text have to be initialized
      */
     private updatePossibleMovesField() {
-        if(this.game.play.length !== 0) {
+        if(this.game.getPlay().length !== 0) {
             let moves = this.game.getPossibleMovesString(undefined, undefined, true);
             this.possible_moves_text.updatePanel(moves);
         } else {
@@ -333,6 +396,5 @@ export class PhaserGameController {
             console.log(error);
         }
     }
-
-
 }
+

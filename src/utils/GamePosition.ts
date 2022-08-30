@@ -1,4 +1,5 @@
 import { Constants } from "./Constants";
+import { SetOps } from "./SetOps";
 
 /**
  * Data Class representing the current or previous game state
@@ -24,7 +25,13 @@ export abstract class GamePosition {
      * @returns returns true if @otherPosition is a symmetric position to this
      */
     isSymmetryMove(otherPosition: GamePosition) : boolean {
-        if(otherPosition.process1 === this.process2 && otherPosition.process2 === this.process1) {
+        if(otherPosition.process1 === this.process2 && otherPosition.process2 === this.process1 && this.constructor === otherPosition.constructor) {
+            if(this instanceof RestrictedAttackerNode) {
+                if(SetOps.areEqual((this as RestrictedAttackerNode).environment, (otherPosition as RestrictedAttackerNode).environment)) {
+                    return true;
+                }
+                return false;
+            }
             return true;
         }
         return false;

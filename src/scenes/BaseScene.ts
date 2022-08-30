@@ -35,12 +35,38 @@ export default class BaseScene extends Phaser.Scene {
         
     }
 
-    fadeImage(obj: Phaser.GameObjects.Image, duration = Constants.camFadeSpeed*2) {
+    fadeImage(obj: Phaser.GameObjects.Image, delay = 0, duration = Constants.camFadeSpeed*2) {
         obj.alpha = 0;
+        if(delay !== 0) {
+            this.time.delayedCall(delay, () => {
+                this.tweens.add({
+                    targets: obj,
+                    duration: duration,
+                    alpha: 1
+                })
+            });
+        } else {
+            this.tweens.add({
+                targets: obj,
+                duration: duration,
+                alpha: 1
+            })
+        }
+    }
+
+    fadeImageOut(obj: Phaser.GameObjects.Image, duration = Constants.camFadeSpeed*2) {
+        obj.alpha = 1;
         this.tweens.add({
             targets: obj,
             duration: duration,
-            alpha: 1
+            alpha: 0
         })
     }
+
+
+
+    /* fadeImageInto(obj0: Phaser.GameObjects.Image, obj1: Phaser.GameObjects.Image, duration: number) {
+        this.tweens.add()
+    } */
+
 }
