@@ -35,6 +35,17 @@ export class ReactiveBisimilarityGame {
     }
 
     /**
+     * sets play of this instance to the same contents as given play,
+     * call by value (new references created)
+     * @param play 
+     */
+    setPlay(play: GamePosition[]) {
+        this.play = [];
+        for(let i = 0; i < play.length; i++) {
+            this.play.push(play[i].copy());
+        }
+    }
+    /**
      * init currents and other data structures
      * @startingPosition if the game starts with a position other than an attacker node
      * @returns -1 if something went wrong
@@ -322,7 +333,8 @@ export class ReactiveBisimilarityGame {
     }
 
     /**
-     * The environment can change at any time
+     * Set environment of this instance to the given environment,
+     * operates call by value (makes a copy)
      * @param newEnv new Environment
      * @returns -1 if the given env contained illegal actions or it wasn't the attackers turn
      */
@@ -602,5 +614,18 @@ export class ReactiveBisimilarityGame {
         }
     }
 
-
+    /**
+     * makes a new reference while copying the same values as this game
+     * copies are created call by value
+     * @returns 
+     */
+         copy() {
+            let g = new ReactiveBisimilarityGame(this.play[0].process1, this.play[0].process2, this.lts.copy(), this.reactive, this.bisimilar);
+            g.setEnvironment(this.environment);
+            g.setPlay(this.play);
+            if(this.play.length === 0) {
+                console.log("Warning: copying uninitialized game.");
+            }
+            return g;
+        }
 }

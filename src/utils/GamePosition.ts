@@ -19,6 +19,8 @@ export abstract class GamePosition {
 
     abstract toString(): string;
 
+    abstract copy(): GamePosition;
+
     /**
      * 
      * @param otherPosition 
@@ -60,6 +62,10 @@ export class AttackerNode extends GamePosition {
         return "(" + this.process1 + ", " + this.process2 + ")_a"
     }
 
+    copy() {
+        return new AttackerNode(this.process1, this.process2);
+    }
+
 }
 
 /**
@@ -80,6 +86,10 @@ export class SimulationDefenderNode extends GamePosition {
 
     toString(): string {
         return "(" + this.previousAction + ", " + this.process1 + ", " + this.process2 + ")_d"
+    }
+
+    copy() {
+        return new SimulationDefenderNode(this.process1, this.process2, this.previousAction);  
     }
 }
 
@@ -112,6 +122,10 @@ export class RestrictedAttackerNode extends GamePosition {
         })
         env_string = env_string.concat("}");
         return "(" + this.process1 + ", " + env_string + ", " + this.process2 + ")_a"
+    }
+
+    copy() {
+        return new RestrictedAttackerNode(this.process1, this.process2, this.environment);
     }
 }
 
@@ -148,5 +162,9 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
         })
         env_string = env_string.concat("}");
         return "(" + this.previousAction + ", " +  this.process1 + ", " + env_string + ", " + this.process2 + ")_d"
+    }
+
+    copy() {
+        return new RestrictedSimulationDefenderNode(this.process1, this.process2, this.previousAction, this.environment);
     }
 }

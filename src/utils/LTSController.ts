@@ -258,5 +258,18 @@ export class LTSController {
     getVisibleActions(): Set<string> {
         return this.A;
     }
+
+    copy(): LTSController {
+        let clone = new LTSController();
+        clone.graph = this.graph.copy();
+        clone.current = [];
+        for(let i = 0; i < this.current.length; i++) {
+            clone.current.push(this.current[i])
+        }
+        this.A.forEach((value) => {
+            clone.addVisibleActionToA(value);
+        })
+        return clone;
+    }
 }
 
