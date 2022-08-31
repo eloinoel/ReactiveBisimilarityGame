@@ -65,15 +65,15 @@ export default class LevelMap extends BaseScene {
         //reactive bisimulation
         let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
         this.levelObjects.push(new LevelSelectionButton(this, 440, 130, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level1")})}, "Level 3.1"));
-        this.levelObjects.push(new LevelSelectionButton(this, 540, 240, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level2")})}, "Level 3.2").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 720, 220, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level3")})}, "Level 3.3").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 540, 240, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level2")})}, "Level 3.2"));
+        this.levelObjects.push(new LevelSelectionButton(this, 720, 220, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level3")})}, "Level 3.3"));
         this.levelObjects.push(new LevelSelectionButton(this, 800, 350, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level4")})}, "Level 3.4").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 930, 255, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level5")})}, "Level 3.5").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 930, 255, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level5")})}, "Level 3.5"));
         this.levelObjects.push(new LevelSelectionButton(this, 1120, 210, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level6")})}, "Level 3.6").disable());
         this.levelObjects.push(new LevelSelectionButton(this, 1045, 360, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level7")})}, "Level 3.7").disable());
         this.levelObjects.push(new LevelSelectionButton(this, 1125, 510, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level8")})}, "Level 3.8").disable());
         this.levelObjects.push(new LevelSelectionButton(this, 1160, 655, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level9")})}, "Level 3.9").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 973, 682, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level10")})}, "Level 3.10").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 973, 682, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level10")})}, "Level 3.10"));
 
 
         //current lvl pulse effect

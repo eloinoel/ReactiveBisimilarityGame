@@ -89,7 +89,7 @@ export class PhaserGameController {
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
             if(p0 === p1) {
-                this.scene.add.image(p0_button.x - 60, p0_button.y, "ui_replay_btn").setScale(0.45).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.blue));
+                this.scene.add.image(p0_button.x - 60, p0_button.y, "ui_replay_btn").setScale(0.45).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.blue)).setRotation(-0.5);
                 this.scene.add.text(p0_button.x - 60, p0_button.y, action, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setFontSize(25).setOrigin(0.5);
             } else {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);

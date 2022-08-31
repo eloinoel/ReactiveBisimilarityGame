@@ -28,7 +28,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
         this.panel_buttons = new Map();
         this.game = game;
-        this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions());
+        this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions()).sort();
         this.curEnvironment = game.getEnvironment();
 
         this.caption = scene.add.text(0, - this.dimensions.y, "Environment", {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(30).setOrigin(0.5).setResolution(2);
@@ -108,7 +108,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      */
     updatePanel() {
         this.curEnvironment = this.game.getEnvironment();
-        this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions());
+        this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions()).sort();
         //create a a new instance and asign it
         this.destroyPanel();
         this.createPanel();
