@@ -45,7 +45,7 @@ export default class Level2_2 extends BaseScene {
         game_controller.addState("q2", 1, 2, 0);
 
         game_controller.addTransition("q0", "q1", "a");
-        game_controller.addTransition("q1", "q1", " b");
+        game_controller.addTransition("q1", "q1", "b");
         game_controller.addTransition("q1", "q2", "b");
 
         game_controller.startGame(this, "p0", "q0", false, true);
