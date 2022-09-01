@@ -1,3 +1,4 @@
+import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle";
 import { Constants } from "../utils/Constants";
 
 export class Button extends Phaser.GameObjects.Container {
@@ -248,7 +249,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
 /**
  * Button class for UI Buttons with one texture, eg. the home button, performs actionOnClick only once
  */
- export class Simple_Button extends Phaser.GameObjects.Container {
+export class Simple_Button extends Phaser.GameObjects.Container {
 
     private image: Phaser.GameObjects.Image;
     private clickedBtn = false;
@@ -299,6 +300,60 @@ export class UI_Button extends Phaser.GameObjects.Container {
         this.on('pointerout', () => {
             this.image.scale = 1
             this.text.scale = 1
+        })
+    }
+}
+
+export class Tick_Button extends Phaser.GameObjects.Container {
+
+    private image: Phaser.GameObjects.Image;
+    private background: RoundRectangle;
+
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, bg_clr: string, border_clr = bg_clr) {
+        super(scene, x, y);
+
+        this.image = scene.add.image(0, 0, texture).setOrigin(0.5).setScale(0.8).setTintFill(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+        this.setSize(this.image.width, this.image.height);
+
+        let scale = 0.32
+        this.setScale(scale)
+
+        this.background = scene.add.existing(new RoundRectangle(scene, 0, 0, this.width, this.height, 10/scale, Constants.convertColorToNumber(bg_clr)))
+        if(bg_clr !== border_clr) {
+            this.background.setStrokeStyle(4/scale, Constants.convertColorToNumber(border_clr));
+        }
+        
+        this.add(this.background)
+        this.add(this.image);
+
+        scene.add.existing(this);
+
+        this.setDepth(1);
+        this.setInteractive();
+
+        /** make image button interactive
+         * PointerEvents:
+         *    pointerover - hovering
+         *    pointerout - not hovering
+         *    pointerup - click and release
+         *    pointerdown - just click
+         */
+        this.on('pointerover', () => {
+            this.scale = scale + 0.05
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
+        })
+        this.on('pointerdown', () => {
+            this.scale = scale - 0.025
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.6)
+        })
+        this.on('pointerup', () => {
+            actionOnClick();
+            this.scale = scale + 0.05
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
+        })
+        this.on('pointerout', () => {
+            this.scale = scale
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(1)
         })
     }
 }

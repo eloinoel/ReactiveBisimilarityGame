@@ -13,11 +13,10 @@ export default class Preloader extends Phaser.Scene {
         //UI
         this.load.image("ui_home_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/home.png");
         this.load.image("ui_info_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/info_2.png");
-        this.load.image("ui_musicon_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/music_on.png");
-        this.load.image("ui_musicoff_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/music_off.png");
         this.load.image("ui_settings_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/settings_3.png");
         this.load.image("ui_replay_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/replay.png");
         this.load.image("ui_leftarrow_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cursor_left.png");
+        this.load.image("ui_tick_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/tick.png");
         this.load.image("ui_swap_btn", "assets/switch.png")
 
         //LTS

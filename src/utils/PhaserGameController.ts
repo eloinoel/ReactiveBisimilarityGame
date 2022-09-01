@@ -50,7 +50,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;
+        this.debug = true;
     }
 
     /**
@@ -112,7 +112,7 @@ export class PhaserGameController {
             this.createReactiveElements();
             if(!reactive) {
                 this.environment_container.setVisible(false);
-                this.environment_panel.setVisible(false);
+                this.environment_panel.makeInvisible();
             }
             this.createCurrentPositionField();
             this.createPossibleMovesField();
@@ -128,21 +128,62 @@ export class PhaserGameController {
     }
 
     /**
+     * add environment change, timeout and idling functionality,
+     * @returns -1 if move is no possible
+     * */
+    encapsulateDoMove(next_process: string, isSymmetryMove = false): number {
+        this.environment_panel.disable(); //clicking a button should interrupt previous environment changes
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+        let moves = this.game.possibleMoves();
+
+        //can only occur in these node types
+        if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove) {
+            let moves_without_symmetry = moves.filter((position) => (!(cur_pos.isSymmetryMove(position) && position.process1 === next_process)));
+            
+            //if idling (no more visible move or tau possible)
+            if(moves_without_symmetry.length === 0) {
+                let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
+                if(edgeLabel !== undefined) {
+                    if(this.game.isVisibleOrHiddenAction(edgeLabel)) {
+                        //TODO: restricted simulation move?
+                    } else if(edgeLabel === Constants.TIMEOUT_ACTION) {
+                        //TODO: timeouts
+                    } else {
+                        this.printError("encapsulateDoMove: illegal action encountered");
+                    }
+                } else {
+                    this.printError("encapsulateDoMove: no edge between process " + cur_pos.process1 + " and " + next_process);
+                    return -1
+                }
+            }
+        }
+
+        //call doMove()
+        return this.doMove(next_process, isSymmetryMove);
+    }
+
+    /**
      * does not work when multiple edges with some different label go to same destination
      * TODO: doMove with edges
      * @param next_process
-     * @returns 
+     * @returns -1 if the move was not possible
      */
-    doMove(next_process: string, isSymmetryMove: boolean = false) {
+    doMove(next_process: string, isSymmetryMove: boolean = false): number{
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
         let action: string = Constants.NO_ACTION;
 
+        /* TODO: if no action possible and idling 
+            * allow timeout-action with environment change
+            * allow restricted simulation challenge
+        */
+
+
         if(moves.length === 0) {
             this.printError("doMove: no possible moves from current position")
             //TODO: display visual feedback
-            return;
+            return -1;
         }
 
         // cautious when using this in the next if case
@@ -162,33 +203,32 @@ export class PhaserGameController {
             }
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
-                return;
+                return -1;
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
             next_position = moves.filter((position) => (position.process2 === next_process));  //TODO: also test transition label
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
-                return
+                return -1;
             }
             action = cur_pos.previousAction;
         } else {
             this.printError("doMove: current position type unknown");
-            //TODO: display visual feedback
-            return;
+            return -1;
         }
         if(next_position.length > 1) {
             console.log("doMove: multiple moves are possible for given arguments, TODO: implement strategy to choose correct one");
         }
 
         if(this.game.performMove(action, next_position[0]) === -1) {
-            //TODO: display visual feedback
             console.log("move not possible: " + action + ", " + next_position.toString());
-            return;
+            return -1;
         } else {
             this.updateCurrentPositionField();
             this.updateHightlights();
             if(this.game.isReactive()) {
                 this.updateEnvironment();
+                this.environment_panel.updatePanel();
             }
             this.updatePossibleMovesField();
 
@@ -208,6 +248,7 @@ export class PhaserGameController {
                 }
             }
         }
+        return 0;
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
@@ -234,9 +275,9 @@ export class PhaserGameController {
         
     }
 
-    //TODO: better parser to gather any chars except t and tau
     /**
-     * set the game logic's environment from a string
+     * set the game logic's environment from a string, 
+     * doesn't detect tau, only singular letters
      * @param text 
      */
     setEnvironment(text: string) {
@@ -257,7 +298,16 @@ export class PhaserGameController {
         } else {
             this.printError("setEnvironment: was called but game is not reactive");
         }
-    } 
+    }
+
+    /**
+     * 
+     * if timeout not possible after setting environment, give visual feedback
+     * @param env 
+     */
+    setEnvironmentAndDoTimeout(env: Set<string>) {
+
+    }
 
     /**
      * display visual hightlights of current game state
@@ -293,7 +343,7 @@ export class PhaserGameController {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game);
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game, this);
     }
 
     /**
@@ -331,8 +381,8 @@ export class PhaserGameController {
      * displays possibles next stateBtns in the game
      */
     private createPossibleMovesField() {
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 250);
-        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250);
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, this.scene.renderer.height - 300);
+        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250, 230);
         this.updatePossibleMovesField();
     }
 

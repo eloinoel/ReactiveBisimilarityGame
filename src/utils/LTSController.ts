@@ -138,6 +138,11 @@ export class LTSController {
         return new Set<string>(actionList);
     }
 
+    /**
+     * returns an array of tupels (edge list) containing the edgelabel and destination of the given node
+     * @param node 
+     * @returns 
+     */
     getActionsAndDestinations(node: string): string[][] {
         let edgeList = [];
         let edge: string[] = [];
@@ -150,6 +155,21 @@ export class LTSController {
             }
         }
         return edgeList;
+    }
+
+    /**
+     * returns undefined if there is no action between the two processes
+     * @param node1 
+     * @param node2 
+     */
+    getActionBetweenTwoProcesses(source: string, destination: string): string | undefined {
+        let edges = this.getActionsAndDestinations(source);
+        let e = edges.filter((edge) => (edge[1] === destination));
+        if (e.length === 0) {
+            return undefined;
+        } else {
+            return e[0][0];
+        } 
     }
 
     /**

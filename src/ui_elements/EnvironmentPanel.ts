@@ -2,6 +2,8 @@ import { Constants } from "../utils/Constants";
 import { FixWidthSizer, RoundRectangle, Label} from 'phaser3-rex-plugins/templates/ui/ui-components';
 import { SetOps } from "../utils/SetOps";
 import { ReactiveBisimilarityGame } from "../utils/ReactiveBisimilarityGameController";
+import { Tick_Button } from "./Button";
+import { PhaserGameController } from "../utils/PhaserGameController";
 
 export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
@@ -10,16 +12,18 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
     private panel_buttons: Map<Phaser.GameObjects.GameObject, boolean>;
     private sizer!: FixWidthSizer;
+    private tickButton!: Phaser.GameObjects.Container;
     private caption;
     private possibleActions;
     private curEnvironment;
     private game;
+    private phaserGameController;
 
     private enabled = true;
     private activated = true;
     private disabledAlpha = 0.4;
 
-    constructor(scene: Phaser.Scene, x: number, y: number, game: ReactiveBisimilarityGame) {
+    constructor(scene: Phaser.Scene, x: number, y: number, game: ReactiveBisimilarityGame, phaser_game: PhaserGameController) {
         super(scene, x, y);
 
 
@@ -28,6 +32,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
         this.panel_buttons = new Map();
         this.game = game;
+        this.phaserGameController = phaser_game;
         this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions()).sort();
         this.curEnvironment = game.getEnvironment();
 
@@ -51,6 +56,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(1)
         }
+        this.tickButton.setVisible(true);
         return this;
     }
 
@@ -64,6 +70,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(this.disabledAlpha)
         }
+        this.tickButton.setVisible(false);
         return this;
     }
 
@@ -75,6 +82,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.activated = true;
         this.caption.setVisible(true);
         this.sizer.setVisible(true);
+        this.tickButton.setVisible(true);
         return this;
     }
 
@@ -86,6 +94,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.activated = false;
         this.caption.setVisible(false);
         this.sizer.setVisible(false);
+        this.tickButton.setVisible(false);
         return this;
     }
 
@@ -120,6 +129,11 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for(let i = 4; i < this.possibleActions.length; i++) {
             width += 45;
         }
+
+        this.tickButton = new Tick_Button(this.scene, this.coordinates.x + width/2 + 30, this.coordinates.y, "ui_tick_btn", () => {
+            let tmp = this.getActiveActions();
+            this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
+        }, Constants.COLORS_BLUE_LIGHT.c3);
 
         this.sizer = new FixWidthSizer(this.scene, {
             x: this.coordinates.x, y: this.coordinates.y,
@@ -165,8 +179,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                 }
                 
                 //set Environment
-                let tmp = this.getActiveActions();
-                this.game.setEnvironment(new Set(tmp));
+                /* let tmp = this.getActiveActions();
+                this.game.setEnvironment(new Set(tmp)); */
             })
             .on('child.down', (child: Label) => {
                 //activated

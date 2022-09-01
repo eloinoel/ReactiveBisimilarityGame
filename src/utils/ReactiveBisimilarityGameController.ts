@@ -248,6 +248,13 @@ export class ReactiveBisimilarityGame {
         this.lts.setCurrentState(nextPosition.process1, process1Index);
         this.lts.setCurrentState(nextPosition.process2, process2Index);
 
+        //TODO: necessary to update Environment?
+        if(nextPosition instanceof SimulationDefenderNode || nextPosition instanceof AttackerNode) {
+            this.resetEnvironment()
+        } else if(nextPosition instanceof RestrictedAttackerNode || nextPosition instanceof RestrictedSimulationDefenderNode) {
+            this.setEnvironment(nextPosition.environment);
+        }
+
         //update move history
         this.play.push(nextPosition);
         console.log("Performed move from (" + curPosition.process1 + ", " + curPosition.process2 + ") --" + 
@@ -394,7 +401,6 @@ export class ReactiveBisimilarityGame {
 
     /**
      * TODO: to test
-     * TODO: does put an action into possible moves for empty environments even when performing timeout action
      * good for debugging purposes
      * @param process 
      */
@@ -611,6 +617,17 @@ export class ReactiveBisimilarityGame {
             return this.lts.current[1];
         } else {
             return "";
+        }
+    }
+
+    /**
+     * returns true if given action is a visible, normal action or a tau action
+     */
+    isVisibleOrHiddenAction(action: string) {
+        if(this.lts.getVisibleActions().has(action) || action === Constants.HIDDEN_ACTION) {
+            return true;
+        } else {
+            return false;
         }
     }
 
