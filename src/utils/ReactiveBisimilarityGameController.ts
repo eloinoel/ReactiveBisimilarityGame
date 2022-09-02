@@ -52,6 +52,10 @@ export class ReactiveBisimilarityGame {
      */
     startNewGame(process1: string, process2: string, startingPosition?: GamePosition, reactive: boolean = true, bisimilar: boolean = true): Number {
         if(this.lts.hasState(process1) && this.lts.hasState(process2)) {
+            //flush play
+            this.play = [];
+
+            //set data structures
             this.lts.setCurrentState(process1, 0);
             this.lts.setCurrentState(process2, 1);
             this.environment = this.lts.getVisibleActions();
@@ -75,9 +79,12 @@ export class ReactiveBisimilarityGame {
      * check if any kind of move from the definition is possible in a position
      * @position if evaluation for an other position than the current position is needed
      * @action action to perform, supply an empty string for symmetry moves
-     * @returns 
+     * @returns a number indicating which type of move was given
+     * 0: move not possible, 1: simulation challenge, 2: simulation answer, 3: symmetry move, 4: timeout simulation challenge,
+     * 5: timeout simulation answer, 6: restricted simulation challenge, 7: invisible simulation challenge, 8: invisible simulation answer,
+     * 9: timeouted timeout simulation challenge, 10: restricted symmetry move
      */
-    isMovePossible(action: string, nextPosition: GamePosition, environment?: Set<string>, curPosition?: GamePosition): boolean {
+    isMovePossible(action: string, nextPosition: GamePosition, environment?: Set<string>, curPosition?: GamePosition): number {
         let A = this.lts.getVisibleActions();
 
         //deal with some optional arguments
@@ -85,26 +92,22 @@ export class ReactiveBisimilarityGame {
             curPosition = this.play[this.play.length - 1]; //get last element in move history
         }
         if(environment === undefined) {
-            //console.log("environment undefined")    //TODO: debug
-            environment = this.environment; //TODO: check if this ruins anything 
+            environment = this.environment; 
         }
 
         //check if action is viable
-        if(this.reactive && !Constants.isSpecialAction(action) && ((!environment?.has(action) || !A.has(action)))) {  //empty action means symmetry move
-            //this.printError('False: action not viable');    //TODO: delete debug
-            return false;
+        if(this.reactive && !Constants.isSpecialAction(action) && (!A.has(action))) {  //empty action means symmetry move
+            return this.getCodeFromMoveString("Illegal Move");
         }
         
         //check if processes of positions exist in LTS
         if(curPosition === undefined || curPosition == null || curPosition.process1 == null || curPosition.process2 == null 
         || !this.lts.hasState(curPosition.process1) || !this.lts.hasState(curPosition.process2)) {
-            //this.printError('False: curPosition not viable'); //TODO: delete debug
-            return false;
+            return this.getCodeFromMoveString("IllegalMove");
         }
         if(nextPosition === undefined || nextPosition == null || nextPosition.process1 == null || !this.lts.hasState(nextPosition.process1)
         || nextPosition.process2 == null || !this.lts.hasState(nextPosition.process2)) {
-            //this.printError('False: nextPosition not viable'); //TODO: delete debug
-            return false;
+            return this.getCodeFromMoveString("IllegalMove");
         }
 
         /************************************************ BISIMULATION AND SIMULATION ************************************************/
@@ -113,15 +116,16 @@ export class ReactiveBisimilarityGame {
                 //symmetry move
                 if(this.bisimilar) {
                     if(action === Constants.NO_ACTION && curPosition.isSymmetryMove(nextPosition)) {
-                        return true;
+                        this.getCodeFromMoveString("Symmetry Move");
                     }
                 }
                 //simulation challenge
-                if(this.lts.getOutgoingActions(curPosition.process1).has(action)) {
+                if(action !== Constants.NO_ACTION) {
+                    //check arguments
                     if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
-                        //check conditions of move, may be redundant with other code but for clarity's sake
+                        //check conditions of move
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action)) {
-                            return true;
+                            return this.getCodeFromMoveString("Simulation Challenge");
                         }
                     }
                 }
@@ -130,45 +134,37 @@ export class ReactiveBisimilarityGame {
                     //simulation answer
                     if(nextPosition instanceof AttackerNode && curPosition.process1 === nextPosition.process1 && action === curPosition.previousAction) {
                         if(this.lts.hasTransition(curPosition.process2, nextPosition.process2, action)) {
-                            return true;
+                            return this.getCodeFromMoveString("Simulation Answer");
                         }
                     }
                 }
             } else {
                 this.printError(('isMovePossible: unknown game position type ' + curPosition.constructor.name) as string);
-                return false;
+                return this.getCodeFromMoveString("Illegal Move");
             }
         /************************************************ REACTIVE BISIMULATION GAME ************************************************/
         } else {
             /* check all game move cases */
             //- check if action is possible from p or q
             if(curPosition instanceof AttackerNode) {
-                //this.printError('isMovePossible: curPosition AttackerNode if case'); //TODO: delete debug
-                //console.log("outgoing actions: " + SetOps.toArray(this.lts.getOutgoingActions(curPosition.process1))); //TODO: delete debug
                 //symmetry move
                 if(action === Constants.NO_ACTION && curPosition.isSymmetryMove(nextPosition)) {
-                    //this.printError('isMovePossible: Empty Action if case'); //TODO: delete debug
-                    return true;
+                    return this.getCodeFromMoveString("Symmetry Move");
                 //does process1 have the action it is supposed to execute
-                } else if(this.lts.getOutgoingActions(curPosition.process1).has(action)) {
-                    //this.printError('isMovePossible: process has action if case'); //TODO: delete debug
-                    //console.log("environment:" +  SetOps.toArray(environment)); //TODO: delete debug
-                    //console.log("environment:" +  SetOps.toArray((nextPosition as RestrictedSimulationDefenderNode).environment)); //TODO: delete debug
+                } else if(action !== Constants.NO_ACTION  && this.lts.getOutgoingActions(curPosition.process1).has(action)) {
                     //simulation challenge
                     if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
-                        //this.printError('isMovePossible: simulation challenge if case'); //TODO: delete debug
-                        //check conditions of move, may be redundant with other code but for clarity's sake
+                        //check conditions of move, may be redundant with other code but for my clarity's sake
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && (A.has(action) || action === Constants.HIDDEN_ACTION)) {
-                            return true;
+                            return this.getCodeFromMoveString("Simulation Challenge");
                         }
                     //timeout simulation challenge
                     } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2
                         && SetOps.areEqual(environment, nextPosition.environment) && nextPosition.previousAction === Constants.TIMEOUT_ACTION) {
-                        //this.printError('isMovePossible: timeout simulation challenge if case'); //TODO: delete debug
                         //check move conditions
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, environment) 
                         && SetOps.isSubsetEq(environment, A)) {
-                            return true;
+                            return this.getCodeFromMoveString("Timeout Simulation Challenge");
                         }
                     }
                 }
@@ -177,48 +173,122 @@ export class ReactiveBisimilarityGame {
                     //simulation answer
                     if(nextPosition instanceof AttackerNode && curPosition.process1 === nextPosition.process1 && action === curPosition.previousAction) {
                         if(this.lts.hasTransition(curPosition.process2, nextPosition.process2, action)) {
-                            return true;
+                            return this.getCodeFromMoveString("Simulation Answer");
                         }
                     }
                 }
             } else if(curPosition instanceof RestrictedAttackerNode) {
                 //restricted symmetry move
                 if(action === Constants.NO_ACTION && curPosition.isSymmetryMove(nextPosition)) {
-                    return true;
-                } else if(this.lts.getOutgoingActions(curPosition.process1).has(action)) {
+                    return this.getCodeFromMoveString("Restricted Symmetry Move");
+                } else if(action !== Constants.NO_ACTION && this.lts.getOutgoingActions(curPosition.process1).has(action)) {
                     //restricted simulation challenge
                     if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && A.has(action) && (environment.has(action) || this.initialsEmpty(curPosition.process1, environment))) {
-                            return true;
+                            return this.getCodeFromMoveString("Restricted Simulation Challenge");
                         }
                     //invisible simulation challenge
                     } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && action === Constants.HIDDEN_ACTION && curPosition.process2 === nextPosition.process2) {
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action)) {
-                            return true;
+                            return this.getCodeFromMoveString("Invisible Simulation Challenge");
                         }
                     //timeouted timeout simulation challenge
                     } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && action === Constants.TIMEOUT_ACTION && curPosition.process2 === nextPosition.process2) {
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, SetOps.union(curPosition.environment, environment)) && SetOps.isSubsetEq(environment, A)) {
-                            return true;
+                            return this.getCodeFromMoveString("Timeouted Timeout Simulation Challenge");
                         }
                     }
                 }
             } else if(curPosition instanceof RestrictedSimulationDefenderNode) {
                 if(action !== Constants.NO_ACTION) {
                     //timeout simulation answer and invisible simulation answer
-                    if(nextPosition instanceof RestrictedAttackerNode && curPosition.process1 == nextPosition.process1 && SetOps.areEqual(curPosition.environment, nextPosition.environment) && action === curPosition.previousAction) {
+                    if(nextPosition instanceof RestrictedAttackerNode && curPosition.process1 == nextPosition.process1 && SetOps.areEqual(curPosition.environment, nextPosition.environment) && action === curPosition.previousAction && action === Constants.HIDDEN_ACTION) {
                         if(this.lts.hasTransition(curPosition.process2, nextPosition.process2, action)) {
-                            return true;
+                            return this.getCodeFromMoveString("Invisible Simulation Answer");
+                        }
+                    } else if(nextPosition instanceof RestrictedAttackerNode && curPosition.process1 == nextPosition.process1 && SetOps.areEqual(curPosition.environment, nextPosition.environment) && action === curPosition.previousAction && action === Constants.TIMEOUT_ACTION) {
+                        if(this.lts.hasTransition(curPosition.process2, nextPosition.process2, action)) {
+                            return this.getCodeFromMoveString("Timeout Simulation Answer");
                         }
                     }
                 }
             } else {
                 this.printError('isMovePossible: unknown game position type')
-                return false;
+                return this.getCodeFromMoveString("Illegal move");
             }
         }
         
-        return false;
+        return this.getCodeFromMoveString("Illegal move");
+    }
+
+    /**
+     * @returns a move string from given number,
+     * 0: move not possible, 1: simulation challenge, 2: simulation answer, 3: symmetry move, 4: timeout simulation challenge,
+     * 5: timeout simulation answer, 6: restricted simulation challenge, 7: invisible simulation challenge, 8: invisible simulation answer,
+     * 9: timeouted timeout simulation challenge, 10: restricted symmetry move
+     */
+    getMoveStringFromCode(code: number): string {
+        switch(code) {
+            case 0:
+                return "Illegal move";
+            case 1:
+                return "Simulation Challenge";
+            case 2:
+                return "Simulation Answer";
+            case 3:
+                return "Symmetry Move";
+            case 4:
+                return "Timeout Simulation Challenge";
+            case 5:
+                return "Timeout Simulation Answer";
+            case 6:
+                return "Restricted Simulation Challenge";
+            case 7:
+                return "Invisible Simulation Challenge";
+            case 8:
+                return "Invisible Simulation Answer";
+            case 9:
+                return "Timeouted Timeout Simulation Challenge";
+            case 10:
+                return "Restricted Symmetry Move"
+            default:
+                return "Unknown move"
+        }
+    }
+
+    /**
+     * @returns a number code for given move,
+     * 0: Illegal move, 1: Simulation Challenge, 2: Simulation Answer, 3: Symmetry Move, 4: Timeout Simulation Challenge,
+     * 5: Timeout Simulation Answer, 6: Restricted Simulation Challenge, 7: Invisible Simulation Challenge, 8: Invisible Simulation Answer,
+     * 9: Timeouted Timeout Simulation Challenge, 10: Restricted Symmetry Move
+     */
+    getCodeFromMoveString(move: string): number {
+        switch(move) {
+            case "Illegal move":
+                return 0;
+            case "Simulation Challenge":
+                return 1;
+            case "Simulation Answer":
+                return 2;
+            case "Symmetry Move":
+                return 3;
+            case "Timeout Simulation Challenge":
+                return 4;
+            case "Timeout Simulation Answer":
+                return 5;
+            case "Restricted Simulation Challenge":
+                return 6;
+            case "Invisible Simulation Challenge":
+                return 7;
+            case "Invisible Simulation Answer":
+                return 8;
+            case "Timeouted Timeout Simulation Challenge":
+                return 9;
+            case "Restricted Symmetry Move":
+                return 10;
+            default:
+                return -1
+        }
     }
 
     /**
@@ -231,7 +301,7 @@ export class ReactiveBisimilarityGame {
     performMove(action: string, nextPosition: GamePosition): number {
         //check if move is possible
         let curPosition = this.play[this.play.length - 1];
-        let legalMove = this.isMovePossible(action, nextPosition, this.environment, curPosition);
+        let legalMove: boolean = Boolean(this.isMovePossible(action, nextPosition, this.environment, curPosition));
         if(!legalMove) {
             console.log("performMove: move not possible: (" + curPosition.process1 + ", " + curPosition.process2 + ") --" + 
             action + "-> (" + nextPosition.process1 + ", " + nextPosition.process2 + ")");
@@ -248,12 +318,12 @@ export class ReactiveBisimilarityGame {
         this.lts.setCurrentState(nextPosition.process1, process1Index);
         this.lts.setCurrentState(nextPosition.process2, process2Index);
 
-        //TODO: necessary to update Environment?
-        if(nextPosition instanceof SimulationDefenderNode || nextPosition instanceof AttackerNode) {
+        //TODO: necessary to update Environment? Current environment should always reflect the game
+        if(nextPosition instanceof SimulationDefenderNode) {
             this.resetEnvironment()
-        } else if(nextPosition instanceof RestrictedAttackerNode || nextPosition instanceof RestrictedSimulationDefenderNode) {
+        } else if(nextPosition instanceof RestrictedSimulationDefenderNode) {
             this.setEnvironment(nextPosition.environment);
-        }
+        } 
 
         //update move history
         this.play.push(nextPosition);

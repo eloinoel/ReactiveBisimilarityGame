@@ -146,6 +146,7 @@ export class PhaserGameController {
                 if(edgeLabel !== undefined) {
                     if(this.game.isVisibleOrHiddenAction(edgeLabel)) {
                         //TODO: restricted simulation move?
+                        //this is possibly already implemented in possible moves and isMovePossible
                     } else if(edgeLabel === Constants.TIMEOUT_ACTION) {
                         //TODO: timeouts
                     } else {
