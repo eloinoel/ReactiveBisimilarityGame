@@ -194,7 +194,7 @@ export class LTSController {
     /**
      * 
      * @param node 
-     * @returns a set of all outgoing transitions
+     * @returns a set of all outgoing transitions of a node
      */
     getOutgoingActions(node: string): Set<string> {
         let actionList: string[] = [];
@@ -276,7 +276,7 @@ export class LTSController {
      * @returns 
      */
     getVisibleActions(): Set<string> {
-        return this.A;
+        return new Set(this.A);
     }
 
     copy(): LTSController {

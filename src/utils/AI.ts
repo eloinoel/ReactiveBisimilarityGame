@@ -8,13 +8,17 @@ import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
  */
 export class AI {
     
+    /** copy of the game at initialization time */
     private game: ReactiveBisimilarityGame;
 
+    /** to disable/reenable printing in console */
+    private consoleLogSignature;
     /**graph of all branching game positions, with all predecessors and, with a boolean for whether game position vertex is in the winning region of attacker*/
     private graph!: Graph<[GamePosition, Node<GamePosition>[], boolean]>;
 
     constructor(game: ReactiveBisimilarityGame) {
         this.game = game.copy();    //TODO: test if this creates a completely independant copy of the game
+        this.consoleLogSignature = console.log;
     }
 
     /**
@@ -24,12 +28,13 @@ export class AI {
     generateGraph() {
         //game initialized?
         if(this.game.getPlay.length === 0) {
-            return -1;
+            this.printError("generateGraph: Cannot generate graph for uninitialized game")
+            return
         }
 
         //construct graph
         this.graph = new Graph<[GamePosition, Node<GamePosition>[], boolean]>((a: [GamePosition, Node<GamePosition>[], boolean], b: [GamePosition, Node<GamePosition>[], boolean]) => {
-            if(a[0] !== b[0]) { //removeNode when Gamepositions differ
+            if(a[0] !== b[0]) { //comparator, removeNode when Gamepositions differ
                 return 1;
             }
             return 0;
@@ -38,13 +43,15 @@ export class AI {
         this.appendNodesRecursively(this.graph.getNodes()[0])
     }
 
+    //TODO:
     private appendNodesRecursively(node: Node<[GamePosition, Node<GamePosition>[], boolean]>) {
         if(this.graph.hasNode(node)) {
             //generate moves
+            let possibleMoves = this.game.possibleMoves(node.data[0], true);
 
             //create nodes for moves
 
-            //cycle detection
+            //cycle detection/node already in graph --> update predecessors of node
 
             //add edges to moves
 
@@ -68,6 +75,14 @@ export class AI {
      */
     getShortestPathLength() {
         //TODO:
+    }
+
+    private disableConsole() {
+        console.log = () => {};
+    }
+
+    private enableConsole() {
+        console.log = this.consoleLogSignature;
     }
 
     /**

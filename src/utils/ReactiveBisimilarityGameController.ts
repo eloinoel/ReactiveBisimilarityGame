@@ -469,7 +469,7 @@ export class ReactiveBisimilarityGame {
      * good for debugging purposes
      * @param process 
      */
-    possibleMoves(curPosition?: GamePosition): GamePosition[] {
+    possibleMoves(curPosition?: GamePosition, allEnvironmentCombinations: boolean = false): GamePosition[] {
         if(curPosition === undefined) {
             curPosition = this.play[this.play.length - 1];
         }
@@ -481,7 +481,7 @@ export class ReactiveBisimilarityGame {
             return moves;
         }
 
-        let potentialMoves = this.generateMoves(curPosition);
+        let potentialMoves = this.generateMoves(curPosition, allEnvironmentCombinations);
 
         for(let i = 0; i < potentialMoves.length; i++) {
             if(curPosition.activePlayer === Player.Attacker) {
@@ -560,7 +560,7 @@ export class ReactiveBisimilarityGame {
      * @param curPosition 
      * @returns 
      */
-    private generateMoves(curPosition: GamePosition): GamePosition[] {
+    private generateMoves(curPosition: GamePosition, allEnvironmentCombinations: boolean = false): GamePosition[] {
         let moves: GamePosition[] = [];
         let A = this.lts.getVisibleActions();
 
@@ -611,7 +611,14 @@ export class ReactiveBisimilarityGame {
                     
                     //timeout simulation challenge
                     } else if(edges[i][0] === Constants.TIMEOUT_ACTION) {
-                        moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, /* maxEnvForTimeout */ new Set(this.environment)));
+                        if(allEnvironmentCombinations) {
+                            let environments = this.generateAllTimeoutEnvironmentCombinations(curPosition.process1);
+                            for(let j = 0; j < environments.length; j++) {
+                                moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, environments[j]));
+                            }
+                        } else {
+                            moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, new Set(this.environment)));
+                        }
                     }
                 }
             } else if(curPosition instanceof RestrictedAttackerNode) {
@@ -619,14 +626,6 @@ export class ReactiveBisimilarityGame {
                 moves.push(curPosition.invertProcesses());
     
                 let edges = this.lts.getActionsAndDestinations(curPosition.process1);
-
-                //get maximal environment to allow timeout
-                /* let maxEnvForTimeout = new Set(A);
-                for(let j = 0; j < edges.length; j++) {
-                    if(!Constants.isSpecialAction(edges[j][0])) {
-                        maxEnvForTimeout.delete(edges[j][0]);
-                    }
-                } */
     
                 for(let i = 0; i < edges.length; i++) {
                     //restricted simulation challenge
@@ -639,7 +638,14 @@ export class ReactiveBisimilarityGame {
                     
                     //timeouted timeout simulation challenge
                     } else if(edges[i][0] === Constants.TIMEOUT_ACTION) {
-                        moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, /* maxEnvForTimeout */ new Set(this.environment)));
+                        if(allEnvironmentCombinations) {
+                            let environments = this.generateAllTimeoutEnvironmentCombinations(curPosition.process1);
+                            for(let j = 0; j < environments.length; j++) {
+                                moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, environments[j]));
+                            }
+                        } else {
+                            moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, new Set(this.environment)));
+                        }
                     }
                 }
             } else if(curPosition instanceof SimulationDefenderNode) {
@@ -663,6 +669,24 @@ export class ReactiveBisimilarityGame {
             }
         }
         return moves;
+    }
+
+    /**
+     * generate every possible environment for a process to execute timeout action
+     */
+    generateAllTimeoutEnvironmentCombinations(sourceProcess: string) {
+        let actionsOfProcess = this.lts.getOutgoingActions(sourceProcess);
+        let visibleActions = SetOps.toArray(this.lts.getVisibleActions());
+        let max_environment = [];
+
+        //get minimal environment for timeout
+        for(let i = 0; i < visibleActions.length; i++) {
+            if(!actionsOfProcess.has(visibleActions[i])) {
+                max_environment.push(visibleActions[i]);
+            }
+        }
+        //get power set
+        return SetOps.powerSet(max_environment);
     }
 
     getCurrent(index?: number): string {

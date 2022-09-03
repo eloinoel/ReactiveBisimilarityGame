@@ -91,6 +91,14 @@ export class SetOps {
         return new Set(this.toArray(a).filter( value => !b.has(value)));
     }
 
+    /**
+     * returns the power set of a (as an array)
+     * @param a 
+     */
+    static powerSet(a: any[]): any[] {
+        return a.reduce((b, v) => b.concat(b.map((r: any) => [v].concat(r).sort())), [[]]);
+    }
+
     static toArray(a: Set<any>): any[] {
         let b: any[] = [];
         a.forEach( value => {
