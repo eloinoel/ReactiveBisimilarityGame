@@ -8,6 +8,7 @@ import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
+import { SetOps } from "./SetOps";
 
 export class PhaserGameController {
     private game: ReactiveBisimilarityGame;
@@ -26,6 +27,8 @@ export class PhaserGameController {
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
 
+    private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
+
     debug: boolean; //TODO: for diplaying possible moves, position etc
 
     /**
@@ -43,6 +46,7 @@ export class PhaserGameController {
         this.stateBtns = new Map<string, LtsStateButton>();
         let lts = new LTSController();
         this.game = new ReactiveBisimilarityGame("", "", lts);
+        this.nextProcessAfterTimeout = "";
         this.current_hightlights = [];
         /* this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
@@ -64,10 +68,12 @@ export class PhaserGameController {
     addState(name: string, lts_num:number, row: number, column: number) {
         this.game.lts.addState(name);
         if(lts_num === 0) {
-            const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
+            const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {
+                this.encapsulateDoMove(name)}, name).setScale(0.5);
             this.stateBtns.set(name, p0);
         } else if(lts_num === 1) {
-            const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
+            const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {
+                this.encapsulateDoMove(name)}, name).setScale(0.5);
             this.stateBtns.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
@@ -76,7 +82,8 @@ export class PhaserGameController {
     }
 
     /**
-     * adds transition to the logical game and to the scene
+     * adds transition to the logical game and to the scene, 
+     * note that the game wont work properly if there are multiple edges between two nodes
      * @param scene 
      * @param p0 process 1
      * @param p1 process 2
@@ -110,6 +117,7 @@ export class PhaserGameController {
             this.game_initialized = true;
             this.createHighlights(p0, p1);
             this.createReactiveElements();
+            this.environment_panel.disable(); //only enable on timeout
             if(!reactive) {
                 this.environment_container.setVisible(false);
                 this.environment_panel.makeInvisible();
@@ -128,58 +136,70 @@ export class PhaserGameController {
     }
 
     /**
-     * add environment change, timeout and idling functionality,
-     * @returns -1 if move is no possible
-     * */
-    encapsulateDoMove(next_process: string, isSymmetryMove = false): number {
-        this.environment_panel.disable(); //clicking a button should interrupt previous environment changes
-        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
-        let moves = this.game.possibleMoves();
+     * if timeout not possible after setting environment, give visual feedback
+     * @param env 
+     */
+     setEnvironmentAndDoTimeout(env: Set<string>) {
+        //set environment
+        this.setEnvironment(env);
 
-        //can only occur in these node types
-        if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove) {
-            let moves_without_symmetry = moves.filter((position) => (!(cur_pos.isSymmetryMove(position) && position.process1 === next_process)));
-            
-            //if idling (no more visible move or tau possible)
-            if(moves_without_symmetry.length === 0) {
-                let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
-                if(edgeLabel !== undefined) {
-                    if(this.game.isVisibleOrHiddenAction(edgeLabel)) {
-                        //TODO: restricted simulation move?
-                        //this is possibly already implemented in possible moves and isMovePossible
-                    } else if(edgeLabel === Constants.TIMEOUT_ACTION) {
-                        //TODO: timeouts
-                    } else {
-                        this.printError("encapsulateDoMove: illegal action encountered");
-                    }
-                } else {
-                    this.printError("encapsulateDoMove: no edge between process " + cur_pos.process1 + " and " + next_process);
-                    return -1
-                }
+        //doMove
+        let legalMove = this.doMove(this.nextProcessAfterTimeout, false);
+
+        //resetEnvironment to previous, if move was not possible
+        if(legalMove === -1) {
+            let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+            if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+                this.game.setEnvironment(cur_pos.environment);
+            } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
+                this.game.resetEnvironment();
             }
         }
-
-        //call doMove()
-        return this.doMove(next_process, isSymmetryMove);
     }
 
     /**
-     * does not work when multiple edges with some different label go to same destination
-     * TODO: doMove with edges
+     * add environment change and timeout functionality
+     * @returns -1 if move is no possible
+     * */
+    encapsulateDoMove(next_process: string, isSymmetryMove = false) {
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+        
+        //revert any changes made to the environment by timeout action
+        if(this.environment_panel.isEnabled()) {
+            this.environment_panel.disable();
+
+            //environment wasn't changed when it is still enabled
+            /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+                if(!SetOps.areEqual(cur_pos.environment, this.game.getEnvironment())) {
+                    this.game.setEnvironment(cur_pos.environment);
+                }
+            } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
+                
+                this.game.resetEnvironment();
+            } */
+        }
+
+        let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
+        //timeout action, can only occur in these node types
+        if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
+            //enable Environment Change UI
+            this.nextProcessAfterTimeout = next_process;
+            this.environment_panel.enable();
+        } else {
+            this.doMove(next_process, isSymmetryMove);
+        }
+    }
+
+    /**
+     * does not work if there are multiple edges between processes
      * @param next_process
      * @returns -1 if the move was not possible
      */
-    doMove(next_process: string, isSymmetryMove: boolean = false): number{
+    doMove(next_process: string, isSymmetryMove: boolean = false): number {
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
         let action: string = Constants.NO_ACTION;
-
-        /* TODO: if no action possible and idling 
-            * allow timeout-action with environment change
-            * allow restricted simulation challenge
-        */
-
 
         if(moves.length === 0) {
             this.printError("doMove: no possible moves from current position")
@@ -228,7 +248,7 @@ export class PhaserGameController {
             this.updateCurrentPositionField();
             this.updateHightlights();
             if(this.game.isReactive()) {
-                this.updateEnvironment();
+                this.updateEnvironmentContainer();
                 this.environment_panel.updatePanel();
             }
             this.updatePossibleMovesField();
@@ -281,7 +301,7 @@ export class PhaserGameController {
      * doesn't detect tau, only singular letters
      * @param text 
      */
-    setEnvironment(text: string) {
+    setEnvironmentFromString(text: string) {
         if(this.game.isReactive()) {
             //parse the given string and extract actions
             let arr = text.split(/(?!$)/u); //split at every character
@@ -293,21 +313,29 @@ export class PhaserGameController {
             }
             this.game.setEnvironment(env);
             //update visualization
-            this.updateEnvironment(); //if some illegal characters are given, reset to previous
-            this.updatePossibleMovesField();
+            this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
             this.environment_panel.updatePanel();
+            this.updatePossibleMovesField();
+
         } else {
-            this.printError("setEnvironment: was called but game is not reactive");
+            this.printError("setEnvironmentFromString: was called but game is not reactive");
         }
     }
 
     /**
-     * 
-     * if timeout not possible after setting environment, give visual feedback
-     * @param env 
+     * set the game logic's environment and update UI
+     * @param text 
      */
-    setEnvironmentAndDoTimeout(env: Set<string>) {
-
+     setEnvironment(env: Set<string>) {
+        if(this.game.isReactive()) {
+            this.game.setEnvironment(env);
+            //update visualization
+            this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
+            this.environment_panel.updatePanel();
+            this.updatePossibleMovesField();
+        } else {
+            this.printError("setEnvironment: was called but game is not reactive");
+        }
     }
 
     /**
@@ -359,7 +387,7 @@ export class PhaserGameController {
         let textEdit = new TextEdit(environment_text);
         environment_text.setInteractive().on('pointerup', () => {
             textEdit.open(undefined, (text_obj) => {
-                this.setEnvironment((text_obj as Phaser.GameObjects.Text).text);
+                this.setEnvironmentFromString((text_obj as Phaser.GameObjects.Text).text);
             })
         })
     }
@@ -391,12 +419,12 @@ export class PhaserGameController {
      * updates visual representation of the game's environment
      * game and environment_text should be initialized
      */
-    private updateEnvironment() {
+    private updateEnvironmentContainer() {
         if(this.game.getPlay().length !== 0) {
             if(this.environment_container.getAll().length === 2) {
                 (this.environment_container.first as Phaser.GameObjects.Text).text = this.game.getEnvironmentString();
             } else {
-                this.printError("updateEnvironment: environment_field not initialized")
+                this.printError("updateEnvironmentContainer: environment_field not initialized")
             }
         } else {
             this.printError("game not initialized")

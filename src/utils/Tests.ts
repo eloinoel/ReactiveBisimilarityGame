@@ -38,7 +38,14 @@ export class Tests {
         let game = this.getReactiveLTS01();
         console.log("----------------- isMovePossible TESTS -----------------")
 
-        //Restricted simulation challenge
+        //Timeout Simulation Challenge
+        console.log("----------------- Timeout Simulation Challenge -----------------");
+        game.startNewGame("p0", "q0", new AttackerNode("p0", "q0"));
+        console.log("Current position: " + game.getPlay()[game.getPlay().length - 1].toString());
+        console.log("isMovePossible(p0-t->p1): " + game.getMoveStringFromCode(game.isMovePossible("t", new RestrictedSimulationDefenderNode("p1", "q0", "t", new Set("b")))) + ", should not be possible, b still in environment");
+        console.log("isMovePossible(p0-t->p1): " + game.getMoveStringFromCode(game.isMovePossible("t", new RestrictedSimulationDefenderNode("p1", "q0", "t", new Set("a")))) + ", should be possible");
+
+        //Restricted Simulation Challenge
         console.log("----------------- Restricted Simulation Challenge -----------------")
         game.startNewGame("p1", "q1", new RestrictedAttackerNode("p1", "q1", game.getEnvironment()));
         console.log("Current position: " + game.getPlay()[game.getPlay().length - 1].toString());
@@ -47,15 +54,24 @@ export class Tests {
         console.log("Current position: " + game.getPlay()[game.getPlay().length - 1].toString());
         console.log("isMovePossible(p1 -a-> p3): " + game.getMoveStringFromCode(game.isMovePossible("a", new SimulationDefenderNode("p3", "q1", "a"))) + ", should work, environment allows action");
         console.log("isMovePossible(p1 -b-> p4): " + game.getMoveStringFromCode(game.isMovePossible("b", new SimulationDefenderNode("p4", "q1", "b"))) + ", should not work, environment doesn't allow action");
+
+        //Invisible Simulation Challenge
+        console.log("----------------- Invisible Simulation Challenge -----------------")
+
+        //Timeouted Timeout Simulation Challenges
+        console.log("----------------- Timeouted Timeout Simulation Challenge -----------------")
+
+        //Restricted Symmetry Moves
+        console.log("----------------- Restricted Symmetry Moves -----------------")
     }
 
     getReactiveLTS01() : ReactiveBisimilarityGame {
         /**
-         *         p0
-         *       t/  \b
-         *      p1    p2
-         *    a/  \b
-         *   p3    p4 
+         *         p0                    q0
+         *       t/  \b                t/  \b
+         *      p1    p2              q1    q2
+         *    a/  \b                a/  \a
+         *   p3    p4              q3    q4
          */
         let lts = new LTSController
         lts.addState("p0");

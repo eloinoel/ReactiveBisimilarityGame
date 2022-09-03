@@ -18,6 +18,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private curEnvironment;
     private game;
     private phaserGameController;
+    private sizer_bg!: RoundRectangle;
 
     private enabled = true;
     private activated = true;
@@ -52,6 +53,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     enable() {
         this.enabled = true;
         this.sizer.setInteractive();
+        this.sizer_bg.setStrokeStyle(3, Constants.convertColorToNumber("#00C59C"));
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(1)
@@ -65,7 +67,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      */
     disable() {
         this.enabled = false;
-        this.sizer.disableInteractive()
+        this.sizer.disableInteractive();
+        this.sizer_bg.setStrokeStyle();
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(this.disabledAlpha)
@@ -96,6 +99,10 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.sizer.setVisible(false);
         this.tickButton.setVisible(false);
         return this;
+    }
+
+    isEnabled() {
+        return this.enabled;
     }
 
     /**
@@ -131,6 +138,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         }
 
         this.tickButton = new Tick_Button(this.scene, this.coordinates.x + width/2 + 30, this.coordinates.y, "ui_tick_btn", () => {
+            this.disable()
             let tmp = this.getActiveActions();
             this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
         }, Constants.COLORS_BLUE_LIGHT.c3);
@@ -140,10 +148,10 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             width: width,
             height: this.dimensions.y,
             align: "center",
-            space: { item: 7 , top: 5, bottom: 5 },
+            space: { item: 7 , top: 7, bottom: 7 },
         })
 
-        this.sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
+        this.sizer.addBackground(this.scene.add.existing(this.sizer_bg = new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
 
         for (var i = 0; i < this.possibleActions.length; i++) {
             let label = new Label(this.scene, {

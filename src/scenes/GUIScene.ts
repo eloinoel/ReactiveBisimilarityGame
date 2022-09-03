@@ -24,14 +24,17 @@ export default class GUIScene extends BaseScene {
 
 
         let homeBtn = new UI_Button(this, 4*Constants.UI_offset, "ui_home_btn", () => {this.fade(false, () => {
+            console.clear()
             this.toHome();
         })}, "Home")
 
         let backBtn = new UI_Button(this, 2*Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
+            console.clear()
             this.toLevelMap();
         })}, "Back");
 
         let replayBtn = new UI_Button(this, this.renderer.width - 4* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
+            console.clear()
             this.restartLevel();
         })}, "Restart");
 
