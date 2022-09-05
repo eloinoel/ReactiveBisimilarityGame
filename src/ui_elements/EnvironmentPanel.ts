@@ -157,7 +157,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             let label = new Label(this.scene, {
                 width: 40, height: 40,
                 background: this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)))
-                 : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(this.disabledAlpha)),
+                 : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1))),
                 text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
                 space: {
                     left: 5,
@@ -236,7 +236,11 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
      * should be followed by another create() call
      */
     private destroyPanel() {
-        this.sizer.destroy(true);
+        let list = this.sizer.getAllChildren()
+        for(let i = 0; i < list.length; i++) {
+            (list[i] as Label).destroy(false);
+        }
+        this.sizer.destroy(false);
         this.panel_buttons.clear();
     }
 }

@@ -330,9 +330,11 @@ export class PhaserGameController {
         if(this.game.isReactive()) {
             this.game.setEnvironment(env);
             //update visualization
-            this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
-            this.environment_panel.updatePanel();
-            this.updatePossibleMovesField();
+            if(this.game_initialized) {
+                this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
+                this.environment_panel.updatePanel();
+                this.updatePossibleMovesField();
+            }
         } else {
             this.printError("setEnvironment: was called but game is not reactive");
         }

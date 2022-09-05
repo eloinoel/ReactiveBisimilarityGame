@@ -415,7 +415,7 @@ export class ReactiveBisimilarityGame {
             this.printError("setEnvironment: method was called but game is not reactive.");
             return -1;
         } else {
-            if(!newEnv.has(Constants.HIDDEN_ACTION) && !newEnv.has(Constants.NO_ACTION) && !newEnv.has(Constants.TIMEOUT_ACTION) && this.play[this.play.length - 1].activePlayer === Player.Attacker) {
+            if(!newEnv.has(Constants.HIDDEN_ACTION) && !newEnv.has(Constants.NO_ACTION) && !newEnv.has(Constants.TIMEOUT_ACTION)) {
                 let tmp = SetOps.toArray(newEnv).sort();
                 //add new actions to A
                 for(let i = 0; i < tmp.length; i++) {
