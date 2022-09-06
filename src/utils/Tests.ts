@@ -4,6 +4,7 @@ import { SetOps } from "./SetOps";
 import { Constants } from "./Constants";
 import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
+import { AI } from "./AI";
 
 export class Tests {
 
@@ -65,6 +66,17 @@ export class Tests {
         console.log("----------------- Restricted Symmetry Moves -----------------")
     }
 
+    testAI() {
+        let game  = this.getReactiveLTS01();
+        let ai_controller = new AI(game);
+        ai_controller.generateGraph();
+        ai_controller.printGraph();
+    }
+
+    /**
+     * generate basic non reactive bisimilar LTS
+     * @returns 
+     */
     getReactiveLTS01() : ReactiveBisimilarityGame {
         /**
          *         p0                    q0
@@ -96,7 +108,35 @@ export class Tests {
         lts.addTransition("q1", "q3", "a");
         lts.addTransition("q1", "q4", "a");
 
-        return new ReactiveBisimilarityGame("p0", "p1", lts, true, true);
+        return new ReactiveBisimilarityGame("p0", "q0", lts, true, true);
+    }
+
+    /**
+     * generate very simple lts to test AI class
+     * @returns 
+     */
+    getReactiveLTS00(): ReactiveBisimilarityGame {
+        /**
+         *         p0                    q0
+         *       t/  \b                t/  \b
+         *      p1    p2              q1    q2
+         */
+         let lts = new LTSController
+         lts.addState("p0");
+         lts.addState("p1");
+         lts.addState("p2");
+ 
+         lts.addTransition("p0", "p1", Constants.TIMEOUT_ACTION);
+         lts.addTransition("p0", "p2", "b");
+ 
+         lts.addState("q0");
+         lts.addState("q1");
+         lts.addState("q2");
+
+         lts.addTransition("q0", "q1", Constants.TIMEOUT_ACTION);
+         lts.addTransition("q0", "q2", "b");
+ 
+         return new ReactiveBisimilarityGame("p0", "q0", lts, true, true);
     }
 
     /**

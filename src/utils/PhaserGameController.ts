@@ -193,6 +193,7 @@ export class PhaserGameController {
     /**
      * does not work if there are multiple edges between processes
      * @param next_process
+     * @isSymmetryMove
      * @returns -1 if the move was not possible
      */
     doMove(next_process: string, isSymmetryMove: boolean = false): number {
@@ -324,6 +325,7 @@ export class PhaserGameController {
 
     /**
      * set the game logic's environment and update UI
+     * only execute after startGame() has been called
      * @param text 
      */
      setEnvironment(env: Set<string>) {

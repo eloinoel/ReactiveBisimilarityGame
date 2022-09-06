@@ -164,17 +164,20 @@ export class Graph<T> {
      * returns a new instance with the same values as this graph but new references
      * only works on primitive data 
      */
-     copy(): Graph<T> {
+    copy(): Graph<T> {
         let g = new Graph(this.comparator);
         this.nodes.forEach((node) => {
             //add nodes
-            g.addNode(node.data);
-            //add edges of that node
+            g.addNode(structuredClone(node.data));
+        });
+
+        //add edges
+        this.nodes.forEach((node) => {
             let edges = node.adjacent;
             for(let j = 0; j < edges.length; j++) {
-                g.addEdge(node.data, edges[j].node.data, edges[j].edgeLabel);
+                g.addEdge(structuredClone(node.data), structuredClone(edges[j].node.data), edges[j].edgeLabel);
             }
-        });
+        })
         return g;
     }
 }

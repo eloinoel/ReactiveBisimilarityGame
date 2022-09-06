@@ -70,6 +70,7 @@ export class ReactiveBisimilarityGame {
                 this.play.push(new AttackerNode(process1, process2));
             }
         } else {
+            //console.log("startNewGame failed");
             return -1;
         }
         return 0;
@@ -410,7 +411,7 @@ export class ReactiveBisimilarityGame {
      * @param newEnv new Environment
      * @returns -1 if the given env contained illegal actions or it wasn't the attackers turn
      */
-    setEnvironment(newEnv: Set<string>): number {
+    setEnvironment(newEnv: Set<string>, disablePrint = false): number {
         if(this.reactive === false) {
             this.printError("setEnvironment: method was called but game is not reactive.");
             return -1;
@@ -422,7 +423,9 @@ export class ReactiveBisimilarityGame {
                     this.lts.addVisibleActionToA(tmp[i]);
                 }
                 this.environment = new Set(tmp);
-                console.log("Environment was set to {" + SetOps.toArray(this.environment) + "}.");
+                if(!disablePrint) {
+                    console.log("Environment was set to {" + SetOps.toArray(this.environment) + "}.");
+                }
                 return 0;
             } else {
                 this.printError('setEnvironment: Error: some illegal action in given environment or not attackers turn');
@@ -465,7 +468,7 @@ export class ReactiveBisimilarityGame {
     }
 
     /**
-     * TODO: to test
+     * generates all following game positions for a given position
      * good for debugging purposes
      * @param process 
      */
@@ -482,6 +485,8 @@ export class ReactiveBisimilarityGame {
         }
 
         let potentialMoves = this.generateMoves(curPosition, allEnvironmentCombinations);
+        /* console.log("generateMoves for " + curPosition.toString())
+        console.log(potentialMoves) TODO: Remove debug*/
 
         for(let i = 0; i < potentialMoves.length; i++) {
             if(curPosition.activePlayer === Player.Attacker) {
@@ -523,9 +528,9 @@ export class ReactiveBisimilarityGame {
         let text = "";
         let moves;
         if(curPosition !== undefined) {
-            moves = this.possibleMoves(curPosition);
+            moves = this.possibleMoves(curPosition, true);
         } else {
-            moves = this.possibleMoves();
+            moves = this.possibleMoves(undefined, true);
         }
         
         let counter = 0;
@@ -717,11 +722,12 @@ export class ReactiveBisimilarityGame {
      */
     copy() {
         let g = new ReactiveBisimilarityGame(this.play[0].process1, this.play[0].process2, this.lts.copy(), this.reactive, this.bisimilar);
-        g.setEnvironment(this.environment);
+        g.setEnvironment(this.environment, true);
         g.setPlay(this.play);
         if(this.play.length === 0) {
             console.log("Warning: copying uninitialized game.");
         }
         return g;
     }
+
 }

@@ -14,6 +14,9 @@ export default class TestScene extends Phaser.Scene {
 
     create(): void {
         let tests = new Tests();
-        tests.testIsMovePossible();
+        //tests.testIsMovePossible();
+        tests.testAI();
+
+        this.scene.launch("ReBisim_Level2")
     }
 }

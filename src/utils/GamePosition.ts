@@ -22,6 +22,11 @@ export abstract class GamePosition {
     abstract copy(): GamePosition;
 
     /**
+     * returns true if the two nodes are the same
+     */
+    abstract samePosition(otherNode: GamePosition): boolean;
+
+    /**
      * 
      * @param otherPosition 
      * @returns returns true if @otherPosition is a symmetric position to this
@@ -66,6 +71,13 @@ export class AttackerNode extends GamePosition {
         return new AttackerNode(this.process1, this.process2);
     }
 
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof AttackerNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 /**
@@ -90,6 +102,14 @@ export class SimulationDefenderNode extends GamePosition {
 
     copy() {
         return new SimulationDefenderNode(this.process1, this.process2, this.previousAction);  
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof SimulationDefenderNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2 && otherNode.previousAction === this.previousAction) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -126,6 +146,14 @@ export class RestrictedAttackerNode extends GamePosition {
 
     copy() {
         return new RestrictedAttackerNode(this.process1, this.process2, this.environment);
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof RestrictedAttackerNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2 && SetOps.areEqual(otherNode.environment, this.environment)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -166,5 +194,13 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
 
     copy() {
         return new RestrictedSimulationDefenderNode(this.process1, this.process2, this.previousAction, this.environment);
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof RestrictedSimulationDefenderNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2 && otherNode.previousAction === this.previousAction && SetOps.areEqual(otherNode.environment, this.environment)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
