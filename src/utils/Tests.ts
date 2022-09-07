@@ -72,7 +72,7 @@ export class Tests {
         let ai_controller = new AI(game);
         ai_controller.generateGraph();
         ai_controller.determineWinningRegion();
-        //ai_controller.printGraph();
+        ai_controller.printGraph();
     }
 
     /**

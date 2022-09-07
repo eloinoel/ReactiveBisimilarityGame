@@ -5,7 +5,7 @@ import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 
 /**
  * this class is used to calculate the "optimal" next move
- * "optimal" because as long as the player doesn't make a wrong move, he will always win
+ * "optimal" because as long as the player doesn't make a wrong move, he will always win in a non reactive bisimilar LTS
  */
 export class AI {
     
@@ -14,8 +14,9 @@ export class AI {
 
     /** to disable/reenable printing in console */
     private consoleLogSignature;
-    /**graph of all branching game positions, with all predecessors and, with a boolean for whether game position vertex is in the winning region of attacker*/
-    private graph!: Graph<[GamePosition, Node<any>[], boolean]>;
+    /**graph of all branching game positions, with all predecessors and, with a number for whether game position vertex is in the winning region of attacker (1), or defender (0),
+     * or a number [0,1] indicating how likely a player will blunder */
+    private graph!: Graph<[GamePosition, Node<any>[], number]>;
 
     constructor(game: ReactiveBisimilarityGame) {
         this.game = game.copy();
@@ -33,13 +34,13 @@ export class AI {
             return
         } else {
             //construct graph
-            this.graph = new Graph<[GamePosition, Node<any>[], boolean]>((a: [GamePosition, Node<any>[], boolean], b: [GamePosition, Node<any>[], boolean]) => {
+            this.graph = new Graph<[GamePosition, Node<any>[], number]>((a: [GamePosition, Node<any>[], number], b: [GamePosition, Node<any>[], number]) => {
                 if(a[0] !== b[0]) { //comparator, removeNode when Gamepositions differ
                     return 1;
                 }
                 return 0;
             });
-            let node = this.graph.addNode([this.game.getPlay()[0], [], false]) //first node
+            let node = this.graph.addNode([this.game.getPlay()[0], [], 0]) //first node
             this.appendNodesRecursively(node)
         }
     }
@@ -51,7 +52,7 @@ export class AI {
      * @param node 
      * @returns 
      */
-    private appendNodesRecursively(node: Node<[GamePosition, Node<any>[], boolean]>): void {
+    private appendNodesRecursively(node: Node<[GamePosition, Node<any>[], number]>): void {
         if(this.graphHasNode(node.data[0])) {
             //generate moves
             let possibleMoves = this.game.possibleMoves(node.data[0], true);
@@ -72,9 +73,9 @@ export class AI {
                     continue;
                 //node not in graph --> add new node
                 } else {
-                    let predecessors: Node<[GamePosition, Node<any>[], boolean]>[] = [];
+                    let predecessors: Node<[GamePosition, Node<any>[], number]>[] = [];
                     predecessors.push(node);
-                    graphNode = this.graph.addNode([possibleMoves[i], predecessors, false])
+                    graphNode = this.graph.addNode([possibleMoves[i], predecessors, 0])
                     //add edge to move
                     this.graph.addEdge(node.data, graphNode.data, ""); //don't need edgeLabels
                     this.appendNodesRecursively(graphNode);
@@ -85,25 +86,10 @@ export class AI {
         }
     }
 
-    private graphHasNode(move: GamePosition): Node<[GamePosition, Node<any>[], boolean]> | undefined {
+    private graphHasNode(move: GamePosition): Node<[GamePosition, Node<any>[], number]> | undefined {
         let nodes = this.graph.getNodes();
         let existing_node = nodes.find((node) => (node.data[0].samePosition(move)));
         return existing_node;
-    }
-
-    /**
-     * calculate the next "best" move
-     */
-    getNextMove(curPosition: GamePosition) {
-        //check if game environment and visible actions A are still the same between copy and real game
-        //TODO:
-    }
-
-    /**
-     * returns in a number of moves in which the player can win in
-     */
-    getShortestPathLength() {
-        //TODO:
     }
 
     /**
@@ -115,12 +101,12 @@ export class AI {
         if(this.graph !== undefined) {
             //recursion starts at defender nodes without winning moves
             let G_d = this.graph.getNodes().sort((a, b) => a.adjacent.length - b.adjacent.length);
-            let num_map = new Map<Node<[GamePosition, Node<any>[], boolean]>, number>();
+            let num_map = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
 
-
-            //init num_map
+            //init num_map and reset nodes
             for(let i = 0; i < G_d.length; i++) {
                 num_map.set(G_d[i], G_d[i].adjacent.length);
+                G_d[i].data[2] = 0;
             }
 
             //iterate through nodes
@@ -137,10 +123,10 @@ export class AI {
      * @param node 
      * @param num_map 
      */
-    private propagateAttackerWin(node: Node<[GamePosition, Node<any>[], boolean]>, num_map: Map<Node<[GamePosition, Node<any>[], boolean]>, number>) {    //TODO: delete defender winning region from args
-        if(node.data[2] === false) {
+    private propagateAttackerWin(node: Node<[GamePosition, Node<any>[], number]>, num_map: Map<Node<[GamePosition, Node<any>[], number]>, number>) {    //TODO: delete defender winning region from args
+        if(node.data[2] === 0) {
             //set node to attacker winning region
-            node.data[2] = true;
+            node.data[2] = 1;
 
             //for all predecessors of node
             for(let j = 0; j < node.data[1].length; j++) {
@@ -148,8 +134,8 @@ export class AI {
                 if(predecessor !== undefined) {
                     num_map.set(predecessor, num_map.get(predecessor)! - 1);
 
-                    //if predecessor is in attacker winning region
-                    if(predecessor.data[0].activePlayer === Player.Attacker || predecessor.adjacent.length === 0 || predecessor.data[2] || num_map.get(predecessor) === 0) {
+                    //if predecessor is in attacker winning region or current player is attacker
+                    if(predecessor.data[0].activePlayer === Player.Attacker || num_map.get(predecessor) === 0) {
                         //propagate attacker region up
                         this.propagateAttackerWin(predecessor, num_map);
                     }
@@ -160,11 +146,72 @@ export class AI {
         }
     }
 
+    /**
+     * traverses the game graph and assigns every node a blunder score in the interval [0, 1], 
+     * 0 meaning that the node is in the winning region of the defender and 1 meaning that the attacker only has winning moves to choose from with no possibility of losing, 
+     * essentially functions like the common minimax algorithm when in the winning region of the defender
+     * @param node 
+     * @param depth 
+     */
+    calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
+        //graph initialized
+        if(this.graph !== undefined) {
+            //terminal node (leaf)
+            if(node.adjacent.length === 0) {
+                //Defender stuck
+                if(node.data[0].activePlayer === Player.Defender) {
+                    node.data[2] = 1;
+                    return 1;
+                //Attacker stuck
+                } else {
+                    this.printError("calculateBlunderScore: Attacker stuck but this should not be possible (Symmetry Move)")
+                    node.data[2] = 0;
+                    return 0;
+                }
+            }
+            //TODO: cycle
+
+
+            //maximizing player === attacker
+            if(node.data[0].activePlayer === Player.Attacker) {
+                let maxEvaluation = 0;
+                //
+                for(let i = 0; i < node.adjacent.length; i++) {
+
+                }
+            //minimizing player === defender
+            } else {
+                let minEvaluation = 1;
+            }
+
+        } else {
+            this.printError("calculateBlunderScore: graph not initialized");
+        }
+    }
+
+    /**
+     * calculate the next "best" move
+     */
+    getNextMove(curPosition: GamePosition) {
+        //check if game environment and visible actions A are still the same between copy and real game
+
+        //cycle detection 
+        //TODO:
+    }
+
+    /**
+     * returns in a number of moves in which the player can win in
+     */
+    getShortestPathLength() {
+        //TODO:
+    }
+    
+
     printGraph() {
         console.log("-------------------- GAME MOVE GRAPH --------------------")
         console.log("Graph: <Vertex>: <(edgeLabel, destinationNode)> ...");
         this.graph.getNodes().forEach((node) => {
-            let edgestring = "Vertex " + node.data[0].toString() + " (" + node.data[2] + "): ";
+            let edgestring = "Vertex " + node.data[0].toString() + ", score = " + node.data[2] + ": ";
             for(let j = 0; j < node.adjacent.length; j++) {
                 edgestring = edgestring.concat(node.adjacent[j].node.data[0].toString(), ", ");
             }
