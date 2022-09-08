@@ -147,6 +147,135 @@ export class AI {
     }
 
     /**
+     * Dijkstra calculates the distance to each node in game graph
+     * @param startingPosition 
+     * @returns 
+     */
+    private dijkstra(startingPosition: GamePosition): Map<GamePosition, number> | undefined {
+        //graph initialized
+        if(this.graph !== undefined) {
+            let startingNode = this.graphHasNode(startingPosition);
+            if(startingNode === undefined) {
+                return undefined;
+            }
+
+            //initiate
+            let dist_map = new Map<GamePosition, number>(); //contains distances for each node in game graph
+            let queue: Node<[GamePosition, Node<any>[], number]>[] = [];
+            let nodes = this.graph.getNodes();
+            for(let i = 0; i < nodes.length; i++) {
+                if(nodes[i] === startingNode) {
+                    dist_map.set(startingNode.data[0], 0);
+                } else {
+                    dist_map.set(nodes[i].data[0], Infinity);
+                }
+                queue.push(nodes[i]);
+            }
+
+            //iterate through queue to visit nodes
+            while(queue.length !== 0) {
+                //get node with minimum distance to the destination
+                let minIndex = 0;
+                for(let i = 1; i < queue.length; i++) {
+                    if(dist_map.get(queue[i].data[0])! < dist_map.get(queue[minIndex].data[0])!) {
+                        minIndex = i;
+                    }
+                }
+                let minNode = queue.splice(minIndex, 1)[0];
+
+                //for every neighbor that is still in queue
+                for(let i = 0; i < minNode.adjacent.length; i++) {
+                    let neighbor = minNode.adjacent[i].node;
+                    //if neighbor has not yet been removed from queue
+                    if(queue.some(node => (node.data[0].samePosition(neighbor.data[0])))) {
+                        let alt = dist_map.get(minNode.data[0])! + 1;   //edges are all 1
+                        if(alt < dist_map.get(neighbor.data[0])!) {
+                            dist_map.set(neighbor.data[0], alt);
+                        }
+                    }
+                }
+            }
+
+            return dist_map;
+        }
+        return undefined
+    }
+
+    /**
+     * performs breadths first search and returns shortest path to defender winning region node
+     * requires winning region algorithm to be performed before
+     * @param curPosition 
+     * @returns (nearest defender winning region node, predecessor path, distance to source)
+     */
+    modifiedBfs(curPosition?: GamePosition): [Node<any>, Map<Node<any>, Node<any>>, Map<Node<any>, number>] | undefined {
+        if(this.graph !== undefined) {
+
+            let nodes = this.graph.getNodes();
+
+            //graph contains position
+            if(curPosition === undefined) {
+                curPosition = this.game.getPlay()[0];
+            }
+            let sourceNode = nodes.find(node => (node.data[0].samePosition(curPosition!)))
+            if(sourceNode === undefined) {
+                return undefined;
+            }
+            
+
+            //initiate
+            let visited = new Map<Node<[GamePosition, Node<any>[], number]>, boolean>();
+            let dist = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
+            let pred = new Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>(); //construct path from destination to source
+
+            let queue: Node<[GamePosition, Node<any>[], number]>[] = [];
+
+            //all vertices unvisited, path not yet constructed
+            for(let i = 0; i < nodes.length; i++) {
+                dist.set(nodes[i], Infinity);
+                visited.set(nodes[i], false);
+                pred.set(nodes[i], undefined!);
+            }
+
+            //start bfs at source
+            visited.set(sourceNode, true);
+            dist.set(sourceNode, 0);
+            queue.push(sourceNode);
+
+            while(queue.length !== 0) {
+                let current = queue.shift()!;
+
+                //for every neighbor
+                for(let i = 0; i < current.adjacent.length; i++) {
+                    let visited_neighbor_yet = visited.get(current.adjacent[i].node);
+                    if(visited_neighbor_yet !== undefined) {
+                        if(!visited_neighbor_yet) {
+                            visited.set(current.adjacent[i].node, true);    //visited node
+                            dist.set(current.adjacent[i].node, dist.get(current)! + 1); //update dist
+                            pred.set(current.adjacent[i].node, current);    //update predecessor on shortest path
+
+                            //found node in defender winning region
+                            if(current.adjacent[i].node.data[2] === 0) {
+                                return [current.adjacent[i].node, pred, dist]
+                            }
+
+                            queue.push(current.adjacent[i].node);
+                        }
+                    } else {
+                        this.printError("modifiedBfs: visited list returned undefined node")
+                    }
+                }
+            }
+        } else {
+            this.printError("modifiedBfs: graph uninitialized")
+        }
+        return undefined;
+    }
+
+
+
+
+
+    /**
      * traverses the game graph and assigns every node a blunder score in the interval [0, 1], 
      * 0 meaning that the node is in the winning region of the defender and 1 meaning that the attacker only has winning moves to choose from with no possibility of losing, 
      * essentially functions like the common minimax algorithm when in the winning region of the defender

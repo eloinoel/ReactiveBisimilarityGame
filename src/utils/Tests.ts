@@ -67,12 +67,20 @@ export class Tests {
     }
 
     testAI() {
-        console.log("----------------- AI Tests -----------------")
+        console.log("----------------- AI Tests -----------------");
         let game  = this.getReactiveLTS01();
         let ai_controller = new AI(game);
         ai_controller.generateGraph();
         ai_controller.determineWinningRegion();
         ai_controller.printGraph();
+        console.log("----------------- BFS Result -----------------");
+        let result = ai_controller.modifiedBfs();
+        if(result === undefined) {
+            console.log("undefined");
+        } else {
+            console.log("nearest defender winning region node: " + result[0].data[0].toString() + ", distance: " + result[2].get(result[0]));
+        }
+        
     }
 
     /**
