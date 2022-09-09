@@ -73,13 +73,27 @@ export class Tests {
         ai_controller.generateGraph();
         ai_controller.determineWinningRegion();
         ai_controller.printGraph();
-        console.log("----------------- BFS Result -----------------");
+        console.log("----------------- BFS Result Tests-----------------");
         let result = ai_controller.modifiedBfs();
         if(result === undefined) {
             console.log("undefined");
         } else {
             console.log("nearest defender winning region node: " + result[0].data[0].toString() + ", distance: " + result[2].get(result[0]));
         }
+        let nextMove = ai_controller.getNextMove(game.getPlay()[game.getPlay().length - 1]);
+        if(nextMove !== undefined) {
+            console.log("nextMove: " + nextMove?.toString());
+        } else {
+            console.log("nextMove: undefined" );
+        }
+        let shortestPathLength = ai_controller.getShortestPathLength(game.getPlay()[game.getPlay().length - 1]);
+        console.log("shortestPathLength: " + shortestPathLength);
+
+        //TODO: Test position in defender winning region, or when no reachable defender winning region node
+
+
+        
+        
         
     }
 

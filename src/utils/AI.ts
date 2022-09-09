@@ -321,18 +321,43 @@ export class AI {
     /**
      * calculate the next "best" move
      */
-    getNextMove(curPosition: GamePosition) {
-        //check if game environment and visible actions A are still the same between copy and real game
+    getNextMove(curPosition: GamePosition): GamePosition | undefined {
+        let bfs_result = this.modifiedBfs(curPosition);
+        if(bfs_result !== undefined && bfs_result[0] !== undefined) {
+            //traverse graph on path until pred === current position 
+            let current = bfs_result[0];
+            let path: Node<[GamePosition, Node<any>[], number]>[] = []; //path from destination to source (curPosition)
+            while(current !== undefined) {
+                console.log(current)
+                path.push(current);
+                current = bfs_result[1].get(current)!;
+            }
+            console.log("Shortest path: " + this.getShortestPathString(path));
+            return path[path.length - 2].data[0];
+        } else {
+            console.log("getNextMove: could not find any next move")
+            return undefined;
+        }
+    }
 
-        //cycle detection 
-        //TODO:
+    getShortestPathString(path: Node<[GamePosition, Node<any>[], number]>[]): string {
+        let path_string = "";
+        for(let i = 0; i < path.length; i++) {
+            path_string = path_string.concat(path[i].data[0].toString() + ", ");
+        }
+        return path_string;
     }
 
     /**
      * returns in a number of moves in which the player can win in
      */
-    getShortestPathLength() {
-        //TODO:
+    getShortestPathLength(curPosition: GamePosition): number {
+        let bfs_result = this.modifiedBfs(curPosition);
+        let sourceNode = this.graphHasNode(curPosition);
+        if(bfs_result !== undefined && sourceNode !== undefined) {
+            return bfs_result[2].get(bfs_result[0])!;
+        }
+        return 0;
     }
     
 
