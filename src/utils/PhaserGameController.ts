@@ -26,6 +26,7 @@ export class PhaserGameController {
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
+    private level_description!: Phaser.GameObjects.Container;
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 

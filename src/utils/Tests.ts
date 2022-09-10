@@ -74,6 +74,7 @@ export class Tests {
         ai_controller.determineWinningRegion();
         ai_controller.printGraph();
         console.log("----------------- BFS Result Tests-----------------");
+        console.log("** - Test for starting position: " + game.getPlay()[game.getPlay().length - 1].toString() + ", in attacker winning region");
         let result = ai_controller.modifiedBfs();
         if(result === undefined) {
             console.log("undefined");
@@ -90,11 +91,34 @@ export class Tests {
         console.log("shortestPathLength: " + shortestPathLength);
 
         //TODO: Test position in defender winning region, or when no reachable defender winning region node
+        console.log("** - Test for game position: " + (new RestrictedSimulationDefenderNode("p1", "q0", Constants.TIMEOUT_ACTION, new Set("a"))).toString() + ", in defender winning region")
+        let result_defender_winning = ai_controller.modifiedBfs(new RestrictedSimulationDefenderNode("p1", "q0", Constants.TIMEOUT_ACTION, new Set("a")));
+        console.log("destination node: " + result_defender_winning![0].data[0].toString());
+        console.log("nextMove: " + ai_controller.getNextMove(new RestrictedSimulationDefenderNode("p1", "q0", Constants.TIMEOUT_ACTION, new Set("a"))))
+        console.log("shortestPathLength: " + ai_controller.getShortestPathLength(new RestrictedSimulationDefenderNode("p1", "q0", Constants.TIMEOUT_ACTION, new Set("a"))))
 
+        console.log("** - Test for game position: " + (new SimulationDefenderNode("p4", "q1", "b")) + ", defender has no moves")
+        let result_no_move = ai_controller.modifiedBfs();
+        console.log("destination node: " + result_no_move![0].data[0].toString());
+        console.log("nextMove: " + ai_controller.getNextMove(new SimulationDefenderNode("p4", "q1", "b")))
+        console.log("shortestPathLength: " + ai_controller.getShortestPathLength(new SimulationDefenderNode("p4", "q1", "b")))
 
-        
-        
-        
+        console.log("** - Test for game with no reachable winning defender nodes: ");
+        let game_attacker_winning = this.getAttackerWinningLTS();
+        let ai_controller2 = new AI(game_attacker_winning);
+        ai_controller2.generateGraph();
+        ai_controller2.determineWinningRegion();
+        ai_controller2.printGraph();
+        console.log("*** starting position: " + game_attacker_winning.getPlay()[game_attacker_winning.getPlay().length - 1].toString());
+        let result_not_reachable = ai_controller2.modifiedBfs();
+        if(result_not_reachable === undefined) {
+            console.log("bfs returned undefined");
+        } else {
+            console.log("destination node: " + result_not_reachable[0].data[0].toString() + ", distance: " + result_not_reachable[2].get(result_not_reachable[0]));
+        }
+        console.log("nextMove: " + ai_controller2.getNextMove());
+        console.log("shortestPathLength: " + ai_controller2.getShortestPathLength());
+        //console.log("shortestPathLength: " + ai_controller.getShortestPathLength())        
     }
 
     /**
@@ -159,6 +183,36 @@ export class Tests {
 
          lts.addTransition("q0", "q1", Constants.TIMEOUT_ACTION);
          lts.addTransition("q0", "q2", "b");
+ 
+         return new ReactiveBisimilarityGame("p0", "q0", lts, true, true);
+    }
+
+    /**
+     * generate very simple lts to test AI class
+     * @returns 
+     */
+     getAttackerWinningLTS(): ReactiveBisimilarityGame {
+        /**
+         *          p0                    q0
+         *          | a                   | a
+         *          p1                    q1
+         *          | b                   | a
+         *          p2                    q2
+         */
+         let lts = new LTSController
+         lts.addState("p0");
+         lts.addState("p1");
+         lts.addState("p2");
+ 
+         lts.addTransition("p0", "p1", "a");
+         lts.addTransition("p1", "p2", "b");
+ 
+         lts.addState("q0");
+         lts.addState("q1");
+         lts.addState("q2");
+
+         lts.addTransition("q0", "q1", "a");
+         lts.addTransition("q1", "q2", "a");
  
          return new ReactiveBisimilarityGame("p0", "q0", lts, true, true);
     }

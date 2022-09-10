@@ -30,6 +30,9 @@ export default class Preloader extends Phaser.Scene {
 
         //background
         this.load.image("background_demo", 'assets/dark_blue_sky.jpg');
+
+        //characters
+        this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 32});
         
         /* Loader Events:
             - complete: when done loading everything

@@ -10,7 +10,7 @@ import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 export class AI {
     
     /** copy of the game at initialization time */
-    private game: ReactiveBisimilarityGame;
+    readonly game: ReactiveBisimilarityGame;
 
     /** to disable/reenable printing in console */
     private consoleLogSignature;
@@ -19,7 +19,7 @@ export class AI {
     private graph!: Graph<[GamePosition, Node<any>[], number]>;
 
     constructor(game: ReactiveBisimilarityGame) {
-        this.game = game.copy();
+        this.game = game; //game.copy() as an option if we want to simulate a game, but then play has to be updated, when original game progresses
         this.consoleLogSignature = console.log;
     }
 
@@ -147,61 +147,6 @@ export class AI {
     }
 
     /**
-     * Dijkstra calculates the distance to each node in game graph
-     * @param startingPosition 
-     * @returns 
-     */
-    private dijkstra(startingPosition: GamePosition): Map<GamePosition, number> | undefined {
-        //graph initialized
-        if(this.graph !== undefined) {
-            let startingNode = this.graphHasNode(startingPosition);
-            if(startingNode === undefined) {
-                return undefined;
-            }
-
-            //initiate
-            let dist_map = new Map<GamePosition, number>(); //contains distances for each node in game graph
-            let queue: Node<[GamePosition, Node<any>[], number]>[] = [];
-            let nodes = this.graph.getNodes();
-            for(let i = 0; i < nodes.length; i++) {
-                if(nodes[i] === startingNode) {
-                    dist_map.set(startingNode.data[0], 0);
-                } else {
-                    dist_map.set(nodes[i].data[0], Infinity);
-                }
-                queue.push(nodes[i]);
-            }
-
-            //iterate through queue to visit nodes
-            while(queue.length !== 0) {
-                //get node with minimum distance to the destination
-                let minIndex = 0;
-                for(let i = 1; i < queue.length; i++) {
-                    if(dist_map.get(queue[i].data[0])! < dist_map.get(queue[minIndex].data[0])!) {
-                        minIndex = i;
-                    }
-                }
-                let minNode = queue.splice(minIndex, 1)[0];
-
-                //for every neighbor that is still in queue
-                for(let i = 0; i < minNode.adjacent.length; i++) {
-                    let neighbor = minNode.adjacent[i].node;
-                    //if neighbor has not yet been removed from queue
-                    if(queue.some(node => (node.data[0].samePosition(neighbor.data[0])))) {
-                        let alt = dist_map.get(minNode.data[0])! + 1;   //edges are all 1
-                        if(alt < dist_map.get(neighbor.data[0])!) {
-                            dist_map.set(neighbor.data[0], alt);
-                        }
-                    }
-                }
-            }
-
-            return dist_map;
-        }
-        return undefined
-    }
-
-    /**
      * performs breadths first search and returns shortest path to defender winning region node
      * requires winning region algorithm to be performed before
      * @param curPosition 
@@ -276,6 +221,7 @@ export class AI {
 
 
     /**
+     * TODO:
      * traverses the game graph and assigns every node a blunder score in the interval [0, 1], 
      * 0 meaning that the node is in the winning region of the defender and 1 meaning that the attacker only has winning moves to choose from with no possibility of losing, 
      * essentially functions like the common minimax algorithm when in the winning region of the defender
@@ -320,27 +266,43 @@ export class AI {
 
     /**
      * calculate the next "best" move
+     * @returns undefined if there is no next move
      */
-    getNextMove(curPosition: GamePosition): GamePosition | undefined {
+    getNextMove(curPosition?: GamePosition): GamePosition | undefined {
+        if(curPosition === undefined && this.game.getPlay().length > 0) {
+            curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
+        }
+
+        if(curPosition === undefined) {
+            this.printError("getNextMove: current Position undefined")
+            return undefined;
+        }
         let bfs_result = this.modifiedBfs(curPosition);
         if(bfs_result !== undefined && bfs_result[0] !== undefined) {
             //traverse graph on path until pred === current position 
             let current = bfs_result[0];
             let path: Node<[GamePosition, Node<any>[], number]>[] = []; //path from destination to source (curPosition)
             while(current !== undefined) {
-                console.log(current)
                 path.push(current);
                 current = bfs_result[1].get(current)!;
             }
             console.log("Shortest path: " + this.getShortestPathString(path));
             return path[path.length - 2].data[0];
         } else {
+            //if no defender winning region node is reachable, return any adjacent node
+            let node = this.graphHasNode(curPosition);
+            if(node !== undefined && node.adjacent.length > 0) {
+                let random_number = Math.floor(Math.random() * (node.adjacent.length));
+                return node.adjacent[random_number].node.data[0];  //return "random" node
+            }
+
+            //no move --> return undefined
             console.log("getNextMove: could not find any next move")
             return undefined;
         }
     }
 
-    getShortestPathString(path: Node<[GamePosition, Node<any>[], number]>[]): string {
+    private getShortestPathString(path: Node<[GamePosition, Node<any>[], number]>[]): string {
         let path_string = "";
         for(let i = 0; i < path.length; i++) {
             path_string = path_string.concat(path[i].data[0].toString() + ", ");
@@ -351,13 +313,19 @@ export class AI {
     /**
      * returns in a number of moves in which the player can win in
      */
-    getShortestPathLength(curPosition: GamePosition): number {
-        let bfs_result = this.modifiedBfs(curPosition);
-        let sourceNode = this.graphHasNode(curPosition);
-        if(bfs_result !== undefined && sourceNode !== undefined) {
-            return bfs_result[2].get(bfs_result[0])!;
+    getShortestPathLength(curPosition?: GamePosition): number {
+        if(curPosition === undefined && this.game.getPlay().length > 0) {
+            curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
         }
-        return 0;
+
+        if(curPosition !== undefined) {
+            let bfs_result = this.modifiedBfs(curPosition);
+            let sourceNode = this.graphHasNode(curPosition);
+            if(bfs_result !== undefined && sourceNode !== undefined) {
+                return bfs_result[2].get(bfs_result[0])!;
+            }
+        }
+        return -1;
     }
     
 
@@ -396,5 +364,62 @@ export class AI {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    
+    /**
+     * TODO: delete if not needed
+     * Dijkstra calculates the distance to each node in game graph
+     * @param startingPosition 
+     * @returns 
+     */
+     private dijkstra(startingPosition: GamePosition): Map<GamePosition, number> | undefined {
+        //graph initialized
+        if(this.graph !== undefined) {
+            let startingNode = this.graphHasNode(startingPosition);
+            if(startingNode === undefined) {
+                return undefined;
+            }
+
+            //initiate
+            let dist_map = new Map<GamePosition, number>(); //contains distances for each node in game graph
+            let queue: Node<[GamePosition, Node<any>[], number]>[] = [];
+            let nodes = this.graph.getNodes();
+            for(let i = 0; i < nodes.length; i++) {
+                if(nodes[i] === startingNode) {
+                    dist_map.set(startingNode.data[0], 0);
+                } else {
+                    dist_map.set(nodes[i].data[0], Infinity);
+                }
+                queue.push(nodes[i]);
+            }
+
+            //iterate through queue to visit nodes
+            while(queue.length !== 0) {
+                //get node with minimum distance to the destination
+                let minIndex = 0;
+                for(let i = 1; i < queue.length; i++) {
+                    if(dist_map.get(queue[i].data[0])! < dist_map.get(queue[minIndex].data[0])!) {
+                        minIndex = i;
+                    }
+                }
+                let minNode = queue.splice(minIndex, 1)[0];
+
+                //for every neighbor that is still in queue
+                for(let i = 0; i < minNode.adjacent.length; i++) {
+                    let neighbor = minNode.adjacent[i].node;
+                    //if neighbor has not yet been removed from queue
+                    if(queue.some(node => (node.data[0].samePosition(neighbor.data[0])))) {
+                        let alt = dist_map.get(minNode.data[0])! + 1;   //edges are all 1
+                        if(alt < dist_map.get(neighbor.data[0])!) {
+                            dist_map.set(neighbor.data[0], alt);
+                        }
+                    }
+                }
+            }
+
+            return dist_map;
+        }
+        return undefined
     }
 }
