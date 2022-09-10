@@ -9,6 +9,8 @@ import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefen
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
 import { SetOps } from "./SetOps";
+import { LevelDescription } from "../ui_elements/LevelDescription";
+import { AI } from "./AI";
 
 export class PhaserGameController {
     private game: ReactiveBisimilarityGame;
@@ -26,7 +28,8 @@ export class PhaserGameController {
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
-    private level_description!: Phaser.GameObjects.Container;
+    private level_description: LevelDescription;
+    private ai_controller!: AI; //defender ai
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
@@ -39,7 +42,7 @@ export class PhaserGameController {
      * @param left_coordinates 
      * @param right_coordinates 
      */
-    constructor(scene: Phaser.Scene, offset_between_vertices = Constants.lts_xy_offset, left_coordinates = Constants.first_coordinates, right_coordinates = Constants.second_coordinates) {
+    constructor(scene: Phaser.Scene, offset_between_vertices = Constants.lts_xy_offset, left_coordinates = Constants.first_coordinates, right_coordinates = Constants.second_coordinates, level_description: LevelDescription) {
         this.left_coordinates = left_coordinates;
         this.right_coordinates = right_coordinates;
         this.offset_between_vertices = offset_between_vertices;
@@ -56,6 +59,7 @@ export class PhaserGameController {
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
         this.debug = true;
+        this.level_description = level_description;
     }
 
     /**
@@ -133,6 +137,9 @@ export class PhaserGameController {
                 this.current_position.setVisible(false);
                 this.possible_moves_text.makeInvisible();
             }
+            this.ai_controller = new AI(this.game);
+            this.ai_controller.generateGraph();
+            this.ai_controller.determineWinningRegion();
         }
     }
 
@@ -159,36 +166,46 @@ export class PhaserGameController {
     }
 
     /**
-     * add environment change and timeout functionality
+     * add environment change, timeout functionality
+     * and AI functionality
      * @returns -1 if move is no possible
      * */
     encapsulateDoMove(next_process: string, isSymmetryMove = false) {
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
-        
-        //revert any changes made to the environment by timeout action
-        if(this.environment_panel.isEnabled()) {
-            this.environment_panel.disable();
 
-            //environment wasn't changed when it is still enabled
-            /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-                if(!SetOps.areEqual(cur_pos.environment, this.game.getEnvironment())) {
-                    this.game.setEnvironment(cur_pos.environment);
-                }
-            } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
-                
-                this.game.resetEnvironment();
-            } */
-        }
+        //Defender ---> red blinking to signal its not the players turn
+        if(cur_pos.activePlayer === Player.Defender) {
+            //TODO:
 
-        let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
-        //timeout action, can only occur in these node types
-        if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
-            //enable Environment Change UI
-            this.nextProcessAfterTimeout = next_process;
-            this.environment_panel.enable();
+        //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
-            this.doMove(next_process, isSymmetryMove);
+            //revert any changes made to the environment by timeout action
+            if(this.environment_panel.isEnabled()) {
+                this.environment_panel.disable();
+
+                //environment wasn't changed if it is still enabled
+                /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+                    if(!SetOps.areEqual(cur_pos.environment, this.game.getEnvironment())) {
+                        this.game.setEnvironment(cur_pos.environment);
+                    }
+                } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
+                    
+                    this.game.resetEnvironment();
+                } */
+            }
+
+            let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
+            //timeout action, can only occur in these node types
+            if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
+                //enable Environment Change UI
+                this.nextProcessAfterTimeout = next_process;
+                this.environment_panel.enable();
+            } else {
+                this.doMove(next_process, isSymmetryMove);
+            }
         }
+        
+        
     }
 
     /**

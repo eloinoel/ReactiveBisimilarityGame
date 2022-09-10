@@ -32,7 +32,8 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("background_demo", 'assets/dark_blue_sky.jpg');
 
         //characters
-        this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 57});
+        this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
         
         /* Loader Events:
             - complete: when done loading everything
