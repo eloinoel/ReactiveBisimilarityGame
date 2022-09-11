@@ -18,7 +18,7 @@ export class LevelDescription extends Phaser.GameObjects.Container {
         this.enemy_turn = scene.add.text(0, 80, "Opponent's turn", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.4, 0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
         this.player_turn = scene.add.text(0, 80, "Your turn", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.4, 0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
         this.img_player = scene.add.image(-80, 85, "witch_idle", 0).setOrigin(0.5);
-        this.img_opponent = scene.add.image(-125, 77, "hellhound_idle", 0);
+        this.img_opponent = scene.add.image(-130, 77, "hellhound_idle", 0);
 
 
 

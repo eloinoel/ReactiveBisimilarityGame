@@ -1,6 +1,7 @@
 import BaseScene from "../BaseScene";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
+import { LevelDescription } from "../../ui_elements/LevelDescription";
 
 export default class Level3_1 extends BaseScene {
     constructor() {
@@ -28,7 +29,8 @@ export default class Level3_1 extends BaseScene {
 
     private setupLTS(): void {
 
-        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates)
+        let level_description = new LevelDescription(this, this.renderer.width/2, 50, "3.1", "Reactive Bisimulation", true);
+        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates, level_description)
         
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);
@@ -53,6 +55,6 @@ export default class Level3_1 extends BaseScene {
         game_controller.addTransition("q2", "q4", "a");
 
         game_controller.startGame(this, "p0", "q0", true, true);
-        game_controller.setEnvironment("");
+        game_controller.setEnvironment(new Set(""));
     }
 }

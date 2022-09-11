@@ -17,6 +17,6 @@ export default class TestScene extends Phaser.Scene {
         //tests.testIsMovePossible();
         tests.testAI();
 
-        //this.scene.launch("ReBisim_Level2")
+        this.scene.launch("ReBisim_Level2")
     }
 }

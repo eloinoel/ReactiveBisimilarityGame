@@ -162,7 +162,7 @@ export class AI {
                 curPosition = this.game.getPlay()[0];
             }
             let sourceNode = nodes.find(node => (node.data[0].samePosition(curPosition!)))
-            if(sourceNode === undefined) {
+            if(sourceNode === undefined || sourceNode.adjacent.length === 0) {
                 return undefined;
             }
             
@@ -176,7 +176,7 @@ export class AI {
 
             //all vertices unvisited, path not yet constructed
             for(let i = 0; i < nodes.length; i++) {
-                dist.set(nodes[i], Infinity);
+                dist.set(nodes[i], -1);
                 visited.set(nodes[i], false);
                 pred.set(nodes[i], undefined!);
             }
@@ -204,19 +204,71 @@ export class AI {
                             }
 
                             queue.push(current.adjacent[i].node);
+                        } else {
+                            dist.set(current.adjacent[i].node, Infinity)
                         }
                     } else {
                         this.printError("modifiedBfs: visited list returned undefined node")
                     }
                 }
             }
+
+            //if no winning region node was found, return the longest path, doesn't count cycles as infinity
+            let max_node = sourceNode;
+            let dist_array = Array.from(dist.entries());
+            for(let i = 0; i < dist.size; i++) {
+                if(dist.get(max_node)! < dist_array[i][1]) {
+                    max_node = dist_array[i][0];
+                }
+            }
+            return [max_node, pred, dist];
         } else {
             this.printError("modifiedBfs: graph uninitialized")
         }
         return undefined;
     }
 
+    /**
+     * calculate the next "best" move
+     * @returns undefined if there is no next move
+     */
+    getNextMove(curPosition?: GamePosition): GamePosition | undefined {
+        if(curPosition === undefined && this.game.getPlay().length > 0) {
+            curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
+        }
 
+        if(curPosition === undefined) {
+            this.printError("getNextMove: current Position undefined")
+            return undefined;
+        }
+
+        let bfs_result = this.modifiedBfs(curPosition);
+        if(bfs_result !== undefined && bfs_result[0] !== undefined) {
+            //traverse graph on path until pred === current position 
+            let current = bfs_result[0];
+            let path: Node<[GamePosition, Node<any>[], number]>[] = []; //path from destination to source (curPosition)
+            while(current !== undefined) {
+                path.push(current);
+                current = bfs_result[1].get(current)!;
+            }
+            console.log("AI: Current node: " + curPosition.toString() + ", path: " + this.getShortestPathString(path));  // TODO: Delete debug
+            return path[path.length - 2].data[0];
+        } else {
+            //return any node if bfs results in undefined, shouldn't happen though hahaaaa
+            let node = this.graphHasNode(curPosition);
+            if(node !== undefined && node.adjacent.length > 0) {
+                let random_number = Math.floor(Math.random() * (node.adjacent.length));
+                this.printError("getNextMove: bfs returned undefined but there are adjacent nodes");
+                return node.adjacent[random_number].node.data[0];  //return "random" node
+            }
+
+            //no move --> return undefined
+            console.log("getNextMove: could not find any next move")
+            return undefined;
+        }
+    }
+
+    
 
 
 
@@ -228,7 +280,7 @@ export class AI {
      * @param node 
      * @param depth 
      */
-    calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
+     calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
         //graph initialized
         if(this.graph !== undefined) {
             //terminal node (leaf)
@@ -261,44 +313,6 @@ export class AI {
 
         } else {
             this.printError("calculateBlunderScore: graph not initialized");
-        }
-    }
-
-    /**
-     * calculate the next "best" move
-     * @returns undefined if there is no next move
-     */
-    getNextMove(curPosition?: GamePosition): GamePosition | undefined {
-        if(curPosition === undefined && this.game.getPlay().length > 0) {
-            curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
-        }
-
-        if(curPosition === undefined) {
-            this.printError("getNextMove: current Position undefined")
-            return undefined;
-        }
-        let bfs_result = this.modifiedBfs(curPosition);
-        if(bfs_result !== undefined && bfs_result[0] !== undefined) {
-            //traverse graph on path until pred === current position 
-            let current = bfs_result[0];
-            let path: Node<[GamePosition, Node<any>[], number]>[] = []; //path from destination to source (curPosition)
-            while(current !== undefined) {
-                path.push(current);
-                current = bfs_result[1].get(current)!;
-            }
-            console.log("Shortest path: " + this.getShortestPathString(path));
-            return path[path.length - 2].data[0];
-        } else {
-            //if no defender winning region node is reachable, return any adjacent node
-            let node = this.graphHasNode(curPosition);
-            if(node !== undefined && node.adjacent.length > 0) {
-                let random_number = Math.floor(Math.random() * (node.adjacent.length));
-                return node.adjacent[random_number].node.data[0];  //return "random" node
-            }
-
-            //no move --> return undefined
-            console.log("getNextMove: could not find any next move")
-            return undefined;
         }
     }
 

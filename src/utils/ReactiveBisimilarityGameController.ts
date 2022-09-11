@@ -306,8 +306,8 @@ export class ReactiveBisimilarityGame {
         let legalMove = this.isMovePossible(action, nextPosition, curPosition);
         let curPlayer = curPosition.activePlayer;
         if(!legalMove) {
-            console.log("performMove: move not possible: (" + curPosition.process1 + ", " + curPosition.process2 + ") --" + 
-            action + "-> (" + nextPosition.process1 + ", " + nextPosition.process2 + ")");
+            console.log("performMove: move not possible:" + curPosition.toString() + " --" + 
+            action + "-> " + nextPosition.toString());
             return -1;
         }
 
@@ -320,6 +320,11 @@ export class ReactiveBisimilarityGame {
         }
         this.lts.setCurrentState(nextPosition.process1, process1Index);
         this.lts.setCurrentState(nextPosition.process2, process2Index);
+
+        //only attacker can change the environment
+        if(curPosition instanceof RestrictedAttackerNode && nextPosition instanceof SimulationDefenderNode) {
+            this.resetEnvironment();
+        }
 
         //update move history
         this.play.push(nextPosition);

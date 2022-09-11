@@ -175,7 +175,8 @@ export class PhaserGameController {
 
         //Defender ---> red blinking to signal its not the players turn
         if(cur_pos.activePlayer === Player.Defender) {
-            //TODO:
+            //TODO: Visual Feedback
+            console.log("Not player's turn")
 
         //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
@@ -212,7 +213,7 @@ export class PhaserGameController {
      * does not work if there are multiple edges between processes
      * @param next_process
      * @isSymmetryMove
-     * @returns -1 if the move was not possible
+     * @returns -1 if the move was not possible, 0 if the game is over
      */
     doMove(next_process: string, isSymmetryMove: boolean = false): number {
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
@@ -231,6 +232,7 @@ export class PhaserGameController {
             isSymmetryMove = true;
         }
 
+        //determine next position from LTS and given arguments
         if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
             if(isSymmetryMove) {
                 next_position = moves.filter((position) => (cur_pos.isSymmetryMove(position) && position.process1 === next_process));
@@ -260,31 +262,41 @@ export class PhaserGameController {
             console.log("doMove: multiple moves are possible for given arguments, TODO: implement strategy to choose correct one");
         }
 
+        //now execute the move
         if(this.game.performMove(action, next_position[0]) === -1) {
             console.log("move not possible: " + action + ", " + next_position.toString());
             return -1;
         } else {
-            this.updateCurrentPositionField();
-            this.updateHightlights();
-            if(this.game.isReactive()) {
-                this.updateEnvironmentContainer();
-                this.environment_panel.updatePanel();
-            }
-            this.updatePossibleMovesField();
 
+            //update visuals
+            this.updateVisualsAfterMove()
+
+            cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             //check if the game is over
             moves = this.game.possibleMoves();
-            cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
-
-            if(cur_pos.activePlayer === Player.Attacker) {
-                //in the reactive bisimulation game the defender cannot get stuck as he always has a symmetry move
-            //Defender is stuck
-            } else if(cur_pos.activePlayer === Player.Defender) {
-                if(moves.length === 0) {
+            if(moves.length === 0) {
+                //defender is stuck
+                if(cur_pos.activePlayer === Player.Defender) {
                     //TODO: Show Points and Congratulation
                     let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
                         wintext.destroy();
                     });
+                } else {
+                    this.printError("doMove: No possible moves in attacker position. Should not be possible.");
+                }
+                return 0;
+            }
+
+            //AI makes a move
+            if(cur_pos.activePlayer === Player.Defender) {
+                let defender_move = this.ai_controller.getNextMove(cur_pos);
+                if(defender_move !== undefined) {
+                    let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
+                    if(return_code === -1) {
+                        this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
+                    } else {
+                        this.updateVisualsAfterMove()
+                    }
                 }
             }
         }
@@ -293,6 +305,29 @@ export class PhaserGameController {
 
     /************************************* UTILITY AND DEBUG *************************************/
 
+    /**
+     * wrapper for multiple update functions
+     * Hightlights, environmentPanel and Container, CurrentPositionField, PossibleMovesField, Turn
+     */
+    private updateVisualsAfterMove() {
+        this.updateHightlights();
+        if(this.game.isReactive()) {
+            this.updateEnvironmentContainer();
+            this.environment_panel.updatePanel();
+        }
+        if(this.debug) {
+            this.updateCurrentPositionField();
+            this.updatePossibleMovesField();
+        }
+
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+        //set turn
+        if(cur_pos.activePlayer === Player.Defender) {
+            this.level_description.setTurn(false);
+        } else {
+            this.level_description.setTurn(true);
+        }
+    }
     /**
      * TODO: check if switching game mode is possible in current game state
      * if @reactive = true, @bisimilar is not checked in the internal game engine
