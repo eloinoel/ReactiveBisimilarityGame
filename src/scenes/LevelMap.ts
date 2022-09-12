@@ -19,6 +19,8 @@ export default class LevelMap extends BaseScene {
         this.load.spritesheet("blue_button", 'assets/LevelMap/blue_button.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("orange_button", 'assets/LevelMap/orange_button.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("red_button", 'assets/LevelMap/red_button.png', {frameWidth: 16, frameHeight: 16});
+        this.load.image("star", 'assets/UI/Stars/Star.png');
+        this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');
     }
 
     create() {
@@ -40,6 +42,35 @@ export default class LevelMap extends BaseScene {
 
         //fade scene in
         this.fade(true);
+
+        //init local storage for stars and enabling of levels
+        let levels = JSON.parse(localStorage.getItem("levels") as string);
+        if(levels === null) {
+            levels = [
+                //simulation levels
+                {state: true, stars: 0}, 
+                {state: false, stars: 0},
+                {state: false, stars: 0},
+                {state: false, stars: 0},
+                //bisimulation levels
+                {state: false, stars: 0},
+                {state: false, stars: 0},
+                {state: false, stars: 0},
+                {state: false, stars: 0},
+                //reactive bisimulation levels
+                {state: false, stars: 0},    //level 3.1
+                {state: false, stars: 0},    //level 3.2
+                {state: false, stars: 0},    //level 3.3
+                {state: false, stars: 0},    //level 3.4
+                {state: false, stars: 0},    //level 3.5
+                {state: false, stars: 0},    //level 3.6
+                {state: false, stars: 0},    //level 3.7
+                {state: false, stars: 0},    //level 3.8
+                {state: false, stars: 0},    //level 3.9
+                {state: false, stars: 0},    //level 3.10
+            ]
+        }
+        localStorage.setItem("levels", JSON.stringify(levels));
 
         //UI Buttons
         let backBtn = new UI_Button(this, Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
@@ -75,9 +106,21 @@ export default class LevelMap extends BaseScene {
         this.levelObjects.push(new LevelSelectionButton(this, 1160, 655, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level9")})}, "Level 3.9").disable());
         this.levelObjects.push(new LevelSelectionButton(this, 973, 682, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level10")})}, "Level 3.10"));
 
+        //disable all levels that players hasn't unlocked yet
+        let fartest_enabled_level_index = 0;
+        for(let i = 0; i < this.levelObjects.length; i++) {
+            if(!levels[i].state) {
+                this.levelObjects[i].disable()
+            } else {
+                fartest_enabled_level_index = i;
+                this.levelObjects[i].enable();
+            }
+            this.levelObjects[i].setStars(levels[i].stars);
+        }
+
 
         //current lvl pulse effect
-        this.curLevelBtn = this.levelObjects[0];    //TODO: dependant on what player has already played
+        this.curLevelBtn = this.levelObjects[fartest_enabled_level_index];
         
         if(this.curLevelBtn !== undefined) {
             this.pulseTween = this.tweens.add({
