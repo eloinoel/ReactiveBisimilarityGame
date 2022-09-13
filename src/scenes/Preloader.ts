@@ -35,6 +35,9 @@ export default class Preloader extends Phaser.Scene {
         this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 57});
         this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
         
+        //highscore
+        this.load.image("star", 'assets/UI/Stars/Star.png');
+        this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()

@@ -11,7 +11,7 @@ import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
 import { SetOps } from "./SetOps";
 import { LevelDescription } from "../ui_elements/LevelDescription";
 import { AI } from "./AI";
-import { WinPopup } from "../ui_elements/EndGamePopup";
+import { WinPopup, LosePopup } from "../ui_elements/EndGamePopup";
 import BaseScene from "../scenes/BaseScene";
 
 export class PhaserGameController {
@@ -294,6 +294,7 @@ export class PhaserGameController {
 
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             moves = this.game.possibleMoves(undefined, true);
+            console.log("moves: " + moves.length)
 
             if(cur_pos.activePlayer === Player.Defender) {
                 //attacker did a move, update counter
@@ -315,17 +316,20 @@ export class PhaserGameController {
                             this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
                         } else {
                             this.updateVisualsAfterMove()
+                            moves = this.game.possibleMoves(undefined, true);
+                            //should only occur in simulation game because there is always a symmetry move in bisimilar games
+                            if(moves.length === 0) {
+                                this.launchEndScreen(false);
+                            }
                         }
                     }
                 }
 
             //now Attackers Turn
             } else {
-                //should only occur in simulation game because there is always a symmetry move in bisimilar games
-                if(moves.length === 0) {
-                    this.launchEndScreen(false);
+                
                 //TODO: detect symmetry move loop with bfs
-                } else if(false) {
+                if(false) {
                     this.launchEndScreen(false)
                 }
                 
@@ -339,7 +343,9 @@ export class PhaserGameController {
      * end screen Popup
      * @param win 
      */
-    private launchEndScreen(win: boolean) {
+    launchEndScreen(win: boolean) {
+        //TODO: set private
+
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
             if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
@@ -347,8 +353,8 @@ export class PhaserGameController {
                 //get number of stars
                 let num_stars = 1;
                 for(let i = 0; i < this.num_moves_for_stars.length && i < 2; i++) {
-                    if(this.num_moves <= this.num_moves_for_stars[i]) {
-                        num_stars = this.num_moves_for_stars[i];
+                    if(this.num_moves <= this.num_moves_for_stars[i] ) {
+                        num_stars = i + 2;
                     }
                 }
 
@@ -365,22 +371,27 @@ export class PhaserGameController {
                 }
 
                 //grey overlay
-                let bg_overlay = new Phaser.GameObjects.Rectangle(this.scene, 0, 0, this.scene.renderer.width + 1, this.scene.renderer.height + 1, Constants.convertColorToNumber(Constants.COLORPACK_1.black), 0.2).setOrigin(0.5).setDepth(2);
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
 
                 //open popup
                 let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
                     //replayAction
-                    pop.destroyPopup();
-                    bg_overlay.destroy();
-                    (this.scene as BaseScene).fade(false, () => {console.clear(); this.scene.scene.stop("GUIScene"); this.scene.scene.restart()})
+                    (this.scene as BaseScene).fade(false, () => {
+                        pop.destroyPopup();
+                        bg_overlay.destroy();
+                        console.clear(); 
+                        this.scene.scene.stop("GUIScene"); 
+                        this.scene.scene.restart()
+                    })
                 }, () => {
                     //nextLevelAction
-                    pop.destroyPopup();
-                    bg_overlay.destroy();
                     (this.scene as BaseScene).fade(false, () => {
+                        localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
                         console.clear();
+                        pop.destroyPopup();
+                        bg_overlay.destroy();
                         this.scene.scene.stop("GUIScene");
-                        this.scene.scene.start(this.getSceneKeyFromIndex(current_level));
+                        this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
                     })
                 })
             } else {
@@ -390,8 +401,24 @@ export class PhaserGameController {
                 });
                 return;
             }
+        //lose
         } else {
+            console.log("The defender wins the game!");
 
+            //grey overlay
+            let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+
+            //open popup
+            let pop = new LosePopup(this.scene, () => {
+                //replayAction
+                (this.scene as BaseScene).fade(false, () => {
+                    pop.destroyPopup();
+                    bg_overlay.destroy();
+                    console.clear(); 
+                    this.scene.scene.stop("GUIScene"); 
+                    this.scene.scene.restart()
+                })
+            });
         }
     }
 

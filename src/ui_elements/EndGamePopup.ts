@@ -4,7 +4,7 @@ import { Constants } from "../utils/Constants";
 export class WinPopup extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;
-    private dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/3.8, 220);
+    private dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/3.8, 230);
 
     private movesNeeded: number;
     private stars: number;
@@ -39,7 +39,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
             width: this.dimensions.x,
             height: this.dimensions.y,
             orientation: 'y',
-            space: {item: 5, top: 7, bottom: 7, left: 7, right: 7}
+            space: {item: 5, top: 10, bottom: 10, left: 7, right: 7}
         })
         sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
         
@@ -47,7 +47,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
         sizer.add(this.scene.add.text(0, 0, "You win!", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"})
 
         //Moves needed
-        sizer.add(this.scene.add.text(0, 0, "Moves needed: " + this.movesNeeded, this.textStyle).setResolution(2).setFontSize(20), {padding: {top: 10},})
+        sizer.add(this.scene.add.text(0, 0, "Moves needed: " + this.movesNeeded, this.textStyle).setResolution(2).setFontSize(20), {padding: {top: 10, bottom: 3},})
 
         //Feedback
         if(this.stars === 1) {
@@ -59,7 +59,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
         }
 
         //Stars
-        sizer.add(this.createStarsContainer(this.stars));
+        sizer.add(this.createStarsContainer(this.stars), {padding: {top: 3, bottom: 3}});
 
         //Buttons
         sizer.add(new Sizer(this.scene)
@@ -95,7 +95,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
 export class LosePopup extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;
-    private dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/5.5, 130);
+    private dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/4.4, 130);
     private replay_action;
 
 
@@ -124,12 +124,15 @@ export class LosePopup extends Phaser.GameObjects.Container {
             width: this.dimensions.x,
             height: this.dimensions.y,
             orientation: 'y',
-            space: {item: 17, top: 17, bottom: 17, left: 7, right: 7}
+            space: {item: 10, top: 17, bottom: 17, left: 7, right: 7}
         })
         sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
         
         //title
-        sizer.add(this.scene.add.text(0, 0, "You lose", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"})
+        sizer.add(this.scene.add.text(0, 0, "You lose", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
+
+        //hint
+        sizer.add(this.scene.add.text(0, 0, "No (winning) moves left", this.textStyle).setFontSize(20).setResolution(2), {align: "center", padding: {bottom: 10}})
 
 
         //Buttons

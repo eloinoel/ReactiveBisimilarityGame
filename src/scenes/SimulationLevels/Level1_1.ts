@@ -54,5 +54,14 @@ export default class Level1_1 extends BaseScene {
         game_controller.addTransition("q0", "q2", "a");
 
         game_controller.startGame(this, "p0", "q0", false, false);
+
+        //TODO: remove testing
+        /* localStorage.setItem("currentLevel", "0");
+        let levels = JSON.parse(localStorage.getItem("levels") as string);
+        levels[0].stars = 1
+        localStorage.setItem("levels", JSON.stringify(levels));
+        game_controller.launchEndScreen(false)
+        levels = JSON.parse(localStorage.getItem("levels") as string);
+        console.log(levels[0])  */
     }
 }

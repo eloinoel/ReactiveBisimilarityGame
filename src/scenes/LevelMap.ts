@@ -20,8 +20,6 @@ export default class LevelMap extends BaseScene {
         this.load.spritesheet("blue_button", 'assets/LevelMap/blue_button.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("orange_button", 'assets/LevelMap/orange_button.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("red_button", 'assets/LevelMap/red_button.png', {frameWidth: 16, frameHeight: 16});
-        this.load.image("star", 'assets/UI/Stars/Star.png');
-        this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');
     }
 
     create() {
