@@ -86,6 +86,10 @@ export class WinPopup extends Phaser.GameObjects.Container {
 
         return sizer;
     }
+
+    destroyPopup() {
+        //TODO: destroy buttons and all references
+    }
 }
 
 export class LosePopup extends Phaser.GameObjects.Container {
@@ -139,18 +143,8 @@ export class LosePopup extends Phaser.GameObjects.Container {
         return sizer;
     }
 
-    private createStarsContainer(num_stars: number): Sizer {
-        let sizer = new Sizer(this.scene, {orientation: 'x'})
-
-        let star_scale = 0.08
-        for(let i = 0; i < num_stars && i < 3; i++) {
-            sizer.add(this.scene.add.image(0, 0, "star").setScale(star_scale))
-        }
-        for(let i = num_stars; i < 3; i++) {
-            sizer.add(this.scene.add.image(0, 0, "star_empty").setScale(star_scale))
-        }
-
-        return sizer;
+    destroyPopup() {
+        //TODO: destroy buttons and all references
     }
 }
 
@@ -206,6 +200,10 @@ export class ReplayButton extends Phaser.GameObjects.Container {
             this.scale = 1
             this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(1)
         })
+    }
+
+    destroyButton() {
+        //TODO: destroy all references
     }
 }
 

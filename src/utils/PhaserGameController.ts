@@ -11,6 +11,8 @@ import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
 import { SetOps } from "./SetOps";
 import { LevelDescription } from "../ui_elements/LevelDescription";
 import { AI } from "./AI";
+import { WinPopup } from "../ui_elements/EndGamePopup";
+import BaseScene from "../scenes/BaseScene";
 
 export class PhaserGameController {
     private game: ReactiveBisimilarityGame;
@@ -30,6 +32,9 @@ export class PhaserGameController {
     private environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
     private ai_controller!: AI; //defender ai
+
+    private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
+    private num_moves: number; //the number of moves a player currently made
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
@@ -60,6 +65,8 @@ export class PhaserGameController {
         this.game_initialized = false;
         this.debug = true;
         this.level_description = level_description;
+        this.num_moves_for_stars = [0, 0];
+        this.num_moves = 0;
     }
 
     /**
@@ -113,8 +120,11 @@ export class PhaserGameController {
      * start a new game, p0 playing against p1
      * @param p0 name of first process
      * @param p1 name of second process
+     * @param reactive turns the game into reactive bisimulation game
+     * @param bisimilar turns the game into bisimulation game, isn't evaluated if @reactive is true
+     * @param num_moves_for_stars an array with the first 2 indeces containing the number of moves needed to achieve 2 or 3 stars at the end of the level
      */
-    startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true) {
+    startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true, num_moves_for_stars = [0, 0, 0]) {
         if(this.game.startNewGame(p0, p1) === 0) {
             this.createEnvironmentField();
             this.game.setReactive(reactive) //order with createEnvironmentField is important
@@ -137,11 +147,21 @@ export class PhaserGameController {
                 this.current_position.setVisible(false);
                 this.possible_moves_text.makeInvisible();
             }
+
+            //ai initialization
             this.ai_controller = new AI(this.game);
             this.ai_controller.generateGraph();
             this.ai_controller.determineWinningRegion();
+            //stars evaluation
+            for(let i = 0; i < num_moves_for_stars.length; i++) {
+                if(num_moves_for_stars[i] >= 0) {
+                    this.num_moves_for_stars[i] = num_moves_for_stars[i];
+                }
+            }
+            this.num_moves = 0;
         }
     }
+
 
     /**
      * if timeout not possible after setting environment, give visual feedback
@@ -271,39 +291,159 @@ export class PhaserGameController {
             //update visuals
             this.updateVisualsAfterMove()
 
-            cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
-            //check if the game is over
-            moves = this.game.possibleMoves();
-            if(moves.length === 0) {
-                //defender is stuck
-                if(cur_pos.activePlayer === Player.Defender) {
-                    //TODO: Show Points and Congratulation
-                    let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
-                        wintext.destroy();
-                    });
-                } else {
-                    this.printError("doMove: No possible moves in attacker position. Should not be possible.");
-                }
-                return 0;
-            }
 
-            //AI makes a move
+            cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+            moves = this.game.possibleMoves(undefined, true);
+
             if(cur_pos.activePlayer === Player.Defender) {
-                let defender_move = this.ai_controller.getNextMove(cur_pos);
-                if(defender_move !== undefined) {
-                    let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
-                    if(return_code === -1) {
-                        this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
-                    } else {
-                        this.updateVisualsAfterMove()
+                //attacker did a move, update counter
+                this.num_moves++;
+                //check if the game is over
+                //defender is stuck
+                if(moves.length === 0) {
+                /*     let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                        wintext.destroy();
+                    }); */
+                    this.launchEndScreen(true);
+                    return 0;
+                //AI makes a move
+                } else {
+                    let defender_move = this.ai_controller.getNextMove(cur_pos);
+                    if(defender_move !== undefined) {
+                        let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
+                        if(return_code === -1) {
+                            this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
+                        } else {
+                            this.updateVisualsAfterMove()
+                        }
                     }
                 }
+
+            //now Attackers Turn
+            } else {
+                //should only occur in simulation game because there is always a symmetry move in bisimilar games
+                if(moves.length === 0) {
+                    this.launchEndScreen(false);
+                //TODO: detect symmetry move loop with bfs
+                } else if(false) {
+                    this.launchEndScreen(false)
+                }
+                
             }
         }
-        return 0;
+        return 1;
+    }
+
+    /**
+     * set localstorage stars, 
+     * end screen Popup
+     * @param win 
+     */
+    private launchEndScreen(win: boolean) {
+        if(win) {
+            let current_level = parseInt(localStorage.getItem("currentLevel") as string);
+            if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
+                console.log("The attacker won the game!");
+                //get number of stars
+                let num_stars = 1;
+                for(let i = 0; i < this.num_moves_for_stars.length && i < 2; i++) {
+                    if(this.num_moves <= this.num_moves_for_stars[i]) {
+                        num_stars = this.num_moves_for_stars[i];
+                    }
+                }
+
+                //update local storage
+                let tmp_levels = localStorage.getItem("levels");
+                if(tmp_levels === null) {
+                    this.printError("launchEndScreen: retrieving levels from storage returned null");
+                } else {
+                    let levels = JSON.parse(tmp_levels);
+                    if(levels[current_level].stars < num_stars) {
+                        levels[current_level].stars = num_stars;
+                    }
+                    localStorage.setItem("levels", JSON.stringify(levels));
+                }
+
+                //grey overlay
+                let bg_overlay = new Phaser.GameObjects.Rectangle(this.scene, 0, 0, this.scene.renderer.width + 1, this.scene.renderer.height + 1, Constants.convertColorToNumber(Constants.COLORPACK_1.black), 0.2).setOrigin(0.5).setDepth(2);
+
+                //open popup
+                let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
+                    //replayAction
+                    pop.destroyPopup();
+                    bg_overlay.destroy();
+                    (this.scene as BaseScene).fade(false, () => {console.clear(); this.scene.scene.stop("GUIScene"); this.scene.scene.restart()})
+                }, () => {
+                    //nextLevelAction
+                    pop.destroyPopup();
+                    bg_overlay.destroy();
+                    (this.scene as BaseScene).fade(false, () => {
+                        console.clear();
+                        this.scene.scene.stop("GUIScene");
+                        this.scene.scene.start(this.getSceneKeyFromIndex(current_level));
+                    })
+                })
+            } else {
+                this.printError("launchEndScreen: currenLevel: " + current_level);
+                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                    wintext.destroy(); 
+                });
+                return;
+            }
+        } else {
+
+        }
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
+
+    /**
+     * returns the name of the scene for the specified level index
+     * @param index 
+     */
+    getSceneKeyFromIndex(index: number) {
+        switch(index) {
+            case 0: 
+                return "Sim_Level1";
+            case 1:
+                return "Sim_Level2";
+            case 2: 
+                return "Sim_Level3";
+            case 3:
+                return "Sim_Level4";
+            case 4: 
+                return "Bisim_Level1";
+            case 5:
+                return "Bisim_Level2";
+            case 6: 
+                return "Bisim_Level3";
+            case 7:
+                return "Bisim_Level4";
+            case 8: 
+                return "ReBisim_Level1";
+            case 9:
+                return "ReBisim_Level2";
+            case 10: 
+                return "ReBisim_Level3";
+            case 11:
+                return "ReBisim_Level4";
+            case 12: 
+                return "ReBisim_Level5";
+            case 13:
+                return "ReBisim_Level6";
+            case 14: 
+                return "ReBisim_Level7";
+            case 15:
+                return "ReBisim_Level8";
+            case 16: 
+                return "ReBisim_Level9";
+            case 17:
+                return "ReBisim_Level10";
+            default:
+                this.printError("getSceneKeyFromIndex: Unknown index " + index);
+                return undefined;
+        }
+    }
 
     /**
      * wrapper for multiple update functions

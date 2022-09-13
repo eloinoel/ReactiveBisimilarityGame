@@ -63,10 +63,4 @@ export default class BaseScene extends Phaser.Scene {
         })
     }
 
-
-
-    /* fadeImageInto(obj0: Phaser.GameObjects.Image, obj1: Phaser.GameObjects.Image, duration: number) {
-        this.tweens.add()
-    } */
-
 }
