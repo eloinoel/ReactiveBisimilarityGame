@@ -13,6 +13,8 @@ export class WinPopup extends Phaser.GameObjects.Container {
     private next_level_action
 
     private sizer: Sizer;
+    private replay_btn!: ReplayButton;
+    private next_level_btn!: ReplayButton;
 
     constructor(scene: Phaser.Scene, stars: number, movesNeeded: number, replayAction = () => {console.log("replay action")}, nextLevelAction = () => {console.log("next level action")}) {
         super(scene, scene.renderer.width/2, scene.renderer.height/2);
@@ -27,6 +29,8 @@ export class WinPopup extends Phaser.GameObjects.Container {
 
         this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2);
         this.sizer = this.createPanel();
+
+        
 
         scene.add.existing(this);
     }
@@ -63,8 +67,8 @@ export class WinPopup extends Phaser.GameObjects.Container {
 
         //Buttons
         sizer.add(new Sizer(this.scene)
-            .add(new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Replay", this.textStyle), {padding: {top: 10, right: 7}})
-            .add(new ReplayButton(this.scene, 0, 0, this.next_level_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Next Level", this.textStyle), {padding: {top: 10, left: 7}})
+            .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Replay", this.textStyle), {padding: {top: 10, right: 7}})
+            .add(this.next_level_btn = new ReplayButton(this.scene, 0, 0, this.next_level_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Next Level", this.textStyle), {padding: {top: 10, left: 7}})
         );
 
         sizer.setDepth(2)
@@ -88,7 +92,10 @@ export class WinPopup extends Phaser.GameObjects.Container {
     }
 
     destroyPopup() {
-        //TODO: destroy buttons and all references
+        this.replay_btn.destroyButton();
+        this.next_level_btn.destroyButton();
+        this.sizer.destroy()
+        this.destroy();
     }
 }
 
@@ -102,6 +109,7 @@ export class LosePopup extends Phaser.GameObjects.Container {
     private textStyle: Phaser.Types.GameObjects.Text.TextStyle;
 
     private sizer: Sizer;
+    private replay_btn!: ReplayButton;
 
     constructor(scene: Phaser.Scene, replayAction = () => {console.log("replay action")}) {
         super(scene, scene.renderer.width/2, scene.renderer.height/2);
@@ -137,7 +145,7 @@ export class LosePopup extends Phaser.GameObjects.Container {
 
         //Buttons
         sizer.add(new Sizer(this.scene)
-            .add(new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Try again", this.textStyle))
+            .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Try again", this.textStyle))
         );
 
         sizer.setDepth(2)
@@ -147,7 +155,9 @@ export class LosePopup extends Phaser.GameObjects.Container {
     }
 
     destroyPopup() {
-        //TODO: destroy buttons and all references
+        this.replay_btn.destroyButton();
+        this.sizer.destroy();
+        this.destroy();
     }
 }
 
@@ -206,7 +216,9 @@ export class ReplayButton extends Phaser.GameObjects.Container {
     }
 
     destroyButton() {
-        //TODO: destroy all references
+        this.text.destroy();
+        this.background.destroy();
+        this.destroy();
     }
 }
 

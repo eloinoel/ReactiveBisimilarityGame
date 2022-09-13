@@ -31,7 +31,7 @@ export class PhaserGameController {
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
-    private ai_controller!: AI; //defender ai
+    ai_controller!: AI; //defender ai TODO: set private
 
     private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
     private num_moves: number; //the number of moves a player currently made
@@ -367,8 +367,15 @@ export class PhaserGameController {
                     if(levels[current_level].stars < num_stars) {
                         levels[current_level].stars = num_stars;
                     }
+                    //unlock next level
+                    if(current_level < 17 && levels[current_level + 1].state === false) {
+                        levels[current_level + 1].state = true;
+                    }
+
                     localStorage.setItem("levels", JSON.stringify(levels));
                 }
+
+                
 
                 //grey overlay
                 let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);

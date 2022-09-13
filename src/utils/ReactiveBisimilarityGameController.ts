@@ -490,8 +490,6 @@ export class ReactiveBisimilarityGame {
         }
 
         let potentialMoves = this.generateMoves(curPosition, allEnvironmentCombinations);
-        /* console.log("generateMoves for " + curPosition.toString())
-        console.log(potentialMoves) TODO: Remove debug*/
 
         for(let i = 0; i < potentialMoves.length; i++) {
             if(curPosition.activePlayer === Player.Attacker) {

@@ -186,8 +186,11 @@ export class AI {
             dist.set(sourceNode, 0);
             queue.push(sourceNode);
 
+            console.log("---------------BFS Visiting---------------")   //TODO: delete debug
+
             while(queue.length !== 0) {
                 let current = queue.shift()!;
+                console.log(current.data[0].toString())    //TODO: delete Debug
 
                 //for every neighbor
                 for(let i = 0; i < current.adjacent.length; i++) {
