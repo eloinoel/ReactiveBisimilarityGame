@@ -1,6 +1,7 @@
 import { Button, LevelSelectionButton, UI_Button } from '../ui_elements/Button';
 import BaseScene from './BaseScene';
 import { Constants } from '../utils/Constants';
+import { WinPopup, LosePopup } from '../ui_elements/EndGamePopup';
 
 export default class LevelMap extends BaseScene {
     private zoomTime = 600;
@@ -87,15 +88,15 @@ export default class LevelMap extends BaseScene {
         this.levelObjects.push(new LevelSelectionButton(this, 520, this.renderer.height - 290, "blue_button", () => {this.fade(false, () => {this.scene.start("Sim_Level4")})}, "Level 1.4"));
 
         //bisimulation
-        let bisimText = this.add.text(360, 70, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
+        let bisimText = this.add.text(300, 40, "Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);
         this.levelObjects.push(new LevelSelectionButton(this, 270, this.renderer.height/2 + 45, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level1")})}, "Level 2.1"));
         this.levelObjects.push(new LevelSelectionButton(this, 200, this.renderer.height/2 - 50, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level2")})}, "Level 2.2"));
-        this.levelObjects.push(new LevelSelectionButton(this, 120, 170, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level3")})}, "Level 2.3"));
+        this.levelObjects.push(new LevelSelectionButton(this, 95, 187, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level3")})}, "Level 2.3"));
         this.levelObjects.push(new LevelSelectionButton(this, 290, 200, "orange_button", () => {this.fade(false, () => {this.scene.start("Bisim_Level4")})}, "Level 2.4").disable());
 
         //reactive bisimulation
-        let rebisimText = this.add.text(this.renderer.width - 300, 150, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
-        this.levelObjects.push(new LevelSelectionButton(this, 440, 130, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level1")})}, "Level 3.1"));
+        let rebisimText = this.add.text(this.renderer.width - 300, 110, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
+        this.levelObjects.push(new LevelSelectionButton(this, 440, 150, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level1")})}, "Level 3.1"));
         this.levelObjects.push(new LevelSelectionButton(this, 540, 240, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level2")})}, "Level 3.2"));
         this.levelObjects.push(new LevelSelectionButton(this, 720, 220, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level3")})}, "Level 3.3"));
         this.levelObjects.push(new LevelSelectionButton(this, 800, 350, "red_button", () => {this.fade(false, () => {this.scene.start("ReBisim_Level4")})}, "Level 3.4").disable());
@@ -117,7 +118,6 @@ export default class LevelMap extends BaseScene {
             }
             this.levelObjects[i].setStars(levels[i].stars);
         }
-
 
         //current lvl pulse effect
         this.curLevelBtn = this.levelObjects[fartest_enabled_level_index];

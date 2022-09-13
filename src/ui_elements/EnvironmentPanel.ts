@@ -28,7 +28,6 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         super(scene, x, y);
 
 
-        this.scene = scene;
         this.coordinates = new Phaser.Math.Vector2(x, y);
 
         this.panel_buttons = new Map();

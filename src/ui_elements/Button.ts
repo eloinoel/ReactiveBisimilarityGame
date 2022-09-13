@@ -171,7 +171,7 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
             }
             if(!this.btnClicked) {
                 this.btnClicked = true;
-                //actionOnClick();
+                actionOnClick();
             }
         })
         this.on('pointerout', () => {
@@ -215,7 +215,6 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
      * @param n 
      */
     setStars(n: number) {
-        console.log(n)
         if(n >= 1 && n <= 3) {
             for(let i = 3; i < n+3; i++) {
                 this.stars[i].setVisible(true);
@@ -408,3 +407,5 @@ export class Tick_Button extends Phaser.GameObjects.Container {
         })
     }
 }
+
+
