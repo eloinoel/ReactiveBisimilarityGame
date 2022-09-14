@@ -31,14 +31,14 @@ export class PhaserGameController {
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
-    ai_controller!: AI; //defender ai TODO: set private
+    private ai_controller!: AI; 
 
     private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
     private num_moves: number; //the number of moves a player currently made
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
-    debug: boolean; //TODO: for diplaying possible moves, position etc
+    debug: boolean;
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -63,7 +63,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;
+        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -294,7 +294,6 @@ export class PhaserGameController {
 
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             moves = this.game.possibleMoves(undefined, true);
-            console.log("moves: " + moves.length)
 
             if(cur_pos.activePlayer === Player.Defender) {
                 //attacker did a move, update counter
@@ -325,7 +324,7 @@ export class PhaserGameController {
                     }
                 }
 
-            //now Attackers Turn
+            //Attackers Turn, only reachable after symmetry move
             } else {
                 
                 //TODO: detect symmetry move loop with bfs

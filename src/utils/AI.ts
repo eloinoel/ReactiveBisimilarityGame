@@ -186,11 +186,8 @@ export class AI {
             dist.set(sourceNode, 0);
             queue.push(sourceNode);
 
-            console.log("---------------BFS Visiting---------------")   //TODO: delete debug
-
             while(queue.length !== 0) {
                 let current = queue.shift()!;
-                console.log(current.data[0].toString())    //TODO: delete Debug
 
                 //for every neighbor
                 for(let i = 0; i < current.adjacent.length; i++) {
@@ -209,6 +206,10 @@ export class AI {
                             queue.push(current.adjacent[i].node);
                         } else {
                             dist.set(current.adjacent[i].node, Infinity)
+                            //reached starting node of bfs, which has no predecessor
+                            if(pred.get(current.adjacent[i].node) === undefined) {
+                                pred.set(current.adjacent[i].node, current);
+                            }
                         }
                     } else {
                         this.printError("modifiedBfs: visited list returned undefined node")
@@ -219,6 +220,7 @@ export class AI {
             //if no winning region node was found, return the longest path, doesn't count cycles as infinity
             let max_node = sourceNode;
             let dist_array = Array.from(dist.entries());
+
             for(let i = 0; i < dist.size; i++) {
                 if(dist.get(max_node)! < dist_array[i][1]) {
                     max_node = dist_array[i][0];
@@ -248,11 +250,21 @@ export class AI {
         let bfs_result = this.modifiedBfs(curPosition);
         if(bfs_result !== undefined && bfs_result[0] !== undefined) {
             //traverse graph on path until pred === current position 
-            let current = bfs_result[0];
+            let current = bfs_result[0] as Node<[GamePosition, Node<any>[], number]>;
             let path: Node<[GamePosition, Node<any>[], number]>[] = []; //path from destination to source (curPosition)
+            let visited_starting_node = false;
             while(current !== undefined) {
                 path.push(current);
                 current = bfs_result[1].get(current)!;
+                //if destination is source (cycle), build path but break the cycle when reaching node again
+                if(current !== undefined && current.data[0].samePosition(curPosition)) {    
+                    if(visited_starting_node) {
+                        path.push(current);
+                        break;
+                    } else {
+                        visited_starting_node = true;
+                    }
+                }
             }
             console.log("AI: Current node: " + curPosition.toString() + ", path: " + this.getShortestPathString(path));  // TODO: Delete debug
             return path[path.length - 2].data[0];
