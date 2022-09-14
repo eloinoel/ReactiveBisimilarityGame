@@ -23,22 +23,22 @@ export default class GUIScene extends BaseScene {
         this.otherRunningScene = data.otherRunningScene;
 
 
-        let homeBtn = new UI_Button(this, 4*Constants.UI_offset, "ui_home_btn", () => {this.fade(false, () => {
+        let homeBtn = new UI_Button(this, 3.5*Constants.UI_offset, "ui_home_btn", () => {this.fade(false, () => {
             console.clear()
             this.toHome();
         })}, "Home")
 
-        let backBtn = new UI_Button(this, 2*Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
+        let backBtn = new UI_Button(this, 1.5*Constants.UI_offset, "ui_level_map_btn", () => {this.fade(false, () => {
             console.clear()
             this.toLevelMap();
-        })}, "Back");
+        })}, "Map");
 
-        let replayBtn = new UI_Button(this, this.renderer.width - 4* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
+        let replayBtn = new UI_Button(this, this.renderer.width - 3.5* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
             console.clear()
             this.restartLevel();
         })}, "Restart");
 
-        let infoyBtn = new UI_Button(this, this.renderer.width - 2* Constants.UI_offset, "ui_info_btn", () => {
+        let infoyBtn = new UI_Button(this, this.renderer.width - 1.5* Constants.UI_offset, "ui_questionmark_btn", () => {
             //TODO:Display Popup
             console.log("TODO: display rules popup")
         }, "Rules", false);

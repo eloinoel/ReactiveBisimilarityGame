@@ -71,5 +71,6 @@ export default class Level3_10 extends BaseScene {
 
 
         game_controller.startGame(this, "p0", "q0", true, true);
+        game_controller.printAIGraph();
     }
 }

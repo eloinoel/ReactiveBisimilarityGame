@@ -41,6 +41,8 @@ export default class Level1_3 extends BaseScene {
         game_controller.addTransition("p0", "p1", "a");
         game_controller.addTransition("p1", "p2", "a");
         game_controller.addTransition("p1", "p3", "b");
+        game_controller.addTransition("p2", "p3", "a");
+        game_controller.addTransition("p3", "p2", "a");
 
         game_controller.addState("q0", 1, 0, 0);
         game_controller.addState("q1", 1, 1, -1);
@@ -52,6 +54,8 @@ export default class Level1_3 extends BaseScene {
         game_controller.addTransition("q0", "q2", "a");
         game_controller.addTransition("q1", "q3", "a");
         game_controller.addTransition("q2", "q4", "b");
+        game_controller.addTransition("q3", "q4", "a");
+        game_controller.addTransition("q4", "q3", "a");
 
         game_controller.startGame(this, "p0", "q0", false, false, [3, 2]);
     }

@@ -295,9 +295,10 @@ export class PhaserGameController {
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             moves = this.game.possibleMoves(undefined, true);
 
+            //attacker did a move, update counter
+            this.num_moves++;
+
             if(cur_pos.activePlayer === Player.Defender) {
-                //attacker did a move, update counter
-                this.num_moves++;
                 //check if the game is over
                 //defender is stuck
                 if(moves.length === 0) {
@@ -430,6 +431,15 @@ export class PhaserGameController {
 
     /************************************* UTILITY AND DEBUG *************************************/
 
+
+    printAIGraph() {
+        if(this.ai_controller !== undefined && this.ai_controller !== null) {
+            this.ai_controller.printGraph();
+        } else {
+            this.printError("printAIGraph: AI not initialized.");
+        }
+
+    }
     /**
      * returns the name of the scene for the specified level index
      * @param index 

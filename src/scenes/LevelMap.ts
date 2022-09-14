@@ -76,7 +76,7 @@ export default class LevelMap extends BaseScene {
         localStorage.setItem("levels", JSON.stringify(levels));
 
         //UI Buttons
-        let backBtn = new UI_Button(this, Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
+        let backBtn = new UI_Button(this, 1.5* Constants.UI_offset, "ui_leftarrow_btn", () => {this.fade(false, () => {
                 //this.pulseTween.stop();
                 this.scene.start("ParallaxScene");
         })}, "Back")

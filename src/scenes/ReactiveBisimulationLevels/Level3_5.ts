@@ -58,7 +58,6 @@ export default class Level3_5 extends BaseScene {
         game_controller.addTransition("q0", "q2", "a");
         game_controller.addTransition("q2", "q4", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("q1", "q4", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("q5", "q4", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("q2", "q5", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("q5", "q3", "a");
         game_controller.addTransition("q3", "q2", "a");
