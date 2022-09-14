@@ -55,6 +55,5 @@ export default class Level1_4 extends BaseScene {
         game_controller.addTransition("q3", "q2", "b");
 
         game_controller.startGame(this, "p0", "q0", false, false, [3, 2]);
-        game_controller.ai_controller.printGraph()
     }
 }

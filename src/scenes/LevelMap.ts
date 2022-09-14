@@ -23,6 +23,10 @@ export default class LevelMap extends BaseScene {
     }
 
     create() {
+
+        /* localStorage.removeItem("levels");
+        localStorage.removeItem("levelsBeforeToggle") */
+
         //zoom effect
         this.cameras.main.zoom = 1 - this.zoomAmount;
         this.tweens.add({
@@ -130,15 +134,80 @@ export default class LevelMap extends BaseScene {
                 loop: -1
             })
         }
+
+        //toggle switch
+        this.input.keyboard.on('keydown-T', (event:KeyboardEvent) => {
+            if(event.shiftKey) {
+                this.toggleAllLevels()
+            }
+        })
+        this.input.keyboard.on('keydown-R', (event:KeyboardEvent) => {
+            if(event.shiftKey) {
+                this.resetAllProgress()
+            }
+        })
     }
 
     update(time: number, delta: number): void {
-        //zoom in
+    }
+
+    toggleAllLevels() {
+        let levels = JSON.parse(localStorage.getItem("levels") as string);
+
+        let on = false;
+        for(let i = 0; i < levels.length; i++) {
+            if(levels[i].state === false) {
+                on = true;
+                break;
+            }
+        }
+
+        //unlock all levels
+        if(on) {
+            localStorage.setItem("levelsBeforeToggle", JSON.stringify(levels))
+            for(let i = 0; i < levels.length; i++) {
+                levels[i].state = true;
+            }
+            localStorage.setItem("levels", JSON.stringify(levels));
+        //reset to previous state
+        } else {
+            let tmp = localStorage.getItem("levelsBeforeToggle");
+            if(tmp !== null) {
+                let levelsBeforeToggle = JSON.parse(tmp);
+                localStorage.removeItem("levelsBeforeToggle")
+                localStorage.setItem("levels", JSON.stringify(levelsBeforeToggle));
+            }
+        }
+        this.scene.restart();
+    }
+
+    resetAllProgress() {
         
-        /* if(time - this.startTime <= this.zoomTime) {
-            let easeFn = Phaser.Tweens.Builders.GetEaseFunction(Phaser.Math.Easing.Sine.Out);
-            console.log(easeFn(0.2))
-            this.cameras.main.zoom += (delta / this.zoomTime) * this.zoomAmount;
-        } */
+        let levels = [
+            //simulation levels
+            {state: true, stars: 0}, 
+            {state: false, stars: 0},
+            {state: false, stars: 0},
+            {state: false, stars: 0},
+            //bisimulation levels
+            {state: false, stars: 0},
+            {state: false, stars: 0},
+            {state: false, stars: 0},
+            {state: false, stars: 0},
+            //reactive bisimulation levels
+            {state: false, stars: 0},    //level 3.1
+            {state: false, stars: 0},    //level 3.2
+            {state: false, stars: 0},    //level 3.3
+            {state: false, stars: 0},    //level 3.4
+            {state: false, stars: 0},    //level 3.5
+            {state: false, stars: 0},    //level 3.6
+            {state: false, stars: 0},    //level 3.7
+            {state: false, stars: 0},    //level 3.8
+            {state: false, stars: 0},    //level 3.9
+            {state: false, stars: 0},    //level 3.10
+        ]
+        localStorage.removeItem("levelsBeforeToggle")
+        localStorage.setItem("levels", JSON.stringify(levels));
+        this.scene.restart();
     }
 }

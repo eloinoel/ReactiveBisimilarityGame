@@ -114,7 +114,7 @@ export class ReactiveBisimilarityGame {
                 //symmetry move
                 if(this.bisimilar) {
                     if(action === Constants.NO_ACTION && curPosition.isSymmetryMove(nextPosition)) {
-                        this.getCodeFromMoveString("Symmetry Move");
+                        return this.getCodeFromMoveString("Symmetry Move");
                     }
                 }
                 //simulation challenge
@@ -490,6 +490,7 @@ export class ReactiveBisimilarityGame {
         }
 
         let potentialMoves = this.generateMoves(curPosition, allEnvironmentCombinations);
+
 
         for(let i = 0; i < potentialMoves.length; i++) {
             if(curPosition.activePlayer === Player.Attacker) {
