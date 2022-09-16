@@ -121,7 +121,7 @@ export class PhaserGameController {
      * @param p0 name of first process
      * @param p1 name of second process
      * @param reactive turns the game into reactive bisimulation game
-     * @param bisimilar turns the game into bisimulation game, isn't evaluated if @reactive is true
+     * @param bisimilar turns the game into bisimulation game, isn't evaluated if reactive is true
      * @param num_moves_for_stars an array with the first 2 indeces containing the number of moves needed to achieve 2 or 3 stars at the end of the level
      */
     startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true, num_moves_for_stars = [0, 0, 0]) {
