@@ -87,10 +87,14 @@ export default class MainMenu extends BaseScene {
             options_button.scale = 1.1;
             if(!this.clickedBtn) { 
                 this.clickedBtn = true;
-                this.fade(false, () => {
-                    this.scene.stop('ParallaxScene');
-                    this.scene.start('DemoScene');
-                }, 500)
+
+                this.tweens.killAll()
+                for(let i = 0; i < this.toFadeIn.length - 1; i++) {
+                    this.fadeImageOut(this.toFadeIn[i], i*100 + 100, );
+                }
+                this.fadeImageOut(this.toFadeIn[this.toFadeIn.length - 1], (this.toFadeIn.length - 1) * 100 + 100, true, () => {
+                    this.scene.start('CreditsScene');
+                })
             }
         });
     }
