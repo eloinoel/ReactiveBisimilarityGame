@@ -21,8 +21,10 @@ import Level3_3 from './scenes/ReactiveBisimulationLevels/Level3_3';
 import Level3_4 from './scenes/ReactiveBisimulationLevels/Level3_4';
 import Level3_5 from './scenes/ReactiveBisimulationLevels/Level3_5';
 import Level3_6 from './scenes/ReactiveBisimulationLevels/Level3_6';
-import Level3_8 from './scenes/ReactiveBisimulationLevels/Level3_8';
 import Level3_7 from './scenes/ReactiveBisimulationLevels/Level3_7';
+import Level3_8 from './scenes/ReactiveBisimulationLevels/Level3_8';
+import Level3_9 from './scenes/ReactiveBisimulationLevels/Level3_9';
+
 
 export default {
   type: Phaser.AUTO,
@@ -51,7 +53,7 @@ export default {
   },/*  */
   scene: [PreloaderScene, /* ParallaxScene, MainMenuScene, LevelMapScene, DemoScene, Level1_1, Level1_2,
    Level1_3, Level1_4, Level2_1, Level2_2, Level2_3, Level2_4, Level3_1, Level3_2, Level3_3, Level3_4, Level3_5,
-   Level3_6, Level3_7,*/ Level3_8, GUIScene, TestScene],
+   Level3_6, Level3_7, Level3_8,*/ Level3_9, GUIScene, TestScene],
   render: {
     //pixelArt: true,
     //antialias: false,

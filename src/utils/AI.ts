@@ -152,7 +152,7 @@ export class AI {
      * @param curPosition 
      * @returns (nearest defender winning region node, predecessor path, distance to source)
      */
-    modifiedBfs(curPosition?: GamePosition): [Node<any>, Map<Node<any>, Node<any>>, Map<Node<any>, number>] | undefined {
+    private modifiedBfs(curPosition?: GamePosition): [Node<any>, Map<Node<any>, Node<any>>, Map<Node<any>, number>] | undefined {
         if(this.graph !== undefined) {
 
             let nodes = this.graph.getNodes();
@@ -295,7 +295,7 @@ export class AI {
      * @param node 
      * @param depth 
      */
-     calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
+    calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
         //graph initialized
         if(this.graph !== undefined) {
             //terminal node (leaf)
@@ -339,22 +339,123 @@ export class AI {
         return path_string;
     }
 
+
+
+    /**
+     * performs breadths first search and returns shortest paths to attacker winning region leafs
+     * requires winning region algorithm to be performed before
+     * @param curPosition 
+     * @returns (Array of winning leafs, predecessor path, distance to source)
+     */
+    private BFS_attacker(curPosition?: GamePosition): [Node<any>[], Map<Node<any>, Node<any>>, Map<Node<any>, number>] | undefined {
+        if(this.graph !== undefined) {
+
+            let nodes = this.graph.getNodes();
+
+            //graph contains position
+            if(curPosition === undefined) {
+                curPosition = this.game.getPlay()[0];
+            }
+            let sourceNode = nodes.find(node => (node.data[0].samePosition(curPosition!)))
+            if(sourceNode === undefined || sourceNode.adjacent.length === 0) {
+                return undefined;
+            }
+            
+
+            //initiate
+            let visited = new Map<Node<[GamePosition, Node<any>[], number]>, boolean>();
+            let dist = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
+            let pred = new Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>(); //construct path from destination to source
+
+            let queue: Node<[GamePosition, Node<any>[], number]>[] = [];
+            let winning_leafs: Node<any>[] = [];
+
+            //all vertices unvisited, path not yet constructed
+            for(let i = 0; i < nodes.length; i++) {
+                dist.set(nodes[i], -1);
+                visited.set(nodes[i], false);
+                pred.set(nodes[i], undefined!);
+            }
+
+            //start bfs at source
+            visited.set(sourceNode, true);
+            dist.set(sourceNode, 0);
+            queue.push(sourceNode);
+
+            while(queue.length !== 0) {
+                let current = queue.shift()!;
+
+                if(current.adjacent.length === 0 && Boolean(current.data[2]) === true) {
+                    winning_leafs.push(current);
+                }
+
+                //for every neighbor
+                for(let i = 0; i < current.adjacent.length; i++) {
+                    let visited_neighbor_yet = visited.get(current.adjacent[i].node);
+                    if(visited_neighbor_yet !== undefined) {
+                        if(!visited_neighbor_yet) {
+                            visited.set(current.adjacent[i].node, true);    //visited node
+                            dist.set(current.adjacent[i].node, dist.get(current)! + 1); //update dist
+                            pred.set(current.adjacent[i].node, current);    //update predecessor on shortest path
+                            queue.push(current.adjacent[i].node);
+
+                        } else {
+                            //reached starting node of bfs, which has no predecessor
+                            if(pred.get(current.adjacent[i].node) === undefined) {
+                                pred.set(current.adjacent[i].node, current);
+                            }
+                        }
+                    } else {
+                        this.printError("modifiedBfs: visited list returned undefined node")
+                    }
+                }
+            }
+
+            return [winning_leafs, pred, dist];
+        } else {
+            this.printError("modifiedBfs: graph uninitialized")
+        }
+        return undefined;
+    }
+
     /**
      * returns in a number of moves in which the player can win in
      */
-    getShortestPathLength(curPosition?: GamePosition): number {
+    getShortestPath(curPosition?: GamePosition): Node<any>[] | undefined {
         if(curPosition === undefined && this.game.getPlay().length > 0) {
             curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
         }
 
-        if(curPosition !== undefined) {
-            let bfs_result = this.modifiedBfs(curPosition);
-            let sourceNode = this.graphHasNode(curPosition);
-            if(bfs_result !== undefined && sourceNode !== undefined) {
-                return bfs_result[2].get(bfs_result[0])!;
+        let bfs_result = this.BFS_attacker(curPosition);
+        if(bfs_result !== undefined) {
+            let winning_leafs = bfs_result[0];
+            let dist_map = bfs_result[2];
+            let min = Infinity;
+            let index = -1;
+
+            //get min path
+            for(let i = 0; i < winning_leafs.length; i++) {
+                if(dist_map.get(winning_leafs[i])! < min) {
+                    index = i;
+                    min = dist_map.get(winning_leafs[i])!;
+                }
             }
+
+            //build path
+            let path = [];
+            let current = winning_leafs[index];
+            let pred_map = bfs_result[1];
+            while(true) {
+                path.push(current);
+                if(current.data[0].samePosition(curPosition)) {
+                    break;
+                }
+                current = pred_map.get(current)!;
+            }
+            
+            return path;
         }
-        return -1;
+        return undefined;
     }
     
 

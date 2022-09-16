@@ -438,7 +438,31 @@ export class PhaserGameController {
         } else {
             this.printError("printAIGraph: AI not initialized.");
         }
+    }
 
+    printAttackerShortestPath() {
+        if(this.ai_controller !== undefined && this.ai_controller !== null) {
+            let path = this.ai_controller.getShortestPath();
+            if(path !== undefined) {
+                let length = 0;
+                let path_string = "";
+                let previous = undefined;   //for detecting symmetry moves
+                for(let i = 0; i < path.length; i++) {
+                    if(path[i].data[0].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].data[0].activePlayer === Player.Attacker)) {
+                        length++;
+                    }
+                    previous = path[i].data[0].activePlayer;
+                    path_string = path_string.concat(path[i].data[0].toString() + ", ");
+                }
+                path_string = path_string.concat("; moves: " + length);
+                console.log(path_string);
+            } else {
+                this.printError("printAttackerShortestPath: path undefined" )
+            }
+            
+        } else {
+            this.printError("printAttackerShortestPath: AI not initialized.");
+        }
     }
     /**
      * returns the name of the scene for the specified level index
