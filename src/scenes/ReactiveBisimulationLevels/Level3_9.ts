@@ -35,40 +35,34 @@ export default class Level3_9 extends BaseScene {
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1.5);
         game_controller.addState("p2", 0, 1, 0);
-        game_controller.addState("p3", 0, 1, 1.5);
-        //game_controller.addState("p4", 0, 2, -1.5);
-        game_controller.addState("p5", 0, 2, 0);
-        game_controller.addState("p6", 0, 2, 1.5);
+        game_controller.addState("p3", 0, 2, 0);
+        game_controller.addState("p4", 0, 2, 1.5);
 
-        game_controller.addTransition("p0", "p1", "a");
+        game_controller.addTransition("p0", "p1", "b");
         game_controller.addTransition("p0", "p2", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("p1", "p5", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("p5", "p3", "b");
-        game_controller.addTransition("p3", "p0", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("p2", "p3", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("p5", "p2", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("p2", "p1", "a");
-        //game_controller.addTransition("p1", "p4", "b");
-        game_controller.addTransition("p3", "p6", "b");
+        game_controller.addTransition("p1", "p3", "b");
+        game_controller.addTransition("p3", "p4", "a");
+        game_controller.addTransition("p3", "p2", Constants.TIMEOUT_ACTION);
+        game_controller.addTransition("p2", "p1", Constants.HIDDEN_ACTION);
 
         game_controller.addState("q0", 1, 0, 0);
-        game_controller.addState("q1", 1, 1, -1.5);
-        game_controller.addState("q2", 1, 1, 0);
-        game_controller.addState("q3", 1, 1, 1.5);
-        game_controller.addState("q4", 1, 2, -1.5);
-        game_controller.addState("q5", 1, 2, 0);
+        game_controller.addState("q1", 1, 1, 0);
+        game_controller.addState("q2", 1, 1, 1.5);
+        game_controller.addState("q3", 1, 1, -1.5);
+        game_controller.addState("q4", 1, 2, 0);
+        game_controller.addState("q5", 1, 2, 1.5);
 
         game_controller.addTransition("q0", "q1", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("q0", "q2", "a");
-        game_controller.addTransition("q1", "q5", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("q2", "q5", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("q5", "q3", "b");
-        game_controller.addTransition("q3", "q0", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("q2", "q1", Constants.HIDDEN_ACTION);
+        game_controller.addTransition("q0", "q2", "b");
+        game_controller.addTransition("q1", "q2", Constants.HIDDEN_ACTION);
+        game_controller.addTransition("q1", "q3", "b");
+        game_controller.addTransition("q2", "q4", "b");
+        game_controller.addTransition("q4", "q1", Constants.TIMEOUT_ACTION);
+        game_controller.addTransition("q4", "q5", "a");
 
 
-        game_controller.startGame(this, "p0", "q0", true, true, [7, 6]);
-        game_controller.printAttackerShortestPath();
+
+        game_controller.startGame(this, "p0", "q0", true, true, [7, 5]);
         
     }
 }

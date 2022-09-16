@@ -419,7 +419,7 @@ export class AI {
     }
 
     /**
-     * returns in a number of moves in which the player can win in
+     * returns shortest path of moves in which the player can win in
      */
     getShortestPath(curPosition?: GamePosition): Node<any>[] | undefined {
         if(curPosition === undefined && this.game.getPlay().length > 0) {

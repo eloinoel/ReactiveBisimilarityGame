@@ -63,7 +63,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -113,6 +113,8 @@ export class PhaserGameController {
             } else {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
             }
+        } else {
+            this.printError("addTransition: illegal arguments: " + p0 + ", " + p1);
         }
     }
 
@@ -632,7 +634,7 @@ export class PhaserGameController {
      * symmetry move button
      */
     private createReactiveElements() {
-        this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2 -100, "ui_swap_btn", () => {
+        this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2, "ui_swap_btn", () => {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
