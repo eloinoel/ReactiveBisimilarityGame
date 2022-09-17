@@ -39,6 +39,12 @@ export default class Preloader extends Phaser.Scene {
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');
         this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');
+        
+        //Icons
+        this.load.image("fire_icon", 'assets/fire.png');
+        this.load.image("water_icon", 'assets/water-drop.png');
+        this.load.image("leaf_icon", 'assets/leaf2.png');
+        
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()

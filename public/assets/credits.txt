@@ -31,6 +31,10 @@ arrow swap - https://www.flaticon.com/free-icon/switch_466154?related_id=466154&
 
  stars - https://simple-wares.itch.io/basic-bars-buttons-asset-pack/
 
+water drop - <a href="https://www.flaticon.com/free-icons/water" title="water icons">Water icons created by Freepik - Flaticon</a>
+fire - <a href="https://www.flaticon.com/free-icons/fire" title="fire icons">Fire icons created by Freepik - Flaticon</a>
+leaf - <a href="https://www.flaticon.com/free-icons/leaf" title="leaf icons">Leaf icons created by Pixel perfect - Flaticon</a>
+
 Fonts
 Sukuriburu - https://soultyragevin.itch.io/sukuriburu-font
 monogram - https://datagoblin.itch.io/

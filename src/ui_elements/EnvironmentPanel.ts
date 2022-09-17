@@ -72,6 +72,10 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(this.disabledAlpha)
+            //icons
+            if(list[i] instanceof Phaser.GameObjects.Image) {
+                (list[i] as Label).setAlpha(0.9)
+            }
         }
         this.tickButton.setVisible(false);
         return this;
@@ -176,19 +180,45 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.sizer.addBackground(this.scene.add.existing(this.sizer_bg = new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
 
         for (var i = 0; i < this.possibleActions.length; i++) {
-            let label = new Label(this.scene, {
-                width: 40, height: 40,
-                background: this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)))
-                 : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1))),
-                text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
-                space: {
-                    left: 5,
-                    right: 5,
-                    top: 5,
-                    bottom: 5,
-                },
-                align: 'center'
-            })
+            let icon;
+            let label: Label;
+            let label_bg = this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)))
+            : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)));
+
+            if(this.possibleActions[i] === "a" || this.possibleActions[i] === "b" || this.possibleActions[i] === "c") {
+                if(this.possibleActions[i] === "a") {
+                    icon = this.scene.add.image(0, 0,"fire_icon").setScale(0.057);
+                } else if(this.possibleActions[i] === "b") {
+                    icon = this.scene.add.image(0, 0, "water_icon").setScale(0.05);
+                } else if(this.possibleActions[i] === "c") {
+                    icon = this.scene.add.image(0, 0, "leaf_icon").setScale(0.05);
+                }
+                label = new Label(this.scene, {
+                    width: 40, height: 40,
+                    background: label_bg,
+                    icon: icon,
+                    space: {
+                        left: 5,
+                        right: 5,
+                        top: 5,
+                        bottom: 5,
+                    },
+                    align: 'center'
+                })
+            } else {
+                label = new Label(this.scene, {
+                    width: 40, height: 40,
+                    background: label_bg,
+                    text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
+                    space: {
+                        left: 5,
+                        right: 5,
+                        top: 5,
+                        bottom: 5,
+                    },
+                    align: 'center'
+                })
+            }
             this.sizer.add(label);
             this.panel_buttons.set(label, this.curEnvironment.has(this.possibleActions[i]) ? true : false);
         }
