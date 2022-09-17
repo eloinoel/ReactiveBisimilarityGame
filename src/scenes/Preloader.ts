@@ -28,7 +28,6 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("arrow_tail", 'assets/DemoScene/right-arrow_tail.png');
         this.load.image("arrow_middle", 'assets/DemoScene/right-arrow_middle.png');
         this.load.image("arrow_head", 'assets/DemoScene/right-arrow_head.png');
-        this.load.image("panel", 'assets/DemoScene/Panel02.png')
 
         //background
         this.load.image("background_demo", 'assets/dark_blue_sky.jpg');

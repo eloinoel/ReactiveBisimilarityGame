@@ -6,6 +6,8 @@ export class Button extends Phaser.GameObjects.Container {
     private outImage: Phaser.GameObjects.Image;
     private overImage: Phaser.GameObjects.Image;
     private downImage: Phaser.GameObjects.Image;
+    
+    private blinkingRectangle;
 
     text: Phaser.GameObjects.Text;
 
@@ -23,7 +25,7 @@ export class Button extends Phaser.GameObjects.Container {
             this.downImage = scene.add.image(0, 0, outTexture).setDepth(1);
         } else {
             this.downImage = scene.add.image(0, 0, downTexture).setDepth(1);
-        }
+        }        
 
         this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
         this.text.x = Math.round(this.text.x);
@@ -33,6 +35,7 @@ export class Button extends Phaser.GameObjects.Container {
         this.add(this.overImage);
         this.add(this.downImage);
         this.add(this.text);
+        //this.add(this.blinkingRectangle)
 
         this.overImage.setVisible(false);
         this.downImage.setVisible(false);
@@ -45,6 +48,25 @@ export class Button extends Phaser.GameObjects.Container {
         this.y = Math.round(this.y);
         this.setDepth(1);
         this.setInteractive();
+        this.setScale(0.5);
+
+        
+        //red blink animation
+        this.blinkingRectangle = this.scene.add.graphics({
+            /* x: this.overImage.x - this.overImage.width/2,
+            y: this.overImage.y - this.overImage.height/2, */
+        })
+        .fillStyle(Constants.COLOR_BORDEAUX, 0.9).fillRect(this.x - this.width*this.scale/2, this.y - this.height*this.scale/2, this.width*this.scale, this.height*this.scale).setDepth(10).setAlpha(0);
+        
+        let mask_img = this.scene.make.image({
+            x: this.x,
+            y: this.y,
+            key: outTexture,
+            scale: 0.5,
+            add: false
+        })
+        let mask = new Phaser.Display.Masks.BitmapMask(this.scene, mask_img);
+        this.blinkingRectangle.mask = mask
 
         /** make image button interactive
          * PointerEvents:
@@ -73,6 +95,20 @@ export class Button extends Phaser.GameObjects.Container {
             this.overImage.setVisible(false);
             this.outImage.setVisible(true);
             this.downImage.setVisible(false);
+        })
+    }
+
+    redBlinking() {
+        this.blinkingRectangle.alpha = 0
+        this.scene.tweens.add({
+            targets: this.blinkingRectangle,
+            alpha: 0.8,
+            ease: Phaser.Math.Easing.Quintic.InOut,
+            duration: 160,
+            repeat: 1,
+            onComplete: () => {
+                this.blinkingRectangle.alpha = 0
+            }
         })
     }
 }

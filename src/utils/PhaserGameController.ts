@@ -81,11 +81,19 @@ export class PhaserGameController {
         this.game.lts.addState(name);
         if(lts_num === 0) {
             const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {
-                this.encapsulateDoMove(name)}, name).setScale(0.5);
+                let tmp = this.encapsulateDoMove(name);
+                if(tmp === -1) {
+                    p0.redBlinking()
+                }
+            }, name)
             this.stateBtns.set(name, p0);
         } else if(lts_num === 1) {
             const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {
-                this.encapsulateDoMove(name)}, name).setScale(0.5);
+                let tmp = this.encapsulateDoMove(name);
+                if(tmp === -1) {
+                    q0.redBlinking()
+                }
+            }, name)
             this.stateBtns.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
@@ -169,7 +177,7 @@ export class PhaserGameController {
      * if timeout not possible after setting environment, give visual feedback
      * @param env 
      */
-     setEnvironmentAndDoTimeout(env: Set<string>) {
+    setEnvironmentAndDoTimeout(env: Set<string>) {
         //set environment
         this.setEnvironment(env);
 
@@ -186,20 +194,21 @@ export class PhaserGameController {
             }
         }
         this.environment_panel.updatePanel();
+        return legalMove;
     }
 
     /**
      * add environment change, timeout functionality
      * and AI functionality
-     * @returns -1 if move is no possible
+     * @returns -1 if move is not possible
      * */
     encapsulateDoMove(next_process: string, isSymmetryMove = false) {
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
 
         //Defender ---> red blinking to signal its not the players turn
         if(cur_pos.activePlayer === Player.Defender) {
-            //TODO: Visual Feedback
             console.log("Not player's turn")
+            return -1;
 
         //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
@@ -225,7 +234,7 @@ export class PhaserGameController {
                 this.nextProcessAfterTimeout = next_process;
                 this.environment_panel.enable();
             } else {
-                this.doMove(next_process, isSymmetryMove);
+                return this.doMove(next_process, isSymmetryMove);
             }
         }
         

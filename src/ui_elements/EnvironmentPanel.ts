@@ -20,6 +20,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private phaserGameController;
     private sizer_bg!: RoundRectangle;
 
+    private blinkingRectangle!: RoundRectangle;
+
     private enabled = true;
     private activated = true;
     private disabledAlpha = 0.4;
@@ -40,7 +42,6 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.add(this.caption);
 
         this.createPanel();
-
 
         scene.add.existing(this);
         this.setDepth(1);
@@ -125,8 +126,23 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.curEnvironment = this.game.getEnvironment();
         this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions()).sort();
         //create a a new instance and asign it
-        this.destroyPanel();
+        this.destroyPanel();    //TODO: destroy blinking rectangle as well
         this.createPanel();
+    }
+
+    redBlinking() {
+        this.blinkingRectangle.setVisible(true)
+        this.blinkingRectangle.alpha = 0
+        this.scene.tweens.add({
+            targets: this.blinkingRectangle,
+            alpha: 0.5,
+            ease: Phaser.Math.Easing.Quintic.InOut,
+            duration: 160,
+            repeat: 1,
+            onComplete: () => {
+                this.blinkingRectangle.alpha = 0
+            }
+        })
     }
 
     private createPanel() {
@@ -139,7 +155,12 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.tickButton = new Tick_Button(this.scene, this.coordinates.x + width/2 + 30, this.coordinates.y, "ui_tick_btn", () => {
             this.disable()
             let tmp = this.getActiveActions();
-            this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
+            let result = this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
+
+            //red blinking
+            if(result === -1) {
+                this.redBlinking();
+            }
         }, Constants.COLORS_BLUE_LIGHT.c3);
 
         this.sizer = new FixWidthSizer(this.scene, {
@@ -149,6 +170,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             align: "center",
             space: { item: 7 , top: 7, bottom: 7 },
         })
+
+        this.blinkingRectangle = this.scene.add.existing(new RoundRectangle(this.scene, this.coordinates.x, this.coordinates.y, width, this.dimensions.y + 4, 10, Constants.COLOR_BORDEAUX)).setDepth(3).setAlpha(0);
 
         this.sizer.addBackground(this.scene.add.existing(this.sizer_bg = new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
 
@@ -239,6 +262,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).destroy(false);
         }
+        this.blinkingRectangle.destroy()
         this.sizer.destroy(false);
         this.panel_buttons.clear();
     }
