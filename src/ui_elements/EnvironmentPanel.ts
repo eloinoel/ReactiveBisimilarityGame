@@ -126,7 +126,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.curEnvironment = this.game.getEnvironment();
         this.possibleActions = SetOps.toArray(this.game.lts.getVisibleActions()).sort();
         //create a a new instance and asign it
-        this.destroyPanel();    //TODO: destroy blinking rectangle as well
+        this.destroyPanel();
         this.createPanel();
     }
 
