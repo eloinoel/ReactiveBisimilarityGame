@@ -115,7 +115,6 @@ export class Transition extends Phaser.GameObjects.Container {
             }
             /** caption */
             //calculate position in 90 degree angle to transition middle
-            console.log(caption + ": " + Phaser.Math.RadToDeg(v_12.angle()));
 
             let caption_position;
             //position caption left of arrow

@@ -68,6 +68,6 @@ export default class Level3_10 extends BaseScene {
 
 
         game_controller.startGame(this, "p0", "q1", true, true, [7, 5]);
-        
+        game_controller.printAttackerShortestPath()
     }
 }

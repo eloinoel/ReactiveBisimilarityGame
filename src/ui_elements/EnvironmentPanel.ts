@@ -197,6 +197,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                     width: 40, height: 40,
                     background: label_bg,
                     icon: icon,
+                    text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2).setVisible(false).setSize(0, 0),
                     space: {
                         left: 5,
                         right: 5,
