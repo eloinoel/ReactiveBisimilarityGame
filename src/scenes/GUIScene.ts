@@ -33,6 +33,13 @@ export default class GUIScene extends BaseScene {
             this.toLevelMap();
         })}, "Map");
 
+        this.input.keyboard.on('keydown-ESC', (event:KeyboardEvent) => {
+            this.fade(false, () => {
+                console.clear()
+                this.toLevelMap();
+            })
+        })
+
         let replayBtn = new UI_Button(this, this.renderer.width - 3.5* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
             console.clear()
             this.restartLevel();

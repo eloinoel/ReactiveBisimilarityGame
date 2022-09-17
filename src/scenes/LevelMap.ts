@@ -81,6 +81,13 @@ export default class LevelMap extends BaseScene {
                 this.scene.start("ParallaxScene");
         })}, "Back")
 
+        this.input.keyboard.on('keydown-ESC', (event:KeyboardEvent) => {
+            this.fade(false, () => {
+                //this.pulseTween.stop();
+                this.scene.start("ParallaxScene");
+            })
+        })
+
         this.levelObjects = [];
         //simulation
         let simText = this.add.text(600, this.renderer.height - 150, "Simulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);

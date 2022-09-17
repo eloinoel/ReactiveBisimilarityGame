@@ -25,6 +25,20 @@ export default class CreditsScene extends BaseScene {
 
         this.toFadeIn = []
 
+         //UI Buttons
+         let backBtn = new UI_Button(this, 1.5* Constants.UI_offset, "ui_leftarrow_btn", () => {
+            this.tweens.killAll()
+            for(let i = 0; i < this.toFadeIn.length - 1; i++) {
+                this.fadeImageOut(this.toFadeIn[i] as Phaser.GameObjects.Image, i*50, );
+            }
+            this.fadeImageOut(this.toFadeIn[this.toFadeIn.length - 1] as Phaser.GameObjects.Image, (this.toFadeIn.length - 1) * 50, true, () => {
+                this.scene.start('MainMenuScene');
+            })
+        }, "Back")
+
+        this.toFadeIn.push(backBtn)
+        this.toFadeIn.push(backBtn.text)
+
         this.toFadeIn.push(this.add.text(this.renderer.width/2, 50, "Credits", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(45).setOrigin(0.5));
         this.toFadeIn.push(this.add.text(this.renderer.width/9, 200, "Design and Programming                         Eloi Sandt", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(30).setOrigin(0,0.5));
         this.toFadeIn.push(this.add.text(this.renderer.width/9, 250, "Consulting                                     Benjamin Bisping", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(30).setOrigin(0,0.5));
@@ -34,12 +48,14 @@ export default class CreditsScene extends BaseScene {
         
         this.toFadeIn.push(this.add.text(this.renderer.width/9, 500, "Assets                                         TODO", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(30).setOrigin(0,0.5));
 
+       
+
+
         for(let i = 0; i < this.toFadeIn.length; i++) {
             this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*25);
         }
 
-        //UI Buttons
-        let backBtn = new UI_Button(this, 1.5* Constants.UI_offset, "ui_leftarrow_btn", () => {
+        this.input.keyboard.on('keydown-ESC', (event:KeyboardEvent) => {
             this.tweens.killAll()
             for(let i = 0; i < this.toFadeIn.length - 1; i++) {
                 this.fadeImageOut(this.toFadeIn[i] as Phaser.GameObjects.Image, i*50, );
@@ -47,7 +63,7 @@ export default class CreditsScene extends BaseScene {
             this.fadeImageOut(this.toFadeIn[this.toFadeIn.length - 1] as Phaser.GameObjects.Image, (this.toFadeIn.length - 1) * 50, true, () => {
                 this.scene.start('MainMenuScene');
             })
-        }, "Back")
+        })
     }
 
     /* update function is a loop that runs constantly */
