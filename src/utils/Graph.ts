@@ -27,6 +27,7 @@ export class Graph<T> {
         this.comparator = comparator;
     }
 
+
     /**
      * Add a new node if it was not added before
      * @param {T} data
@@ -109,6 +110,14 @@ export class Graph<T> {
         return entries;
     }
 
+    hasNode(node: Node<T>): boolean {
+        let nodes = this.getNodes();
+        if(nodes.includes(node)) {
+            return true;
+        }
+        return false;
+    }
+
     getEdgesList(): {node: Node<T>, edgeLabel: string}[][] {
         let edges: {node: Node<T>, edgeLabel: string}[][] = [];
         this.nodes.forEach((node) => {
@@ -145,6 +154,31 @@ export class Graph<T> {
             console.log(edgestring);
             i++;
         })
+    }
+
+    getType<T>(type: T): string {
+        return typeof type;
+    }
+
+    /**
+     * returns a new instance with the same values as this graph but new references
+     * only works on primitive data 
+     */
+    copy(): Graph<T> {
+        let g = new Graph(this.comparator);
+        this.nodes.forEach((node) => {
+            //add nodes
+            g.addNode(structuredClone(node.data));
+        });
+
+        //add edges
+        this.nodes.forEach((node) => {
+            let edges = node.adjacent;
+            for(let j = 0; j < edges.length; j++) {
+                g.addEdge(structuredClone(node.data), structuredClone(edges[j].node.data), edges[j].edgeLabel);
+            }
+        })
+        return g;
     }
 }
 

@@ -3,6 +3,7 @@ import { Constants } from '../utils/Constants';
 import { PhaserGameController } from '../utils/PhaserGameController';
 import BaseScene from './BaseScene';
 import { UI_Button } from '../ui_elements/Button';
+import { LevelDescription } from '../ui_elements/LevelDescription';
 
 export default class DemoLevel extends BaseScene {
     constructor() {
@@ -36,7 +37,8 @@ export default class DemoLevel extends BaseScene {
         let second_coordinates = Constants.second_coordinates;
         let xy_offset = Constants.lts_xy_offset;
 
-        let game_controller = new PhaserGameController(this, xy_offset, first_coordinates, second_coordinates)
+        let level_description = new LevelDescription(this, this.renderer.width/2, 50, "Demo", "Reactive Bisimulation", true);
+        let game_controller = new PhaserGameController(this, xy_offset, first_coordinates, second_coordinates, level_description)
 
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);
@@ -79,6 +81,7 @@ export default class DemoLevel extends BaseScene {
         game_controller.addTransition("q6", "q8", "a");
 
         game_controller.startGame(this, "p0", "q0");
+        game_controller.printAIGraph();
     }
 
 }

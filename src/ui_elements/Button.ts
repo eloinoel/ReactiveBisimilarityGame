@@ -1,3 +1,4 @@
+import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle";
 import { Constants } from "../utils/Constants";
 
 export class Button extends Phaser.GameObjects.Container {
@@ -93,14 +94,30 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
     private btnClicked = false;
     private disableAlpha = 0.4;
     text: Phaser.GameObjects.Text;
+
+    private stars: Phaser.GameObjects.Image[];
+    private star_scale = 1;
     
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, caption: string = "", fontSize = 25) {
         super(scene, x, y);
 
         this.texture = scene.add.sprite(0, 0, texture, 0).setScale(1.5);
         this.clickTexture = scene.add.sprite(0, 0, texture, 1).setScale(1.5);
+        this.stars = [];
+    
+        this.star_scale = 0.055
+        this.stars[3] = scene.add.image(0, -fontSize -4, "star").setOrigin(1.4, 0.5).setVisible(false);
+        this.stars[4] = scene.add.image(0, -fontSize -4, "star").setVisible(false);
+        this.stars[5] = scene.add.image(0, -fontSize -4, "star").setOrigin(-0.4, 0.5).setVisible(false);
+        this.stars[0] = scene.add.image(0, -fontSize -4, "star_empty").setOrigin(1.4, 0.5);
+        this.stars[1] = scene.add.image(0, -fontSize -4, "star_empty");
+        this.stars[2] = scene.add.image(0, -fontSize -4, "star_empty").setOrigin(-0.4, 0.5);
+        for(let i = 0; i < this.stars.length; i++) {
+            this.add(this.stars[i].setScale(this.star_scale))
+        }
 
-        this.text = scene.add.text(0, -fontSize - 3, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(fontSize);
+
+        this.text = scene.add.text(0, -2*fontSize - 3, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(fontSize);
         this.text.setStroke('#000000', 3).setScale(0.9, 0.9).setResolution(2);
         this.text.x = Math.round(this.text.x);
         this.text.y = Math.round(this.text.y);
@@ -130,6 +147,9 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
             //this.texture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
             this.texture.scale = this.texture.scale + 0.1;
             this.clickTexture.scale = this.clickTexture.scale + 0.1;
+            for(let i = 0; i < this.stars.length; i++) {
+                this.stars[i].scale = this.star_scale + 0.0075;
+            }
             //this.clickTexture.setTint(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2));
             this.clickTexture.setVisible(false);
             this.text.scale = 1;
@@ -138,11 +158,17 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
             this.texture.setVisible(false);
             this.clickTexture.setVisible(true);
             this.text.scale = 0.85;
+            for(let i = 0; i < this.stars.length; i++) {
+                this.stars[i].scale = this.star_scale - 0.004;
+            }
         })
         this.on('pointerup', () => {
             this.texture.setVisible(true);
             this.clickTexture.setVisible(false);
             this.text.scale = 1;
+            for(let i = 0; i < this.stars.length; i++) {
+                this.stars[i].scale = this.star_scale + 0.0075;
+            }
             if(!this.btnClicked) {
                 this.btnClicked = true;
                 actionOnClick();
@@ -156,6 +182,9 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
             this.texture.setVisible(true);
             this.clickTexture.setVisible(false);
             this.text.scale = 0.9;
+            for(let i = 0; i < this.stars.length; i++) {
+                this.stars[i].scale = this.star_scale;
+            }
         })
     }
 
@@ -164,6 +193,9 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
         this.texture.alpha = this.disableAlpha;
         this.clickTexture.alpha = this.disableAlpha;
         this.text.alpha = this.disableAlpha;
+        for(let i = 0; i < this.stars.length; i++) {
+            this.stars[i].setAlpha(this.disableAlpha);
+        }
         return this;
     }
 
@@ -172,7 +204,26 @@ export class LevelSelectionButton extends Phaser.GameObjects.Container {
         this.texture.alpha = 1;
         this.clickTexture.alpha = 1;
         this.text.alpha = 1
+        for(let i = 0; i < this.stars.length; i++) {
+            this.stars[i].alpha = 1;
+        }
         return this;
+    }
+
+    /**
+     * set yellow stars
+     * @param n 
+     */
+    setStars(n: number) {
+        if(n >= 1 && n <= 3) {
+            for(let i = 3; i < n+3; i++) {
+                this.stars[i].setVisible(true);
+            }
+        } else {
+            for(let i = 3; i < 6; i++) {
+                this.stars[i].setVisible(false);
+            }
+        }
     }
 
 }
@@ -248,7 +299,7 @@ export class UI_Button extends Phaser.GameObjects.Container {
 /**
  * Button class for UI Buttons with one texture, eg. the home button, performs actionOnClick only once
  */
- export class Simple_Button extends Phaser.GameObjects.Container {
+export class Simple_Button extends Phaser.GameObjects.Container {
 
     private image: Phaser.GameObjects.Image;
     private clickedBtn = false;
@@ -302,3 +353,59 @@ export class UI_Button extends Phaser.GameObjects.Container {
         })
     }
 }
+
+export class Tick_Button extends Phaser.GameObjects.Container {
+
+    private image: Phaser.GameObjects.Image;
+    private background: RoundRectangle;
+
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, bg_clr: string, border_clr = bg_clr) {
+        super(scene, x, y);
+
+        this.image = scene.add.image(0, 0, texture).setOrigin(0.5).setScale(0.8).setTintFill(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+        this.setSize(this.image.width, this.image.height);
+
+        let scale = 0.32
+        this.setScale(scale)
+
+        this.background = scene.add.existing(new RoundRectangle(scene, 0, 0, this.width, this.height, 10/scale, Constants.convertColorToNumber(bg_clr)))
+        if(bg_clr !== border_clr) {
+            this.background.setStrokeStyle(4/scale, Constants.convertColorToNumber(border_clr));
+        }
+        
+        this.add(this.background)
+        this.add(this.image);
+
+        scene.add.existing(this);
+
+        this.setDepth(1);
+        this.setInteractive();
+
+        /** make image button interactive
+         * PointerEvents:
+         *    pointerover - hovering
+         *    pointerout - not hovering
+         *    pointerup - click and release
+         *    pointerdown - just click
+         */
+        this.on('pointerover', () => {
+            this.scale = scale + 0.05
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
+        })
+        this.on('pointerdown', () => {
+            this.scale = scale - 0.025
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.6)
+        })
+        this.on('pointerup', () => {
+            actionOnClick();
+            this.scale = scale + 0.05
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
+        })
+        this.on('pointerout', () => {
+            this.scale = scale
+            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(1)
+        })
+    }
+}
+
+

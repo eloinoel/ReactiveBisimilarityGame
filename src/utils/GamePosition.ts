@@ -19,6 +19,13 @@ export abstract class GamePosition {
 
     abstract toString(): string;
 
+    abstract copy(): GamePosition;
+
+    /**
+     * returns true if the two nodes are the same
+     */
+    abstract samePosition(otherNode: GamePosition): boolean;
+
     /**
      * 
      * @param otherPosition 
@@ -60,6 +67,17 @@ export class AttackerNode extends GamePosition {
         return "(" + this.process1 + ", " + this.process2 + ")_a"
     }
 
+    copy() {
+        return new AttackerNode(this.process1, this.process2);
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof AttackerNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 /**
@@ -80,6 +98,18 @@ export class SimulationDefenderNode extends GamePosition {
 
     toString(): string {
         return "(" + this.previousAction + ", " + this.process1 + ", " + this.process2 + ")_d"
+    }
+
+    copy() {
+        return new SimulationDefenderNode(this.process1, this.process2, this.previousAction);  
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof SimulationDefenderNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2 && otherNode.previousAction === this.previousAction) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -112,6 +142,18 @@ export class RestrictedAttackerNode extends GamePosition {
         })
         env_string = env_string.concat("}");
         return "(" + this.process1 + ", " + env_string + ", " + this.process2 + ")_a"
+    }
+
+    copy() {
+        return new RestrictedAttackerNode(this.process1, this.process2, this.environment);
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof RestrictedAttackerNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2 && SetOps.areEqual(otherNode.environment, this.environment)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 
@@ -148,5 +190,17 @@ export class RestrictedSimulationDefenderNode extends GamePosition {
         })
         env_string = env_string.concat("}");
         return "(" + this.previousAction + ", " +  this.process1 + ", " + env_string + ", " + this.process2 + ")_d"
+    }
+
+    copy() {
+        return new RestrictedSimulationDefenderNode(this.process1, this.process2, this.previousAction, this.environment);
+    }
+
+    samePosition(otherNode: GamePosition): boolean {
+        if(otherNode instanceof RestrictedSimulationDefenderNode && otherNode.process1 === this.process1 && otherNode.process2 === this.process2 && otherNode.previousAction === this.previousAction && SetOps.areEqual(otherNode.environment, this.environment)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

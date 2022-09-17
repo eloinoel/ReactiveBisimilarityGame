@@ -13,11 +13,12 @@ export default class Preloader extends Phaser.Scene {
         //UI
         this.load.image("ui_home_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/home.png");
         this.load.image("ui_info_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/info_2.png");
-        this.load.image("ui_musicon_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/music_on.png");
-        this.load.image("ui_musicoff_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/music_off.png");
         this.load.image("ui_settings_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/settings_3.png");
         this.load.image("ui_replay_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/replay.png");
         this.load.image("ui_leftarrow_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cursor_left.png");
+        this.load.image("ui_tick_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/tick.png");
+        this.load.image("ui_level_map_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/list_bulleted.png");
+        this.load.image("ui_questionmark_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/help.png");
         this.load.image("ui_swap_btn", "assets/switch.png")
 
         //LTS
@@ -31,7 +32,14 @@ export default class Preloader extends Phaser.Scene {
 
         //background
         this.load.image("background_demo", 'assets/dark_blue_sky.jpg');
+
+        //characters
+        this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 57});
+        this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
         
+        //highscore
+        this.load.image("star", 'assets/UI/Stars/Star.png');
+        this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()

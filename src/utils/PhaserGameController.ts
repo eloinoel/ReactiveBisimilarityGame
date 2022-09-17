@@ -8,6 +8,11 @@ import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
+import { SetOps } from "./SetOps";
+import { LevelDescription } from "../ui_elements/LevelDescription";
+import { AI } from "./AI";
+import { WinPopup, LosePopup } from "../ui_elements/EndGamePopup";
+import BaseScene from "../scenes/BaseScene";
 
 export class PhaserGameController {
     private game: ReactiveBisimilarityGame;
@@ -25,8 +30,15 @@ export class PhaserGameController {
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
+    private level_description: LevelDescription;
+    private ai_controller!: AI; 
 
-    debug: boolean; //TODO: for diplaying possible moves, position etc
+    private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
+    private num_moves: number; //the number of moves a player currently made
+
+    private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
+
+    debug: boolean;
 
     /**
      * PhaserGameController to manage games and displaying objects in one scene relating to the game
@@ -35,7 +47,7 @@ export class PhaserGameController {
      * @param left_coordinates 
      * @param right_coordinates 
      */
-    constructor(scene: Phaser.Scene, offset_between_vertices = Constants.lts_xy_offset, left_coordinates = Constants.first_coordinates, right_coordinates = Constants.second_coordinates) {
+    constructor(scene: Phaser.Scene, offset_between_vertices = Constants.lts_xy_offset, left_coordinates = Constants.first_coordinates, right_coordinates = Constants.second_coordinates, level_description: LevelDescription) {
         this.left_coordinates = left_coordinates;
         this.right_coordinates = right_coordinates;
         this.offset_between_vertices = offset_between_vertices;
@@ -43,6 +55,7 @@ export class PhaserGameController {
         this.stateBtns = new Map<string, LtsStateButton>();
         let lts = new LTSController();
         this.game = new ReactiveBisimilarityGame("", "", lts);
+        this.nextProcessAfterTimeout = "";
         this.current_hightlights = [];
         /* this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
@@ -50,7 +63,10 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
+        this.level_description = level_description;
+        this.num_moves_for_stars = [0, 0];
+        this.num_moves = 0;
     }
 
     /**
@@ -64,10 +80,12 @@ export class PhaserGameController {
     addState(name: string, lts_num:number, row: number, column: number) {
         this.game.lts.addState(name);
         if(lts_num === 0) {
-            const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
+            const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {
+                this.encapsulateDoMove(name)}, name).setScale(0.5);
             this.stateBtns.set(name, p0);
         } else if(lts_num === 1) {
-            const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {this.doMove(name)}, name).setScale(0.5);
+            const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {
+                this.encapsulateDoMove(name)}, name).setScale(0.5);
             this.stateBtns.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
@@ -76,7 +94,8 @@ export class PhaserGameController {
     }
 
     /**
-     * adds transition to the logical game and to the scene
+     * adds transition to the logical game and to the scene, 
+     * note that the game wont work properly if there are multiple edges between two nodes
      * @param scene 
      * @param p0 process 1
      * @param p1 process 2
@@ -94,6 +113,8 @@ export class PhaserGameController {
             } else {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
             }
+        } else {
+            this.printError("addTransition: illegal arguments: " + p0 + ", " + p1);
         }
     }
 
@@ -101,8 +122,11 @@ export class PhaserGameController {
      * start a new game, p0 playing against p1
      * @param p0 name of first process
      * @param p1 name of second process
+     * @param reactive turns the game into reactive bisimulation game
+     * @param bisimilar turns the game into bisimulation game, isn't evaluated if reactive is true
+     * @param num_moves_for_stars an array with the first 2 indeces containing the number of moves needed to achieve 2 or 3 stars at the end of the level
      */
-    startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true) {
+    startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true, num_moves_for_stars = [0, 0, 0]) {
         if(this.game.startNewGame(p0, p1) === 0) {
             this.createEnvironmentField();
             this.game.setReactive(reactive) //order with createEnvironmentField is important
@@ -110,9 +134,10 @@ export class PhaserGameController {
             this.game_initialized = true;
             this.createHighlights(p0, p1);
             this.createReactiveElements();
+            this.environment_panel.disable(); //only enable on timeout
             if(!reactive) {
                 this.environment_container.setVisible(false);
-                this.environment_panel.setVisible(false);
+                this.environment_panel.makeInvisible();
             }
             this.createCurrentPositionField();
             this.createPossibleMovesField();
@@ -124,16 +149,96 @@ export class PhaserGameController {
                 this.current_position.setVisible(false);
                 this.possible_moves_text.makeInvisible();
             }
+
+            //ai initialization
+            this.ai_controller = new AI(this.game);
+            this.ai_controller.generateGraph();
+            this.ai_controller.determineWinningRegion();
+            //stars evaluation
+            for(let i = 0; i < num_moves_for_stars.length; i++) {
+                if(num_moves_for_stars[i] >= 0) {
+                    this.num_moves_for_stars[i] = num_moves_for_stars[i];
+                }
+            }
+            this.num_moves = 0;
         }
     }
 
+
     /**
-     * does not work when multiple edges with some different label go to same destination
-     * TODO: doMove with edges
-     * @param next_process
-     * @returns 
+     * if timeout not possible after setting environment, give visual feedback
+     * @param env 
      */
-    doMove(next_process: string, isSymmetryMove: boolean = false) {
+     setEnvironmentAndDoTimeout(env: Set<string>) {
+        //set environment
+        this.setEnvironment(env);
+
+        //doMove
+        let legalMove = this.doMove(this.nextProcessAfterTimeout, false);
+
+        //resetEnvironment to previous, if move was not possible
+        if(legalMove === -1) {
+            let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+            if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+                this.game.setEnvironment(cur_pos.environment);
+            } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
+                this.game.resetEnvironment();
+            }
+        }
+        this.environment_panel.updatePanel();
+    }
+
+    /**
+     * add environment change, timeout functionality
+     * and AI functionality
+     * @returns -1 if move is no possible
+     * */
+    encapsulateDoMove(next_process: string, isSymmetryMove = false) {
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+
+        //Defender ---> red blinking to signal its not the players turn
+        if(cur_pos.activePlayer === Player.Defender) {
+            //TODO: Visual Feedback
+            console.log("Not player's turn")
+
+        //Attacker ---> if timeout, activate environment change panel otherwise doMove
+        } else {
+            //revert any changes made to the environment by timeout action
+            if(this.environment_panel.isEnabled()) {
+                this.environment_panel.disable();
+
+                //environment wasn't changed if it is still enabled
+                /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+                    if(!SetOps.areEqual(cur_pos.environment, this.game.getEnvironment())) {
+                        this.game.setEnvironment(cur_pos.environment);
+                    }
+                } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
+                    
+                    this.game.resetEnvironment();
+                } */
+            }
+
+            let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
+            //timeout action, can only occur in these node types
+            if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
+                //enable Environment Change UI
+                this.nextProcessAfterTimeout = next_process;
+                this.environment_panel.enable();
+            } else {
+                this.doMove(next_process, isSymmetryMove);
+            }
+        }
+        
+        
+    }
+
+    /**
+     * does not work if there are multiple edges between processes
+     * @param next_process
+     * @isSymmetryMove
+     * @returns -1 if the move was not possible, 0 if the game is over
+     */
+    doMove(next_process: string, isSymmetryMove: boolean = false): number {
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
         let moves = this.game.possibleMoves();
         let next_position;
@@ -142,7 +247,7 @@ export class PhaserGameController {
         if(moves.length === 0) {
             this.printError("doMove: no possible moves from current position")
             //TODO: display visual feedback
-            return;
+            return -1;
         }
 
         // cautious when using this in the next if case
@@ -150,6 +255,7 @@ export class PhaserGameController {
             isSymmetryMove = true;
         }
 
+        //determine next position from LTS and given arguments
         if(cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) {
             if(isSymmetryMove) {
                 next_position = moves.filter((position) => (cur_pos.isSymmetryMove(position) && position.process1 === next_process));
@@ -162,56 +268,276 @@ export class PhaserGameController {
             }
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
-                return;
+                return -1;
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
             next_position = moves.filter((position) => (position.process2 === next_process));  //TODO: also test transition label
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
-                return
+                return -1;
             }
             action = cur_pos.previousAction;
         } else {
             this.printError("doMove: current position type unknown");
-            //TODO: display visual feedback
-            return;
+            return -1;
         }
         if(next_position.length > 1) {
             console.log("doMove: multiple moves are possible for given arguments, TODO: implement strategy to choose correct one");
         }
 
+        //now execute the move
         if(this.game.performMove(action, next_position[0]) === -1) {
-            //TODO: display visual feedback
             console.log("move not possible: " + action + ", " + next_position.toString());
-            return;
+            return -1;
         } else {
-            this.updateCurrentPositionField();
-            this.updateHightlights();
-            if(this.game.isReactive()) {
-                this.updateEnvironment();
-            }
-            this.updatePossibleMovesField();
 
-            //check if the game is over
-            moves = this.game.possibleMoves();
+            //update visuals
+            this.updateVisualsAfterMove()
+
+
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+            moves = this.game.possibleMoves(undefined, true);
 
-            if(cur_pos.activePlayer === Player.Attacker) {
-                //in the reactive bisimulation game the defender cannot get stuck as he always has a symmetry move
-            //Defender is stuck
-            } else if(cur_pos.activePlayer === Player.Defender) {
+            //attacker did a move, update counter
+            this.num_moves++;
+
+            if(cur_pos.activePlayer === Player.Defender) {
+                //check if the game is over
+                //defender is stuck
                 if(moves.length === 0) {
-                    //TODO: Show Points and Congratulation
-                    let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                /*     let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
                         wintext.destroy();
-                    });
+                    }); */
+                    this.launchEndScreen(true);
+                    return 0;
+                //AI makes a move
+                } else {
+                    let defender_move = this.ai_controller.getNextMove(cur_pos);
+                    if(defender_move !== undefined) {
+                        let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
+                        if(return_code === -1) {
+                            this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
+                        } else {
+                            this.updateVisualsAfterMove()
+                            moves = this.game.possibleMoves(undefined, true);
+                            //should only occur in simulation game because there is always a symmetry move in bisimilar games
+                            if(moves.length === 0) {
+                                this.launchEndScreen(false);
+                            }
+                        }
+                    }
                 }
+
+            //Attackers Turn, only reachable after symmetry move
+            } else {
+                
+                //TODO: detect symmetry move loop with bfs
+                if(false) {
+                    this.launchEndScreen(false)
+                }
+                
             }
+        }
+        return 1;
+    }
+
+    /**
+     * set localstorage stars, 
+     * end screen Popup
+     * @param win 
+     */
+    launchEndScreen(win: boolean) {
+        //TODO: set private
+
+        if(win) {
+            let current_level = parseInt(localStorage.getItem("currentLevel") as string);
+            if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
+                console.log("The attacker won the game!");
+                //get number of stars
+                let num_stars = 1;
+                for(let i = 0; i < this.num_moves_for_stars.length && i < 2; i++) {
+                    if(this.num_moves <= this.num_moves_for_stars[i] ) {
+                        num_stars = i + 2;
+                    }
+                }
+
+                //update local storage
+                let tmp_levels = localStorage.getItem("levels");
+                if(tmp_levels === null) {
+                    this.printError("launchEndScreen: retrieving levels from storage returned null");
+                } else {
+                    let levels = JSON.parse(tmp_levels);
+                    if(levels[current_level].stars < num_stars) {
+                        levels[current_level].stars = num_stars;
+                    }
+                    //unlock next level
+                    if(current_level < 17 && levels[current_level + 1].state === false) {
+                        levels[current_level + 1].state = true;
+                    }
+
+                    localStorage.setItem("levels", JSON.stringify(levels));
+                }
+
+                
+
+                //grey overlay
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+
+                //open popup
+                let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
+                    //replayAction
+                    (this.scene as BaseScene).fade(false, () => {
+                        pop.destroyPopup();
+                        bg_overlay.destroy();
+                        console.clear(); 
+                        this.scene.scene.stop("GUIScene"); 
+                        this.scene.scene.restart()
+                    })
+                }, () => {
+                    //nextLevelAction
+                    (this.scene as BaseScene).fade(false, () => {
+                        localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
+                        console.clear();
+                        pop.destroyPopup();
+                        bg_overlay.destroy();
+                        this.scene.scene.stop("GUIScene");
+                        this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
+                    })
+                })
+            } else {
+                this.printError("launchEndScreen: currenLevel: " + current_level);
+                let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
+                    wintext.destroy(); 
+                });
+                return;
+            }
+        //lose
+        } else {
+            console.log("The defender wins the game!");
+
+            //grey overlay
+            let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+
+            //open popup
+            let pop = new LosePopup(this.scene, () => {
+                //replayAction
+                (this.scene as BaseScene).fade(false, () => {
+                    pop.destroyPopup();
+                    bg_overlay.destroy();
+                    console.clear(); 
+                    this.scene.scene.stop("GUIScene"); 
+                    this.scene.scene.restart()
+                })
+            });
         }
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
 
+
+    printAIGraph() {
+        if(this.ai_controller !== undefined && this.ai_controller !== null) {
+            this.ai_controller.printGraph();
+        } else {
+            this.printError("printAIGraph: AI not initialized.");
+        }
+    }
+
+    printAttackerShortestPath() {
+        if(this.ai_controller !== undefined && this.ai_controller !== null) {
+            let path = this.ai_controller.getShortestPath();
+            if(path !== undefined) {
+                let length = 0;
+                let path_string = "";
+                let previous = undefined;   //for detecting symmetry moves
+                for(let i = 0; i < path.length; i++) {
+                    if(path[i].data[0].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].data[0].activePlayer === Player.Attacker)) {
+                        length++;
+                    }
+                    previous = path[i].data[0].activePlayer;
+                    path_string = path_string.concat(path[i].data[0].toString() + ", ");
+                }
+                path_string = path_string.concat("; moves: " + length);
+                console.log(path_string);
+            } else {
+                this.printError("printAttackerShortestPath: path undefined" )
+            }
+            
+        } else {
+            this.printError("printAttackerShortestPath: AI not initialized.");
+        }
+    }
+    /**
+     * returns the name of the scene for the specified level index
+     * @param index 
+     */
+    getSceneKeyFromIndex(index: number) {
+        switch(index) {
+            case 0: 
+                return "Sim_Level1";
+            case 1:
+                return "Sim_Level2";
+            case 2: 
+                return "Sim_Level3";
+            case 3:
+                return "Sim_Level4";
+            case 4: 
+                return "Bisim_Level1";
+            case 5:
+                return "Bisim_Level2";
+            case 6: 
+                return "Bisim_Level3";
+            case 7:
+                return "Bisim_Level4";
+            case 8: 
+                return "ReBisim_Level1";
+            case 9:
+                return "ReBisim_Level2";
+            case 10: 
+                return "ReBisim_Level3";
+            case 11:
+                return "ReBisim_Level4";
+            case 12: 
+                return "ReBisim_Level5";
+            case 13:
+                return "ReBisim_Level6";
+            case 14: 
+                return "ReBisim_Level7";
+            case 15:
+                return "ReBisim_Level8";
+            case 16: 
+                return "ReBisim_Level9";
+            case 17:
+                return "ReBisim_Level10";
+            default:
+                this.printError("getSceneKeyFromIndex: Unknown index " + index);
+                return undefined;
+        }
+    }
+
+    /**
+     * wrapper for multiple update functions
+     * Hightlights, environmentPanel and Container, CurrentPositionField, PossibleMovesField, Turn
+     */
+    private updateVisualsAfterMove() {
+        this.updateHightlights();
+        if(this.game.isReactive()) {
+            this.updateEnvironmentContainer();
+            this.environment_panel.updatePanel();
+        }
+        if(this.debug) {
+            this.updateCurrentPositionField();
+            this.updatePossibleMovesField();
+        }
+
+        let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
+        //set turn
+        if(cur_pos.activePlayer === Player.Defender) {
+            this.level_description.setTurn(false);
+        } else {
+            this.level_description.setTurn(true);
+        }
+    }
     /**
      * TODO: check if switching game mode is possible in current game state
      * if @reactive = true, @bisimilar is not checked in the internal game engine
@@ -234,12 +560,12 @@ export class PhaserGameController {
         
     }
 
-    //TODO: better parser to gather any chars except t and tau
     /**
-     * set the game logic's environment from a string
+     * set the game logic's environment from a string, 
+     * doesn't detect tau, only singular letters
      * @param text 
      */
-    setEnvironment(text: string) {
+    setEnvironmentFromString(text: string) {
         if(this.game.isReactive()) {
             //parse the given string and extract actions
             let arr = text.split(/(?!$)/u); //split at every character
@@ -251,13 +577,33 @@ export class PhaserGameController {
             }
             this.game.setEnvironment(env);
             //update visualization
-            this.updateEnvironment(); //if some illegal characters are given, reset to previous
-            this.updatePossibleMovesField();
+            this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
             this.environment_panel.updatePanel();
+            this.updatePossibleMovesField();
+
+        } else {
+            this.printError("setEnvironmentFromString: was called but game is not reactive");
+        }
+    }
+
+    /**
+     * set the game logic's environment and update UI
+     * only execute after startGame() has been called
+     * @param text 
+     */
+     setEnvironment(env: Set<string>) {
+        if(this.game.isReactive()) {
+            this.game.setEnvironment(env);
+            //update visualization
+            if(this.game_initialized) {
+                this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
+                this.environment_panel.updatePanel();
+                this.updatePossibleMovesField();
+            }
         } else {
             this.printError("setEnvironment: was called but game is not reactive");
         }
-    } 
+    }
 
     /**
      * display visual hightlights of current game state
@@ -289,11 +635,11 @@ export class PhaserGameController {
      * symmetry move button
      */
     private createReactiveElements() {
-        this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2 -100, "ui_swap_btn", () => {
+        this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2, "ui_swap_btn", () => {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game);
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 50, this.game, this);
     }
 
     /**
@@ -308,7 +654,7 @@ export class PhaserGameController {
         let textEdit = new TextEdit(environment_text);
         environment_text.setInteractive().on('pointerup', () => {
             textEdit.open(undefined, (text_obj) => {
-                this.setEnvironment((text_obj as Phaser.GameObjects.Text).text);
+                this.setEnvironmentFromString((text_obj as Phaser.GameObjects.Text).text);
             })
         })
     }
@@ -331,8 +677,8 @@ export class PhaserGameController {
      * displays possibles next stateBtns in the game
      */
     private createPossibleMovesField() {
-        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, 250);
-        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250);
+        let pos = new Phaser.Math.Vector2(this.scene.renderer.width * 3.15 / 4, this.scene.renderer.height - 300);
+        this.possible_moves_text = new ScrollableTextArea(this.scene, pos.x, pos.y + 40, "panel", "", undefined, undefined, undefined, 250, 230);
         this.updatePossibleMovesField();
     }
 
@@ -340,12 +686,12 @@ export class PhaserGameController {
      * updates visual representation of the game's environment
      * game and environment_text should be initialized
      */
-    private updateEnvironment() {
+    private updateEnvironmentContainer() {
         if(this.game.getPlay().length !== 0) {
             if(this.environment_container.getAll().length === 2) {
                 (this.environment_container.first as Phaser.GameObjects.Text).text = this.game.getEnvironmentString();
             } else {
-                this.printError("updateEnvironment: environment_field not initialized")
+                this.printError("updateEnvironmentContainer: environment_field not initialized")
             }
         } else {
             this.printError("game not initialized")

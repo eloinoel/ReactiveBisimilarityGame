@@ -35,38 +35,44 @@ export default class BaseScene extends Phaser.Scene {
         
     }
 
-    fadeImage(obj: Phaser.GameObjects.Image, delay = 0, duration = Constants.camFadeSpeed*2) {
+    fadeImage(obj: Phaser.GameObjects.Image, delay = 0, duration = Constants.camFadeSpeed*2) : Phaser.Tweens.Tween {
         obj.alpha = 0;
+        let tween: Phaser.Tweens.Tween;
         if(delay !== 0) {
             this.time.delayedCall(delay, () => {
-                this.tweens.add({
+                tween = this.tweens.add({
                     targets: obj,
                     duration: duration,
                     alpha: 1
                 })
             });
         } else {
-            this.tweens.add({
+            tween = this.tweens.add({
                 targets: obj,
                 duration: duration,
                 alpha: 1
             })
         }
+        return tween!;
     }
 
-    fadeImageOut(obj: Phaser.GameObjects.Image, duration = Constants.camFadeSpeed*2) {
-        obj.alpha = 1;
-        this.tweens.add({
-            targets: obj,
-            duration: duration,
-            alpha: 0
-        })
+    fadeImageOut(obj: Phaser.GameObjects.Image, duration = Constants.camFadeSpeed*2, delayedCall = false, fn = () => {}) {
+        //obj.alpha = 1;
+
+        if(delayedCall) {
+            this.tweens.add({
+                targets: obj,
+                duration: duration,
+                alpha: 0,
+                onComplete: fn
+            })
+        } else {
+            this.tweens.add({
+                targets: obj,
+                duration: duration,
+                alpha: 0
+            })
+        }
     }
-
-
-
-    /* fadeImageInto(obj0: Phaser.GameObjects.Image, obj1: Phaser.GameObjects.Image, duration: number) {
-        this.tweens.add()
-    } */
 
 }
