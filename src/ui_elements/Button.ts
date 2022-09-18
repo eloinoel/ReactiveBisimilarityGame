@@ -56,7 +56,7 @@ export class Button extends Phaser.GameObjects.Container {
             /* x: this.overImage.x - this.overImage.width/2,
             y: this.overImage.y - this.overImage.height/2, */
         })
-        .fillStyle(Constants.COLOR_BORDEAUX, 0.9).fillRect(this.x - this.width*this.scale/2, this.y - this.height*this.scale/2, this.width*this.scale, this.height*this.scale).setDepth(10).setAlpha(0);
+        .fillStyle(Constants.convertColorToNumber(Constants.COLORS_RED.c4), 1).fillRect(this.x - this.width*this.scale/2, this.y - this.height*this.scale/2, this.width*this.scale, this.height*this.scale).setDepth(10).setAlpha(0);
         
         let mask_img = this.scene.make.image({
             x: this.x,
@@ -102,7 +102,7 @@ export class Button extends Phaser.GameObjects.Container {
         this.blinkingRectangle.alpha = 0
         this.scene.tweens.add({
             targets: this.blinkingRectangle,
-            alpha: 0.8,
+            alpha: 0.7,
             ease: Phaser.Math.Easing.Quintic.InOut,
             duration: 160,
             repeat: 1,

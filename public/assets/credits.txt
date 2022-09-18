@@ -34,6 +34,11 @@ arrow swap - https://www.flaticon.com/free-icon/switch_466154?related_id=466154&
 water drop - <a href="https://www.flaticon.com/free-icons/water" title="water icons">Water icons created by Freepik - Flaticon</a>
 fire - <a href="https://www.flaticon.com/free-icons/fire" title="fire icons">Fire icons created by Freepik - Flaticon</a>
 leaf - <a href="https://www.flaticon.com/free-icons/leaf" title="leaf icons">Leaf icons created by Pixel perfect - Flaticon</a>
+leaf2 - <a href="https://www.flaticon.com/free-icons/leaf" title="leaf icons">Leaf icons created by Pixel perfect - Flaticon</a>
+
+Transition arrow - <a href="https://www.flaticon.com/free-icon/next_2413462" title="next icons">Next icons created by iconixar - Flaticon</a>
+water splash - https://www.freepik.com/free-vector/water-splash-set-aqua-liquid-dynamic-motion_7058981.htm#query=water%20splash&position=5&from_view=search
+
 
 Fonts
 Sukuriburu - https://soultyragevin.itch.io/sukuriburu-font

@@ -44,6 +44,10 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("fire_icon", 'assets/fire.png');
         this.load.image("water_icon", 'assets/water-drop.png');
         this.load.image("leaf_icon", 'assets/leaf2.png');
+
+        //arrows
+        this.load.image("fire_arrow", 'assets/Transition/fire_arrow.png')
+        this.load.image("water_arrow", 'assets/Transition/water_arrow.png')
         
         /* Loader Events:
             - complete: when done loading everything

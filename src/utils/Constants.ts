@@ -40,7 +40,7 @@ export class Constants {
 
     static first_coordinates = new Phaser.Math.Vector2(this.DEFAULT_WIDTH/3.5, this.DEFAULT_HEIGHT/3.5 + 50);
     static second_coordinates = new Phaser.Math.Vector2(this.DEFAULT_WIDTH*2.5/3.5, this.DEFAULT_HEIGHT/3.5 + 50);
-    static lts_xy_offset = new Phaser.Math.Vector2(this.DEFAULT_WIDTH/12, this.DEFAULT_WIDTH/9.5);
+    static lts_xy_offset = new Phaser.Math.Vector2(this.DEFAULT_WIDTH/12, this.DEFAULT_WIDTH/9);
 
     /**
      * 

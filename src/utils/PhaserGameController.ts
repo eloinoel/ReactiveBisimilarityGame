@@ -2,7 +2,7 @@ import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 import Phaser from 'phaser';
 import { LTSController } from "./LTSController";
 import { LtsStateButton, Simple_Button } from '../ui_elements/Button';
-import { Transition } from '../ui_elements/Transition';
+import { FixedLengthTransition, Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
@@ -115,8 +115,12 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
-
-            const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+            if((action === "a" || action === "b") && p0 !== p1) {
+                const tr_p0_p1 = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
+            } else {
+                const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+            }
+            /* const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75); */
 
         } else {
             this.printError("addTransition: illegal arguments: " + p0 + ", " + p1);

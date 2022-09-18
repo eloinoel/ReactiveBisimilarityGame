@@ -170,3 +170,84 @@ export class Transition extends Phaser.GameObjects.Container {
         this.setDepth(1);
     }
 }
+
+export class FixedLengthTransition extends Phaser.GameObjects.Container {
+    
+    private text!: Phaser.GameObjects.Text;
+
+    private arrow!: Phaser.GameObjects.Image;
+    
+    
+    constructor(scene: Phaser.Scene, source_x: number, source_y: number, destination_x: number, destination_y: number, caption: string = "", scale: number = 1.0) {
+        super(scene, source_x, source_y);
+
+        
+
+        /**
+             * positioning math:
+             * v_12 = v2 - v1                                           Richtungsvektor
+             * c = v1 + 0.5 * v_12                                    Mittelpunkt zwischen vertices
+             * total_len = |v_12| - 2r - padding                        Länge des Pfeils
+             * x_len_middle = total_len - head_x_len_ - tail_x_len      Länge des Mittelstücks
+            */
+        let v_12 = new Phaser.Math.Vector2(destination_x - source_x, destination_y - source_y);
+        let c = new Phaser.Math.Vector2(source_x, source_y).add(v_12.clone().scale(0.5)); 
+        let total_len = v_12.length()
+        let arrow_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(v_12.angle()))
+
+        //circular arrow
+        if(source_x === destination_x && source_y === destination_y) {
+
+            //fire
+            if(caption === "a") {
+                this.arrow = this.scene.add.image(0, 0, "fire_arrow").setOrigin(0.5).setDepth(2);
+            //water
+            } else if(caption === "b") {
+                this.arrow = this.scene.add.image(0, 0, "water_arrow").setOrigin(0.5).setDepth(2);
+            //plant
+            } else if(caption === "c") {
+
+            //TODO:
+            } else if(caption === Constants.TIMEOUT_ACTION) {
+                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+            } else if(caption === Constants.HIDDEN_ACTION) {
+                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+            } else {
+                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+            }
+        } else {
+            //fire
+            if(caption === "a") {
+                this.arrow = this.scene.add.image(0, 0, "fire_arrow").setOrigin(0.5).setDepth(0).setScale(0.15);
+            //water
+            } else if(caption === "b") {
+                this.arrow = this.scene.add.image(0, 0, "water_arrow").setOrigin(0.5).setDepth(2).setScale(0.15);
+            //plant 
+            } else if(caption === "c") {
+
+            //TODO:
+            } else if(caption === Constants.TIMEOUT_ACTION) {
+                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+            } else if(caption === Constants.HIDDEN_ACTION) {
+                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+            } else {
+                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+            }
+        }
+    
+
+        //add arrow parts to container to make the coordinates dependent on the container coords
+        this.add(this.arrow);
+
+
+        //scale and rotate container
+        this.angle = arrow_angle;
+        this.scale = scale;
+
+        //set container origin
+        this.x = Math.round(c.x);
+        this.y = Math.round(c.y);
+        scene.add.existing(this);
+        this.setDepth(1);
+    }
+}
