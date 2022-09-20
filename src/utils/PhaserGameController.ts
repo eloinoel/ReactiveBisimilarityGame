@@ -63,7 +63,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;

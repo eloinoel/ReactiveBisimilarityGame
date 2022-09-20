@@ -42,7 +42,7 @@ export default class Level3_3 extends BaseScene {
 
         game_controller.addTransition("p0", "p1", "a");
         game_controller.addTransition("p0", "p2", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("p2", "p3", "b");
+        game_controller.addTransition("p2", "p3", "c");
         game_controller.addTransition("p2", "p4", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("p4", "p5", "a");
         game_controller.addTransition("p4", "p6", "a");
@@ -57,9 +57,9 @@ export default class Level3_3 extends BaseScene {
         game_controller.addTransition("q0", "q1", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("q0", "q2", "a");
         game_controller.addTransition("q1", "q3", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("q1", "q4", "b");
+        game_controller.addTransition("q1", "q4", "c");
         game_controller.addTransition("q3", "q5", "a");
-        game_controller.addTransition("q3", "q4", "b");
+        game_controller.addTransition("q3", "q4", "c");
 
         game_controller.startGame(this, "p0", "q0", true, true, [5, 4]);
     }

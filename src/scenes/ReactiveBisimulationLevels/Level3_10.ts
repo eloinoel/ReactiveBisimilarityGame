@@ -38,14 +38,14 @@ export default class Level3_10 extends BaseScene {
         game_controller.addState("p3", 0, 1, 1.5);
         game_controller.addState("p4", 0, 2, 0);
 
-        game_controller.addTransition("p0", "p1", "a");
+        game_controller.addTransition("p0", "p1", "c");
         game_controller.addTransition("p0", "p2", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("p1", "p4", Constants.HIDDEN_ACTION);
         game_controller.addTransition("p4", "p3", "b");
         game_controller.addTransition("p3", "p0", Constants.HIDDEN_ACTION);
         game_controller.addTransition("p2", "p3", Constants.HIDDEN_ACTION);
         game_controller.addTransition("p4", "p2", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("p2", "p1", "a");
+        game_controller.addTransition("p2", "p1", "c");
 
         game_controller.addState("q0", 1, 0, -1.5);
         game_controller.addState("q1", 1, 0, 0);
@@ -57,10 +57,10 @@ export default class Level3_10 extends BaseScene {
 
         game_controller.addTransition("q0", "q1", Constants.HIDDEN_ACTION);
         game_controller.addTransition("q1", "q2", Constants.TIMEOUT_ACTION);
-        game_controller.addTransition("q1", "q3", "a");
+        game_controller.addTransition("q1", "q3", "c");
         game_controller.addTransition("q2", "q0", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("q2", "q5", "a");
-        game_controller.addTransition("q2", "q3", "a");
+        game_controller.addTransition("q2", "q5", "c");
+        game_controller.addTransition("q2", "q3", "c");
         game_controller.addTransition("q3", "q6", Constants.HIDDEN_ACTION);
         game_controller.addTransition("q6", "q4", "b");
         game_controller.addTransition("q4", "q1", Constants.HIDDEN_ACTION);
