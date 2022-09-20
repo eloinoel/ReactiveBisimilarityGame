@@ -50,7 +50,9 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("fire_arrow", 'assets/Transition/fire_arrow.png')
         this.load.image("water_arrow", 'assets/Transition/water_arrow.png')
         this.load.image("plant_arrow", 'assets/Transition/plant_arrow.png')
-        
+        this.load.image("water_arrow_circle", 'assets/Transition/water_arrow_circle.png')
+        this.load.image("right_arrow", 'assets/Transition/right-arrow.png')
+
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()

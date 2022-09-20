@@ -115,10 +115,10 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
-            if((action === "a" || action === "b" || action === "c") && p0 !== p1) {
-                const tr_p0_p1 = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
-            } else {
+            if(p0 === p1 && (action === "a" || action === "c")) {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+            } else {
+                const tr_p0_p1 = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
             }
             /* const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75); */
 

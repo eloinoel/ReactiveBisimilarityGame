@@ -195,25 +195,26 @@ export class FixedLengthTransition extends Phaser.GameObjects.Container {
         let total_len = v_12.length()
         let arrow_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(v_12.angle()))
 
+
         //circular arrow
         if(source_x === destination_x && source_y === destination_y) {
 
             //fire
             if(caption === "a") {
-                this.arrow = this.scene.add.image(0, 0, "fire_arrow").setOrigin(0.5).setDepth(2);
+                console.log("circular fire transition not implemented")
             //water
             } else if(caption === "b") {
-                this.arrow = this.scene.add.image(0, 0, "water_arrow").setOrigin(0.5).setDepth(2);
+                this.arrow = this.scene.add.image(-65, 0, "water_arrow_circle").setOrigin(0.5).setDepth(2).setScale(0.09);
             //plant
             } else if(caption === "c") {
-
+                console.log("circular plant transition not implemented")
             //TODO:
             } else if(caption === Constants.TIMEOUT_ACTION) {
-                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+                console.log("circular timeout transition not implemented")
             } else if(caption === Constants.HIDDEN_ACTION) {
-                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+                console.log("circular tau transition not implemented")
             } else {
-                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+                console.log("circular " + caption +  " transition not implemented")
             }
         } else {
             //fire
@@ -228,18 +229,22 @@ export class FixedLengthTransition extends Phaser.GameObjects.Container {
 
             //TODO:
             } else if(caption === Constants.TIMEOUT_ACTION) {
-                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+                this.arrow = this.scene.add.image(0, 0, "right_arrow").setOrigin(0.5).setDepth(0).setScale(0.15);
+                this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30).setDepth(2);
             } else if(caption === Constants.HIDDEN_ACTION) {
-                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+                this.arrow = this.scene.add.image(0, 0, "right_arrow").setOrigin(0.5).setDepth(0).setScale(0.15);
+                this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(305).setDepth(2);
             } else {
-                this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
+                console.log(caption +  " transition not implemented")
             }
         }
     
 
         //add arrow parts to container to make the coordinates dependent on the container coords
         this.add(this.arrow);
-
+        if(this.text !== undefined) {
+            this.text.setFontSize(25).setResolution(2).setPosition(c.x, c.y)
+        }
 
         //scale and rotate container
         this.angle = arrow_angle;
