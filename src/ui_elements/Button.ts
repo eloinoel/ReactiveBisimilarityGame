@@ -12,7 +12,7 @@ export class Button extends Phaser.GameObjects.Container {
     text: Phaser.GameObjects.Text;
 
 
-    constructor(scene: Phaser.Scene, x: number, y: number, outTexture: string, actionOnClick = () => {}, caption: string = "", overTexture?: string, downTexture?: string) {
+    constructor(scene: Phaser.Scene, x: number, y: number, outTexture: string, actionOnClick = () => {}, caption: string = "", overTexture?: string, downTexture?: string, showCaption = true) {
         super(scene, x, y);
 
         this.outImage = scene.add.image(0, 0, outTexture);
@@ -30,6 +30,9 @@ export class Button extends Phaser.GameObjects.Container {
         this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(45);
         this.text.x = Math.round(this.text.x);
         this.text.y = Math.round(this.text.y);
+
+        this.text.setVisible(showCaption);
+
 
         this.add(this.outImage);
         this.add(this.overImage);
@@ -115,8 +118,8 @@ export class Button extends Phaser.GameObjects.Container {
 
 export class LtsStateButton extends Button {
     
-    constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, caption: string) {
-        super(scene, x, y, "circle", actionOnClick, caption, "circle_over", "circle_down");
+    constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, caption: string, showCaption = true) {
+        super(scene, x, y, "circle", actionOnClick, caption, "circle_over", "circle_down", showCaption);
     }
 }
 

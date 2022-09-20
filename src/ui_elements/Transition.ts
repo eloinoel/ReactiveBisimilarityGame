@@ -224,6 +224,7 @@ export class FixedLengthTransition extends Phaser.GameObjects.Container {
                 this.arrow = this.scene.add.image(0, 0, "water_arrow").setOrigin(0.5).setDepth(2).setScale(0.15);
             //plant 
             } else if(caption === "c") {
+                this.arrow = this.scene.add.image(0, 0, "plant_arrow").setOrigin(0.5).setDepth(2).setScale(0.15);
 
             //TODO:
             } else if(caption === Constants.TIMEOUT_ACTION) {

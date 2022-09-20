@@ -85,7 +85,7 @@ export class PhaserGameController {
                 if(tmp === -1) {
                     p0.redBlinking()
                 }
-            }, name)
+            }, name, this.debug)
             this.stateBtns.set(name, p0);
         } else if(lts_num === 1) {
             const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {
@@ -93,7 +93,7 @@ export class PhaserGameController {
                 if(tmp === -1) {
                     q0.redBlinking()
                 }
-            }, name)
+            }, name, this.debug)
             this.stateBtns.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
@@ -115,7 +115,7 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
-            if((action === "a" || action === "b") && p0 !== p1) {
+            if((action === "a" || action === "b" || action === "c") && p0 !== p1) {
                 const tr_p0_p1 = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
             } else {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);

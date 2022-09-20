@@ -35,6 +35,7 @@ export default class Preloader extends Phaser.Scene {
         //characters
         this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 57});
         this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
+        this.load.spritesheet("dark_magician_idle", "assets/characters/Wizard\ Pack/Wizard\ Pack/Idle.png", {frameWidth: 231, frameHeight: 190})
         
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');
@@ -48,6 +49,7 @@ export default class Preloader extends Phaser.Scene {
         //arrows
         this.load.image("fire_arrow", 'assets/Transition/fire_arrow.png')
         this.load.image("water_arrow", 'assets/Transition/water_arrow.png')
+        this.load.image("plant_arrow", 'assets/Transition/plant_arrow.png')
         
         /* Loader Events:
             - complete: when done loading everything
