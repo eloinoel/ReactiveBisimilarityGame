@@ -30,7 +30,7 @@ export default class Level2_3 extends BaseScene {
     private setupLTS(): void {
 
         let level_description = new LevelDescription(this, this.renderer.width/2, 50, "2.3", "Bisimulation", true);
-        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates, level_description)
+        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates.clone().subtract(new Phaser.Math.Vector2(0, 75)), Constants.second_coordinates.clone().subtract(new Phaser.Math.Vector2(0, 75)), level_description)
 
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1);

@@ -266,7 +266,7 @@ export class AI {
                     }
                 }
             }
-            console.log("AI: Current node: " + curPosition.toString() + ", path: " + this.getShortestPathString(path));  // TODO: Delete debug
+            //console.log("AI: Current node: " + curPosition.toString() + ", path: " + this.getShortestPathString(path));  // TODO: Delete debug
             return path[path.length - 2].data[0];
         } else {
             //return any node if bfs results in undefined, shouldn't happen though hahaaaa
@@ -418,7 +418,7 @@ export class AI {
         return undefined;
     }
 
-    /**
+    /** TODO: method isnt correct, always chooses optimal path for the attacker even if the defender wouldnt choose same path
      * returns shortest path of moves in which the player can win in
      */
     getShortestPath(curPosition?: GamePosition): Node<any>[] | undefined {

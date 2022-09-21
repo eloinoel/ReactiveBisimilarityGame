@@ -36,6 +36,7 @@ jobs:
         with:
           name: production-files
           path: ./dist
+          retention-days: 1
 
   deploy:
     name: Deploy

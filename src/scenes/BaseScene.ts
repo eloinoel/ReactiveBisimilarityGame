@@ -56,7 +56,7 @@ export default class BaseScene extends Phaser.Scene {
         return tween!;
     }
 
-    fadeImageOut(obj: Phaser.GameObjects.Image, duration = Constants.camFadeSpeed*2, delayedCall = false, fn = () => {}) {
+    fadeImageOut(obj: Phaser.GameObjects.Image, duration = 25, delayedCall = false, fn = () => {}) {
         //obj.alpha = 1;
 
         if(delayedCall) {

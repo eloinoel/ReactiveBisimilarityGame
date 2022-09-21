@@ -2,7 +2,7 @@ import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 import Phaser from 'phaser';
 import { LTSController } from "./LTSController";
 import { LtsStateButton, Simple_Button } from '../ui_elements/Button';
-import { Transition } from '../ui_elements/Transition';
+import { FixedLengthTransition, Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
 import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
@@ -63,7 +63,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -81,11 +81,19 @@ export class PhaserGameController {
         this.game.lts.addState(name);
         if(lts_num === 0) {
             const p0 = new LtsStateButton(this.scene, this.left_coordinates.x + this.offset_between_vertices.x*column, this.left_coordinates.y + this.offset_between_vertices.y*row, () => {
-                this.encapsulateDoMove(name)}, name).setScale(0.5);
+                let tmp = this.encapsulateDoMove(name);
+                if(tmp === -1) {
+                    p0.redBlinking()
+                }
+            }, name, this.debug)
             this.stateBtns.set(name, p0);
         } else if(lts_num === 1) {
             const q0 = new LtsStateButton(this.scene, this.right_coordinates.x + this.offset_between_vertices.x*column, this.right_coordinates.y + this.offset_between_vertices.y*row, () => {
-                this.encapsulateDoMove(name)}, name).setScale(0.5);
+                let tmp = this.encapsulateDoMove(name);
+                if(tmp === -1) {
+                    q0.redBlinking()
+                }
+            }, name, this.debug)
             this.stateBtns.set(name, q0);
         } else {
             console.log("PhaserGameController: addState: lts_num has illegal parameter");
@@ -107,12 +115,13 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
-            if(p0 === p1) {
-                this.scene.add.image(p0_button.x - 60, p0_button.y, "ui_replay_btn").setScale(0.45).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.blue)).setRotation(-0.5);
-                this.scene.add.text(p0_button.x - 60, p0_button.y, action, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setFontSize(25).setOrigin(0.5);
-            } else {
+            if(p0 === p1 && (action === "a" || action === "c")) {
                 const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+            } else {
+                const tr_p0_p1 = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
             }
+            /* const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75); */
+
         } else {
             this.printError("addTransition: illegal arguments: " + p0 + ", " + p1);
         }
@@ -169,7 +178,7 @@ export class PhaserGameController {
      * if timeout not possible after setting environment, give visual feedback
      * @param env 
      */
-     setEnvironmentAndDoTimeout(env: Set<string>) {
+    setEnvironmentAndDoTimeout(env: Set<string>) {
         //set environment
         this.setEnvironment(env);
 
@@ -186,20 +195,21 @@ export class PhaserGameController {
             }
         }
         this.environment_panel.updatePanel();
+        return legalMove;
     }
 
     /**
      * add environment change, timeout functionality
      * and AI functionality
-     * @returns -1 if move is no possible
+     * @returns -1 if move is not possible
      * */
     encapsulateDoMove(next_process: string, isSymmetryMove = false) {
         let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
 
         //Defender ---> red blinking to signal its not the players turn
         if(cur_pos.activePlayer === Player.Defender) {
-            //TODO: Visual Feedback
             console.log("Not player's turn")
+            return -1;
 
         //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
@@ -225,7 +235,7 @@ export class PhaserGameController {
                 this.nextProcessAfterTimeout = next_process;
                 this.environment_panel.enable();
             } else {
-                this.doMove(next_process, isSymmetryMove);
+                return this.doMove(next_process, isSymmetryMove);
             }
         }
         
@@ -639,7 +649,7 @@ export class PhaserGameController {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 50, this.game, this);
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 60, this.game, this);
     }
 
     /**

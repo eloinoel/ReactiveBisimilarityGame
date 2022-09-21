@@ -20,6 +20,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private phaserGameController;
     private sizer_bg!: RoundRectangle;
 
+    private blinkingRectangle!: RoundRectangle;
+
     private enabled = true;
     private activated = true;
     private disabledAlpha = 0.4;
@@ -40,7 +42,6 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.add(this.caption);
 
         this.createPanel();
-
 
         scene.add.existing(this);
         this.setDepth(1);
@@ -71,6 +72,10 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(this.disabledAlpha)
+            //icons
+            if(list[i] instanceof Phaser.GameObjects.Image) {
+                (list[i] as Label).setAlpha(0.9)
+            }
         }
         this.tickButton.setVisible(false);
         return this;
@@ -129,6 +134,21 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.createPanel();
     }
 
+    redBlinking() {
+        this.blinkingRectangle.setVisible(true)
+        this.blinkingRectangle.alpha = 0
+        this.scene.tweens.add({
+            targets: this.blinkingRectangle,
+            alpha: 0.5,
+            ease: Phaser.Math.Easing.Quintic.InOut,
+            duration: 160,
+            repeat: 1,
+            onComplete: () => {
+                this.blinkingRectangle.alpha = 0
+            }
+        })
+    }
+
     private createPanel() {
 
         let width = this.dimensions.x
@@ -139,7 +159,12 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.tickButton = new Tick_Button(this.scene, this.coordinates.x + width/2 + 30, this.coordinates.y, "ui_tick_btn", () => {
             this.disable()
             let tmp = this.getActiveActions();
-            this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
+            let result = this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
+
+            //red blinking
+            if(result === -1) {
+                this.redBlinking();
+            }
         }, Constants.COLORS_BLUE_LIGHT.c3);
 
         this.sizer = new FixWidthSizer(this.scene, {
@@ -150,22 +175,51 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             space: { item: 7 , top: 7, bottom: 7 },
         })
 
+        this.blinkingRectangle = this.scene.add.existing(new RoundRectangle(this.scene, this.coordinates.x, this.coordinates.y, width, this.dimensions.y + 4, 10, Constants.COLOR_BORDEAUX)).setDepth(3).setAlpha(0);
+
         this.sizer.addBackground(this.scene.add.existing(this.sizer_bg = new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
 
         for (var i = 0; i < this.possibleActions.length; i++) {
-            let label = new Label(this.scene, {
-                width: 40, height: 40,
-                background: this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)))
-                 : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1))),
-                text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
-                space: {
-                    left: 5,
-                    right: 5,
-                    top: 5,
-                    bottom: 5,
-                },
-                align: 'center'
-            })
+            let icon;
+            let label: Label;
+            let label_bg = this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)))
+            : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)));
+
+            if(this.possibleActions[i] === "a" || this.possibleActions[i] === "b" || this.possibleActions[i] === "c") {
+                if(this.possibleActions[i] === "a") {
+                    icon = this.scene.add.image(0, 0,"fire_icon").setScale(0.057);
+                } else if(this.possibleActions[i] === "b") {
+                    icon = this.scene.add.image(0, 0, "water_icon").setScale(0.05);
+                } else if(this.possibleActions[i] === "c") {
+                    icon = this.scene.add.image(0, 0, "leaf_icon").setScale(0.05);
+                }
+                label = new Label(this.scene, {
+                    width: 40, height: 40,
+                    background: label_bg,
+                    icon: icon,
+                    text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2).setVisible(false).setSize(0, 0),
+                    space: {
+                        left: 5,
+                        right: 5,
+                        top: 5,
+                        bottom: 5,
+                    },
+                    align: 'center'
+                })
+            } else {
+                label = new Label(this.scene, {
+                    width: 40, height: 40,
+                    background: label_bg,
+                    text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
+                    space: {
+                        left: 5,
+                        right: 5,
+                        top: 5,
+                        bottom: 5,
+                    },
+                    align: 'center'
+                })
+            }
             this.sizer.add(label);
             this.panel_buttons.set(label, this.curEnvironment.has(this.possibleActions[i]) ? true : false);
         }
@@ -239,6 +293,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).destroy(false);
         }
+        this.blinkingRectangle.destroy()
         this.sizer.destroy(false);
         this.panel_buttons.clear();
     }

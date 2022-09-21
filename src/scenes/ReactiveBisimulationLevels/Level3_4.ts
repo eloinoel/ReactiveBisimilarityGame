@@ -30,7 +30,7 @@ export default class Level3_4 extends BaseScene {
     private setupLTS(): void {
 
         let level_description = new LevelDescription(this, this.renderer.width/2, 50, "3.4", "Reactive Bisimulation", true);
-        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates, level_description)
+        let game_controller = new PhaserGameController(this, Constants.lts_xy_offset, Constants.first_coordinates, Constants.second_coordinates.clone().add(new Phaser.Math.Vector2(50, 0)), level_description)
         
         game_controller.addState("p0", 0, 0, 0);
         game_controller.addState("p1", 0, 1, -1.5);
@@ -54,7 +54,7 @@ export default class Level3_4 extends BaseScene {
         game_controller.addTransition("q1", "q4", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("q1", "q3", "a");
         game_controller.addTransition("q4", "q4", "b");
-        game_controller.addTransition("q4", "q2", "a");
+        game_controller.addTransition("q4", "q2", "c");
         game_controller.addTransition("q4", "q0", Constants.TIMEOUT_ACTION);
 
         game_controller.startGame(this, "p0", "q0", true, true, [5, 4]);
