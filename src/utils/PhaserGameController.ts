@@ -25,6 +25,7 @@ export class PhaserGameController {
     private stateBtns: Map<string, LtsStateButton>; //map from state names to visual buttons references
     private scene: Phaser.Scene;    
     private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
+    private player_icons: Phaser.GameObjects.GameObject[];  //0:_player icon sprite, 1: geometryMaskObject, 2: opponent icon sprite, 3: mask2
     private environment_container!: Phaser.GameObjects.Container;  //text object displaying the current environment
     private current_position!: Phaser.GameObjects.Container;  //text object displaying current game position 
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
@@ -57,6 +58,7 @@ export class PhaserGameController {
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.nextProcessAfterTimeout = "";
         this.current_hightlights = [];
+        this.player_icons = [];
         /* this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
@@ -629,6 +631,7 @@ export class PhaserGameController {
                 this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2));
             } else {
                 this.printError("startGame: " + p0 + " is not in stateBtns list.");
+                return
             }
 
             let p1_button = this.stateBtns.get(p1)
@@ -637,7 +640,63 @@ export class PhaserGameController {
                 this.current_hightlights[1].setStrokeStyle(4,  Constants.convertColorToNumber(Constants.COLORS_RED.c4));
             } else {
                 this.printError("startGame: " + p1 + " is not in stateBtns list.");
+                return
             }
+
+            //create animated player icon
+            let player_anim = this.scene.anims.create({
+                key: 'witch_idle_animation',
+                frames: this.scene.anims.generateFrameNumbers('witch_idle', {frames: [0, 1, 2, 3, 4, 5]}),
+                frameRate: 6,
+                repeat: -1
+            })
+            if(player_anim !== false) { 
+                this.player_icons[0] = this.scene.add.sprite(p0_button.x+1, p0_button.y + 15, 'witch_idle').setScale(1.0).setOrigin(0.5).setDepth(4);
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).play('witch_idle_animation');
+
+                const shape = this.scene.make.graphics({
+                    x: p0_button.x,
+                    y: p0_button.y,
+                    add: false
+                });
+                shape.fillStyle(0xffffff);
+                shape.arc(0, 0, 31, 0, Math.PI*2);
+                shape.fillPath().setDepth(6);
+                this.player_icons[1] = shape;
+                //let debug = this.scene.add.circle(p0_button.x, p0_button.y, 31, 0x6666ff).setDepth(6)
+                
+                let mask = shape.createGeometryMask();
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).mask = mask;
+
+            } else { this.printError("createHighlights: could not generate player animation"); }
+
+            //create animated opponent icon
+            let opponent_anim = this.scene.anims.create({
+                key: 'wizard_idle_animation',
+                frames: this.scene.anims.generateFrameNumbers('dark_magician_idle', {frames: [0, 1, 2, 3, 4, 5]}),
+                frameRate: 6,
+                repeat: -1
+                
+            })
+            if(opponent_anim !== false) { 
+                this.player_icons[2] = this.scene.add.sprite(p1_button.x-5, p1_button.y + 15, 'dark_magician_idle').setScale(1.0).setOrigin(0.5).setDepth(4);
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).play('wizard_idle_animation').toggleFlipX();
+
+                const shape = this.scene.make.graphics({
+                    x: p1_button.x,
+                    y: p1_button.y,
+                    add: false
+                });
+                shape.fillStyle(0xffffff);
+                shape.arc(0, 0, 29, 0, Math.PI*2);
+                shape.fillPath().setDepth(6);
+                this.player_icons[3] = shape;
+                //let debug = this.scene.add.circle(p0_button.x, p0_button.y, 31, 0x6666ff).setDepth(6)
+                
+                let mask = shape.createGeometryMask();
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).mask = mask;
+
+            } else { this.printError("createHighlights: could not generate player animation"); }
         }
     }
 
