@@ -10,6 +10,10 @@ export default class Preloader extends Phaser.Scene {
      * preload stuff
      */
     preload(): void {
+
+        this.load.image("logo", 'assets/phaser3-logo.png')
+        this.load.image("link_icon", 'assets/UI/link.png');
+
         //UI
         this.load.image("ui_home_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/home.png");
         this.load.image("ui_info_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/info_2.png");
@@ -52,6 +56,8 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("plant_arrow", 'assets/Transition/plant_arrow.png')
         this.load.image("water_arrow_circle", 'assets/Transition/water_arrow_circle.png')
         this.load.image("right_arrow", 'assets/Transition/right-arrow.png')
+        this.load.image("timeout_arrow" , 'assets/Transition/timeout_arrow.png')
+        this.load.image("tau_arrow" , 'assets/Transition/tau_arrow.png')
 
         /* Loader Events:
             - complete: when done loading everything

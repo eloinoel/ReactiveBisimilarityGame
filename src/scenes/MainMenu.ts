@@ -11,8 +11,7 @@ export default class MainMenu extends BaseScene {
 
   /* preload function to add music and pictures into memory */
     preload() {
-        this.load.image("logo", 'assets/phaser3-logo.png');
-
+        
     }
 
   /* create function is used to add the objects to the game */
@@ -21,18 +20,26 @@ export default class MainMenu extends BaseScene {
 
         this.toFadeIn = []
 
-        this.toFadeIn.push(this.add.image(this.cameras.main.centerX, this.game.renderer.height * 0.2, 'logo').setDepth(1));
-
-        let playButton = this.add.text(this.renderer.width/2, this.renderer.height/2, "Play", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(50).setOrigin(0.5).setDepth(1);
+        let playButton = this.add.text(this.renderer.width/2, this.renderer.height/2- 30, "Play", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(50).setOrigin(0.5).setDepth(1);
         this.toFadeIn.push(playButton);
 
-        let options_button = this.add.text(this.renderer.width/2, this.renderer.height/2 + 65, "Credits", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(38).setOrigin(0.5).setDepth(1);
+        let options_button = this.add.text(this.renderer.width/2, this.renderer.height/2 + 35, "Credits", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(38).setOrigin(0.5).setDepth(1);
         this.toFadeIn.push(options_button);
 
         for(let i = 0; i < this.toFadeIn.length; i++) {
-            this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*100);
+            this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*100 + 100);
         }
 
+        /* let logo = this.add.image(this.renderer.width/2 + 80, this.renderer.height - 50, "logo").setOrigin(0.5).setScale(0.3)
+        let built_with = this.add.text(this.renderer.width/2 - 70, this.renderer.height - 50, "Built with", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(20).setOrigin(0.5).setDepth(1).setResolution(2);
+        this.toFadeIn.push(built_with);
+        this.toFadeIn.push(logo);
+
+        for(let i = 0; i < this.toFadeIn.length; i++) {
+            this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*25 + 200);
+        } */
+
+        
 
         /** make image buttons interactive
          * PointerEvents:

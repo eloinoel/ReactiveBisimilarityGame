@@ -24,6 +24,8 @@ export class Constants {
     static COLORS_GREEN = {c1: "#00A072", c2: "#00C897", c3: "#0EDDAA", c4: "#ACFFAD"}; //dark to bright
     static COLORS_GREY = {c1: '#413F42', c2: '#7F8487', c3 : '#CFD2CF', c4: '#DDDDDD'}
     static COLOR_BORDEAUX = Phaser.Display.Color.GetColor(200, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).g, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).b);
+    static COLORS_PARALLAX = {white: '#9db8b9', dark_blue: '#12273b', lighter_blue: '#085b87', very_dark_blue: '#0f1326'}
+
 
     static textStyle = "Monospace";
     static UI_height = 60;

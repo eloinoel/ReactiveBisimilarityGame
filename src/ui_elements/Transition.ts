@@ -229,11 +229,11 @@ export class FixedLengthTransition extends Phaser.GameObjects.Container {
 
             //TODO:
             } else if(caption === Constants.TIMEOUT_ACTION) {
-                this.arrow = this.scene.add.image(0, 0, "right_arrow").setOrigin(0.5).setDepth(0).setScale(0.15);
-                this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30).setDepth(2);
+                this.arrow = this.scene.add.image(0, 0, "timeout_arrow").setOrigin(0.5).setDepth(2).setScale(0.15);
+                /* this.arrow = this.scene.add.image(0, 0, "right_arrow").setOrigin(0.5).setDepth(0).setScale(0.15);
+                this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30).setDepth(2); */
             } else if(caption === Constants.HIDDEN_ACTION) {
-                this.arrow = this.scene.add.image(0, 0, "right_arrow").setOrigin(0.5).setDepth(0).setScale(0.15);
-                this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(305).setDepth(2);
+                this.arrow = this.scene.add.image(0, 0, "tau_arrow").setOrigin(0.5).setDepth(2).setScale(0.15);
             } else {
                 console.log(caption +  " transition not implemented")
             }
