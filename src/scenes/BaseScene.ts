@@ -2,6 +2,8 @@ import { Constants } from "../utils/Constants";
 
 export default class BaseScene extends Phaser.Scene {
 
+
+    background!: Phaser.GameObjects.Image;
     /**
      * 
      * @param fadeIn true: fadein, false: fadeout

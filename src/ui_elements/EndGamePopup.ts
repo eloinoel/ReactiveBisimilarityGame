@@ -71,7 +71,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
             .add(this.next_level_btn = new ReplayButton(this.scene, 0, 0, this.next_level_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Next Level", this.textStyle), {padding: {top: 10, left: 7}})
         );
 
-        sizer.setDepth(2)
+        sizer.setDepth(5)
         sizer.layout();
 
         return sizer;
@@ -148,7 +148,7 @@ export class LosePopup extends Phaser.GameObjects.Container {
             .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Try again", this.textStyle))
         );
 
-        sizer.setDepth(2)
+        sizer.setDepth(5)
         sizer.layout();
 
         return sizer;

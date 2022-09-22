@@ -57,6 +57,9 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         let list = this.sizer.getAllChildren()
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(1)
+            if(list[i] instanceof Label) {
+                list[i].setInteractive();
+            }
         }
         this.tickButton.setVisible(true);
         return this;
@@ -75,6 +78,10 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             //icons
             if(list[i] instanceof Phaser.GameObjects.Image) {
                 (list[i] as Label).setAlpha(0.9)
+            }
+
+            if(list[i] instanceof Label) {
+                list[i].disableInteractive();
             }
         }
         this.tickButton.setVisible(false);
@@ -193,7 +200,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                 } else if(this.possibleActions[i] === "c") {
                     icon = this.scene.add.image(0, 0, "leaf_icon").setScale(0.05);
                 }
-                label = new Label(this.scene, {
+                this.scene.add.existing(label = new Label(this.scene, {
                     width: 40, height: 40,
                     background: label_bg,
                     icon: icon,
@@ -205,9 +212,9 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                         bottom: 5,
                     },
                     align: 'center'
-                })
+                }))
             } else {
-                label = new Label(this.scene, {
+                this.scene.add.existing(label = new Label(this.scene, {
                     width: 40, height: 40,
                     background: label_bg,
                     text: this.scene.add.text(0, 0, this.possibleActions[i], {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(22).setResolution(2),
@@ -218,14 +225,72 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                         bottom: 5,
                     },
                     align: 'center'
-                })
+                }))
             }
             this.sizer.add(label);
             this.panel_buttons.set(label, this.curEnvironment.has(this.possibleActions[i]) ? true : false);
         }
+
+        let children = this.sizer.getAllChildren();
+        for(let k = 0; k < children.length; k++) {
+            let child = children[k];
+            if(child instanceof Label) {
+                child.setInteractive()
+                child.on('pointerover', () => {
+                    if(this.panel_buttons.get(child)) {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setAlpha(1);
+                    //toggled off
+                    } else {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)).setAlpha(0.5);
+                    }
+                });
+                
+                child.on('pointerup', () => {
+                    //toggle on or off
+                    this.panel_buttons.set(child, this.panel_buttons.get(child) === undefined? true : !this.panel_buttons.get(child))
+                    //activated
+                    if(this.panel_buttons.get(child)) {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setAlpha(1);
+                        ((child as Label).getElement('background') as RoundRectangle).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3));
+                    //toggled off
+                    } else {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)).setAlpha(0.5);
+                        ((child as Label).getElement('background') as RoundRectangle).setStrokeStyle();
+                    }
+                    
+                    //set Environment
+                    /* let tmp = this.getActiveActions();
+                    this.game.setEnvironment(new Set(tmp)); */
+                })
+
+                child.on('pointerout', () => {
+                    //activated
+                    if(this.panel_buttons.get(child)) {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setAlpha(1);
+                    //toggled off
+                    } else {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(0.5);
+                    }
+                })
+
+                child.on('pointerdown', () => {
+                    //activated
+                    if(this.panel_buttons.get(child)) {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)).setAlpha(1);
+                    //toggled off
+                    } else {
+                        ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c3)).setAlpha(0.5);
+                    }
+                    //var index = (this.sizer.getElement('items') as Phaser.GameObjects.GameObject[]).indexOf(child);
+                    //print.text += `click ${index}\n`; 
+                })
+            }
+        }
+
         this.sizer.layout();
 
-        this.sizer.setChildrenInteractive({})
+        //OLD CODE, IF SOMETHING BREAKS WITH NEW CODE
+        /* this.sizer.setChildrenInteractive({})
             .on('child.up', (child: Label) => {  
                 //toggle on or off
                 this.panel_buttons.set(child, this.panel_buttons.get(child) === undefined? true : !this.panel_buttons.get(child))
@@ -240,8 +305,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                 }
                 
                 //set Environment
-                /* let tmp = this.getActiveActions();
-                this.game.setEnvironment(new Set(tmp)); */
+                let tmp = this.getActiveActions();
+                this.game.setEnvironment(new Set(tmp));
             })
             .on('child.down', (child: Label) => {
                 //activated
@@ -272,7 +337,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                 } else {
                     (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(0.5);
                 }
-            });
+            }); */
         
             //if update call, restore previous settings
             if(!this.enabled) {
@@ -296,5 +361,14 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.blinkingRectangle.destroy()
         this.sizer.destroy(false);
         this.panel_buttons.clear();
+    }
+
+    setAllLabelsInteractive() {
+        let list = this.sizer.getAllChildren()
+        for(let i = 0; i < list.length; i++) {
+            if(list[i] instanceof Label) {
+                list[i].setInteractive();
+            }
+        }
     }
 }

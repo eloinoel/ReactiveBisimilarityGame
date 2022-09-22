@@ -51,7 +51,7 @@ export class Button extends Phaser.GameObjects.Container {
         this.y = Math.round(this.y);
         this.setDepth(1);
         this.setInteractive();
-        this.setScale(0.5);
+        this.setScale(0.5).setAlpha(0.9);
 
         
         //red blink animation

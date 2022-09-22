@@ -7,6 +7,7 @@ import { LevelDescription } from "../../ui_elements/LevelDescription";
  * Introducing hidden action
  */
 export default class Level3_6 extends BaseScene {
+
     constructor() {
         super('ReBisim_Level6');
     }
@@ -20,6 +21,7 @@ export default class Level3_6 extends BaseScene {
 
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
+        this.background = bg;
 
         this.scene.launch("GUIScene", { otherRunningScene: this })
 

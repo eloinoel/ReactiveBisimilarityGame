@@ -35,6 +35,13 @@ export default class Preloader extends Phaser.Scene {
 
         //background
         this.load.image("background_demo", 'assets/dark_blue_sky.jpg');
+        this.load.image("background_mountain_water", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_1/game_background_1.png');
+        this.load.image("background_mountain_desert", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_2/game_background_2.png');
+        this.load.image("background_forest", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_3/game_background_3.1.png');
+        this.load.image("background_swamp", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_4/game_background_4.png');
+        this.load.image("background_dark_gradient", 'assets/background_parallax/dark_gradient.png');
+        this.load.image("background_dark_gradient_green", 'assets/background_parallax/dark_gradient_green.png');
+
 
         //characters
         this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 64, frameHeight: 96});

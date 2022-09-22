@@ -65,7 +65,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -236,6 +236,9 @@ export class PhaserGameController {
                 //enable Environment Change UI
                 this.nextProcessAfterTimeout = next_process;
                 this.environment_panel.enable();
+                (this.scene as BaseScene).background.setInteractive()
+                //this.environment_panel.setAllLabelsInteractive()
+                
             } else {
                 return this.doMove(next_process, isSymmetryMove);
             }
@@ -393,7 +396,7 @@ export class PhaserGameController {
                 
 
                 //grey overlay
-                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(4);
 
                 //open popup
                 let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
@@ -428,7 +431,7 @@ export class PhaserGameController {
             console.log("The defender wins the game!");
 
             //grey overlay
-            let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+            let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(4);
 
             //open popup
             let pop = new LosePopup(this.scene, () => {
@@ -628,7 +631,7 @@ export class PhaserGameController {
             let p0_button = this.stateBtns.get(p0);
             if(p0_button !== undefined) {
                 this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
-                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2));
+                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setVisible(this.debug);
             } else {
                 this.printError("startGame: " + p0 + " is not in stateBtns list.");
                 return
@@ -637,7 +640,7 @@ export class PhaserGameController {
             let p1_button = this.stateBtns.get(p1)
             if(p1_button !== undefined) {
                 this.current_hightlights[1] = this.scene.add.circle(p1_button.x, p1_button.y, 36).setDepth(0);
-                this.current_hightlights[1].setStrokeStyle(4,  Constants.convertColorToNumber(Constants.COLORS_RED.c4));
+                this.current_hightlights[1].setStrokeStyle(4,  Constants.convertColorToNumber(Constants.COLORS_RED.c4)).setVisible(this.debug);
             } else {
                 this.printError("startGame: " + p1 + " is not in stateBtns list.");
                 return
@@ -660,7 +663,7 @@ export class PhaserGameController {
                     add: false
                 });
                 shape.fillStyle(0xffffff);
-                shape.arc(0, 0, 31, 0, Math.PI*2);
+                shape.arc(0, 0, 29, 0, Math.PI*2);
                 shape.fillPath().setDepth(6);
                 this.player_icons[1] = shape;
                 //let debug = this.scene.add.circle(p0_button.x, p0_button.y, 31, 0x6666ff).setDepth(6)
@@ -709,6 +712,12 @@ export class PhaserGameController {
         }).setScale(0.15);
 
         this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 60, this.game, this);
+        
+        (this.scene as BaseScene).background.on('pointerdown', () => {
+            this.environment_panel.disable();
+            this.environment_panel.update();
+            (this.scene as BaseScene).background.disableInteractive()
+        })
     }
 
     /**
@@ -803,6 +812,11 @@ export class PhaserGameController {
         if(cur0_btn !== undefined && cur1_btn !== undefined) {
             this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
             this.current_hightlights[1].setPosition(cur1_btn.x, cur1_btn.y);
+
+            (this.player_icons[0] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x + 1, cur0_btn.y + 15);
+            (this.player_icons[1] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x , cur0_btn.y);
+            (this.player_icons[2] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x - 5, cur1_btn.y - 38);
+            (this.player_icons[3] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x , cur1_btn.y);
         }
     }
 

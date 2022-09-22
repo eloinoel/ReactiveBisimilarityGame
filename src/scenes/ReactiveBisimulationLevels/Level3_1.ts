@@ -15,8 +15,10 @@ export default class Level3_1 extends BaseScene {
     create() {
         this.fade(true);
 
-        let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
+        let bg = this.add.image(this.renderer.width/2, this.renderer.height/2, "background_demo").setOrigin(0.5).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
+        this.background = bg;
+        //this.background.setInteractive();
 
         this.scene.launch("GUIScene", { otherRunningScene: this })
 
