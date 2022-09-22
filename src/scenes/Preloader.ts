@@ -38,8 +38,9 @@ export default class Preloader extends Phaser.Scene {
 
         //characters
         this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 64, frameHeight: 96});
-        this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
-        this.load.spritesheet("dark_magician_idle", "assets/characters/Wizard\ Pack/Wizard\ Pack/Idle.png", {frameWidth: 231, frameHeight: 190})
+        this.load.spritesheet("purple_wizard", "assets/characters/tinyPurpleWizard/MAGE.png", {frameWidth: 150, frameHeight: 150})
+        /* this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
+        this.load.spritesheet("dark_magician_idle", "assets/characters/Wizard\ Pack/Wizard\ Pack/Idle.png", {frameWidth: 231, frameHeight: 190}) */
         
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');

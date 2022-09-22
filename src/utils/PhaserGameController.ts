@@ -651,7 +651,7 @@ export class PhaserGameController {
                 repeat: -1
             })
             if(player_anim !== false) { 
-                this.player_icons[0] = this.scene.add.sprite(p0_button.x+1, p0_button.y + 15, 'witch_idle').setScale(1.0).setOrigin(0.5).setDepth(4);
+                this.player_icons[0] = this.scene.add.sprite(p0_button.x+1, p0_button.y + 15, 'witch_idle').setScale(0.95).setOrigin(0.5).setDepth(4);
                 (this.player_icons[0] as Phaser.GameObjects.Sprite).play('witch_idle_animation');
 
                 const shape = this.scene.make.graphics({
@@ -673,13 +673,13 @@ export class PhaserGameController {
             //create animated opponent icon
             let opponent_anim = this.scene.anims.create({
                 key: 'wizard_idle_animation',
-                frames: this.scene.anims.generateFrameNumbers('dark_magician_idle', {frames: [0, 1, 2, 3, 4, 5]}),
+                frames: this.scene.anims.generateFrameNumbers('purple_wizard', {frames: [0, 1, 2, 3, 4, 5, 6, 7]}),
                 frameRate: 6,
                 repeat: -1
                 
             })
             if(opponent_anim !== false) { 
-                this.player_icons[2] = this.scene.add.sprite(p1_button.x-5, p1_button.y + 15, 'dark_magician_idle').setScale(1.0).setOrigin(0.5).setDepth(4);
+                this.player_icons[2] = this.scene.add.sprite(p1_button.x - 5, p1_button.y - 38, 'purple_wizard').setScale(0.95).setOrigin(0.5).setDepth(4);
                 (this.player_icons[2] as Phaser.GameObjects.Sprite).play('wizard_idle_animation').toggleFlipX();
 
                 const shape = this.scene.make.graphics({
