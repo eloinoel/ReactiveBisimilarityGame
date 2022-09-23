@@ -57,6 +57,7 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("fire_icon", 'assets/fire.png');
         this.load.image("water_icon", 'assets/water-drop.png');
         this.load.image("leaf_icon", 'assets/leaf2.png');
+        this.load.image("sand_clock", 'assets/Transition/sand_clock.png')
 
         //arrows
         this.load.image("fire_arrow", 'assets/Transition/fire_arrow.png')

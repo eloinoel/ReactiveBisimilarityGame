@@ -533,8 +533,10 @@ export class ReactiveBisimilarityGame {
         let moves;
         if(curPosition !== undefined) {
             moves = this.possibleMoves(curPosition, true);
+            //moves = this.generateMoves(curPosition, true)
         } else {
             moves = this.possibleMoves(undefined, true);
+            //moves = this.generateMoves(this.play[this.play.length - 1], true)
         }
         
         let counter = 0;

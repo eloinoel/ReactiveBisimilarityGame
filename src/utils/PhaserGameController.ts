@@ -31,6 +31,7 @@ export class PhaserGameController {
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
+    private movable_environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
     private ai_controller!: AI; 
 
@@ -65,7 +66,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -146,6 +147,7 @@ export class PhaserGameController {
             this.createHighlights(p0, p1);
             this.createReactiveElements();
             this.environment_panel.disable(); //only enable on timeout
+            this.movable_environment_panel.disable()
             if(!reactive) {
                 this.environment_container.setVisible(false);
                 this.environment_panel.makeInvisible();
@@ -195,8 +197,24 @@ export class PhaserGameController {
             } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
                 this.game.resetEnvironment();
             }
+
+            //red blinking
+            
+            this.movable_environment_panel.redBlinking();
+            this.scene.time.delayedCall(400, () => {
+                this.movable_environment_panel.disable()
+                this.movable_environment_panel.makeInvisible()
+                this.environment_panel.updatePanel();
+                this.movable_environment_panel.updatePanel();
+            })
+            
+        } else {
+            this.movable_environment_panel.disable()
+            this.environment_panel.updatePanel();
+            this.movable_environment_panel.updatePanel();
+            this.movable_environment_panel.swooshAnimation(this.environment_panel.getPanelPosition())
         }
-        this.environment_panel.updatePanel();
+
         return legalMove;
     }
 
@@ -216,8 +234,9 @@ export class PhaserGameController {
         //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
             //revert any changes made to the environment by timeout action
-            if(this.environment_panel.isEnabled()) {
-                this.environment_panel.disable();
+            if(this.movable_environment_panel.isEnabled()) {
+                this.movable_environment_panel.disable();
+                this.movable_environment_panel.makeInvisible()
 
                 //environment wasn't changed if it is still enabled
                 /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
@@ -234,11 +253,20 @@ export class PhaserGameController {
             //timeout action, can only occur in these node types
             if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
                 //enable Environment Change UI
-                this.nextProcessAfterTimeout = next_process;
-                this.environment_panel.enable();
-                (this.scene as BaseScene).background.setInteractive()
-                //this.environment_panel.setAllLabelsInteractive()
-                
+                //get position 
+                let p1_btn = this.stateBtns.get(cur_pos.process1);
+                let p2_btn = this.stateBtns.get(next_process);
+                if(p1_btn !== undefined && p2_btn !== undefined) {
+                    this.nextProcessAfterTimeout = next_process;
+                    this.movable_environment_panel.enable();
+                    let vector = new Phaser.Math.Vector2(p2_btn.x - p1_btn.x, p2_btn.y - p1_btn.y);
+                    let center = new Phaser.Math.Vector2(p1_btn.x, p1_btn.y).add(vector.clone().scale(0.5)); 
+                    this.movable_environment_panel.setPanelPosition(center)
+                    this.movable_environment_panel.makeVisible();
+                    (this.scene as BaseScene).background.setInteractive()
+                } else {
+                    this.printError("encapsulateDoMove: cannot display environment panel, buttons were not found");
+                }
             } else {
                 return this.doMove(next_process, isSymmetryMove);
             }
@@ -539,6 +567,7 @@ export class PhaserGameController {
         if(this.game.isReactive()) {
             this.updateEnvironmentContainer();
             this.environment_panel.updatePanel();
+            this.movable_environment_panel.updatePanel()
         }
         if(this.debug) {
             this.updateCurrentPositionField();
@@ -594,6 +623,7 @@ export class PhaserGameController {
             //update visualization
             this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
             this.environment_panel.updatePanel();
+            this.movable_environment_panel.updatePanel()
             this.updatePossibleMovesField();
 
         } else {
@@ -613,6 +643,7 @@ export class PhaserGameController {
             if(this.game_initialized) {
                 this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
                 this.environment_panel.updatePanel();
+                this.movable_environment_panel.updatePanel()
                 this.updatePossibleMovesField();
             }
         } else {
@@ -711,11 +742,14 @@ export class PhaserGameController {
             this.doMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 60, this.game, this);
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game, this, true, 1);
+
+        this.movable_environment_panel = new EnvironmentPanel(this.scene, 0, 0, this.game, this, false, 0.7).makeInvisible();
         
         (this.scene as BaseScene).background.on('pointerdown', () => {
-            this.environment_panel.disable();
-            this.environment_panel.update();
+            this.movable_environment_panel.disable();
+            this.movable_environment_panel.makeInvisible()
+            this.movable_environment_panel.update();
             (this.scene as BaseScene).background.disableInteractive()
         })
     }

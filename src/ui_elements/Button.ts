@@ -51,7 +51,7 @@ export class Button extends Phaser.GameObjects.Container {
         this.y = Math.round(this.y);
         this.setDepth(1);
         this.setInteractive();
-        this.setScale(0.5).setAlpha(0.9);
+        this.setScale(0.5)//.setAlpha(1);
 
         
         //red blink animation
@@ -105,7 +105,7 @@ export class Button extends Phaser.GameObjects.Container {
         this.blinkingRectangle.alpha = 0
         this.scene.tweens.add({
             targets: this.blinkingRectangle,
-            alpha: 0.7,
+            alpha: 0.8,
             ease: Phaser.Math.Easing.Quintic.InOut,
             duration: 160,
             repeat: 1,
@@ -397,19 +397,20 @@ export class Tick_Button extends Phaser.GameObjects.Container {
 
     private image: Phaser.GameObjects.Image;
     private background: RoundRectangle;
+    scale_btn: number;  //reset parameter
 
-    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, bg_clr: string, border_clr = bg_clr) {
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, actionOnClick = () => {}, bg_clr: string, border_clr = bg_clr, scale = 1) {
         super(scene, x, y);
 
         this.image = scene.add.image(0, 0, texture).setOrigin(0.5).setScale(0.8).setTintFill(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
         this.setSize(this.image.width, this.image.height);
 
-        let scale = 0.32
-        this.setScale(scale)
+        this.scale_btn = 0.32 * scale;
+        this.setScale(this.scale_btn)
 
-        this.background = scene.add.existing(new RoundRectangle(scene, 0, 0, this.width, this.height, 10/scale, Constants.convertColorToNumber(bg_clr)))
+        this.background = scene.add.existing(new RoundRectangle(scene, 0, 0, this.width, this.height, 150*this.scale_btn, Constants.convertColorToNumber(bg_clr)))
         if(bg_clr !== border_clr) {
-            this.background.setStrokeStyle(4/scale, Constants.convertColorToNumber(border_clr));
+            this.background.setStrokeStyle(4/this.scale_btn, Constants.convertColorToNumber(border_clr));
         }
         
         this.add(this.background)
@@ -428,23 +429,24 @@ export class Tick_Button extends Phaser.GameObjects.Container {
          *    pointerdown - just click
          */
         this.on('pointerover', () => {
-            this.scale = scale + 0.05
+            this.scale = this.scale_btn + 0.15*this.scale_btn
             this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
         })
         this.on('pointerdown', () => {
-            this.scale = scale - 0.025
+            this.scale = this.scale_btn - 0.0075*this.scale_btn
             this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.6)
         })
         this.on('pointerup', () => {
             actionOnClick();
-            this.scale = scale + 0.05
+            this.scale = this.scale_btn + 0.15*this.scale_btn
             this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
         })
         this.on('pointerout', () => {
-            this.scale = scale
+            this.scale = this.scale_btn;
             this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(1)
         })
     }
+
 }
 
 
