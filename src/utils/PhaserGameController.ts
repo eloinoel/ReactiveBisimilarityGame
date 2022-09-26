@@ -395,9 +395,7 @@ export class PhaserGameController {
      * end screen Popup
      * @param win 
      */
-    launchEndScreen(win: boolean) {
-        //TODO: set private
-
+    private launchEndScreen(win: boolean) {
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
             if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
@@ -426,8 +424,6 @@ export class PhaserGameController {
 
                     localStorage.setItem("levels", JSON.stringify(levels));
                 }
-
-                
 
                 //grey overlay
                 let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(4);
@@ -589,6 +585,7 @@ export class PhaserGameController {
         }
     }
     /**
+     * Method not needed in project
      * TODO: check if switching game mode is possible in current game state
      * if @reactive = true, @bisimilar is not checked in the internal game engine
      * @param reactive 
