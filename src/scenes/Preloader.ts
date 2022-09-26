@@ -23,7 +23,8 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("ui_tick_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/tick.png");
         this.load.image("ui_level_map_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/list_bulleted.png");
         this.load.image("ui_questionmark_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/help.png");
-        this.load.image("ui_swap_btn", "assets/switch.png")
+        //this.load.image("ui_swap_btn", "assets/switch.png")
+        this.load.image("ui_swap_btn", "assets/Transition/symmetry_arrow.png")
 
         //LTS
         this.load.image("circle", 'assets/DemoScene/Circle03.png');
@@ -46,8 +47,6 @@ export default class Preloader extends Phaser.Scene {
         //characters
         this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 64, frameHeight: 96});
         this.load.spritesheet("purple_wizard", "assets/characters/tinyPurpleWizard/MAGE.png", {frameWidth: 150, frameHeight: 150})
-        /* this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
-        this.load.spritesheet("dark_magician_idle", "assets/characters/Wizard\ Pack/Wizard\ Pack/Idle.png", {frameWidth: 231, frameHeight: 190}) */
         
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');

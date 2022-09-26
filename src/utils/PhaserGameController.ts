@@ -253,16 +253,20 @@ export class PhaserGameController {
             let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
             //timeout action, can only occur in these node types
             if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
+                //this.movable_environment_panel.stopAllTweens();
+                this.movable_environment_panel.disable();
+                this.movable_environment_panel.makeInvisible()
                 //enable Environment Change UI
                 //get position 
                 let p1_btn = this.stateBtns.get(cur_pos.process1);
                 let p2_btn = this.stateBtns.get(next_process);
                 if(p1_btn !== undefined && p2_btn !== undefined) {
                     this.nextProcessAfterTimeout = next_process;
-                    this.movable_environment_panel.enable();
                     let vector = new Phaser.Math.Vector2(p2_btn.x - p1_btn.x, p2_btn.y - p1_btn.y);
                     let center = new Phaser.Math.Vector2(p1_btn.x, p1_btn.y).add(vector.clone().scale(0.5)); 
+                    this.movable_environment_panel.stopAllTweens()
                     this.movable_environment_panel.setPanelPosition(center)
+                    this.movable_environment_panel.enable();
                     this.movable_environment_panel.makeVisible();
                     (this.scene as BaseScene).background.setInteractive()
                 } else {
@@ -425,7 +429,7 @@ export class PhaserGameController {
                 }
 
                 //grey overlay
-                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(4);
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7);
 
                 //open popup
                 let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {

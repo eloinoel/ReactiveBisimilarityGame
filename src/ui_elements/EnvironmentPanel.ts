@@ -4,7 +4,7 @@ import { SetOps } from "../utils/SetOps";
 import { ReactiveBisimilarityGame } from "../utils/ReactiveBisimilarityGameController";
 import { Tick_Button } from "./Button";
 import { PhaserGameController } from "../utils/PhaserGameController";
-import { Time } from "phaser";
+import { Time, Tweens } from "phaser";
 
 export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
@@ -29,6 +29,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private disabledAlpha = 0.4;
     private current_alpha = 1;
     private inFadeTween = false;
+    private tweenList: Tweens.Tween[];
 
 
     constructor(scene: Phaser.Scene, x: number, y: number, game: ReactiveBisimilarityGame, phaser_game: PhaserGameController, display_caption = true, scale = 1) {
@@ -36,6 +37,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
 
         this.coordinates = new Phaser.Math.Vector2(x, y);
+        this.tweenList = []
 
         this.panel_buttons = new Map();
         this.game = game;
@@ -65,7 +67,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     enable() {
         this.enabled = true;
         this.sizer.setInteractive();
-        this.sizer_bg.setStrokeStyle(3, Constants.convertColorToNumber("#00C59C"));
+        //this.sizer_bg.setStrokeStyle(3, Constants.convertColorToNumber("#00C59C"));
         let list = this.sizer.getAllChildren()
         this.caption.setAlpha(1)
         for(let i = 0; i < list.length; i++) {
@@ -201,7 +203,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     swooshAnimation(destination: Phaser.Math.Vector2) {
 
         //position
-        this.scene.tweens.add({
+        let tw0 = this.scene.tweens.add({
             targets: this.coordinates,
             x: destination.x,
             y: destination.y,
@@ -211,7 +213,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
         //fade out
         this.inFadeTween = true
-        this.scene.tweens.add({
+        let tw1 = this.scene.tweens.add({
             targets: this.sizer,
             alpha: 0,
             ease: Phaser.Math.Easing.Cubic.InOut,
@@ -219,6 +221,12 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             onUpdate: (tween) => { this.updatePanel(); this.current_alpha = tween.getValue()},
             onComplete: () => {this.makeInvisible(); this.inFadeTween = false;}
         })
+
+        this.tweenList.push(tw0, tw1);
+    }
+
+    stopAllTweens() {
+        this.scene.tweens.killAll()
     }
 
     private createPanel() {
@@ -250,7 +258,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for (var i = 0; i < this.possibleActions.length; i++) {
             let icon;
             let label: Label;
-            let label_bg = this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)).setDepth(6))
+            let label_bg = this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3) ).setDepth(6))
             : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setDepth(6));
 
             if(this.possibleActions[i] === "a" || this.possibleActions[i] === "b" || this.possibleActions[i] === "c") {
