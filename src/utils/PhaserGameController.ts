@@ -746,7 +746,7 @@ export class PhaserGameController {
     private createReactiveElements() {
         this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2, "ui_swap_btn", () => {
             this.encapsulateDoMove(this.game.getCurrent(1), true);
-        }).setScale(0.15);
+        }).setScale(0.14);
 
         this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game, this, true, 1);
 
@@ -775,6 +775,11 @@ export class PhaserGameController {
                 this.setEnvironmentFromString((text_obj as Phaser.GameObjects.Text).text);
             })
         })
+    }
+
+    //TODO:
+    pulsateNextMoveButtons() {
+
     }
 
     /**
