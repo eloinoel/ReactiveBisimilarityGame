@@ -40,6 +40,7 @@ export class PhaserGameController {
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
+    /**shows debug UI if set to true */
     debug: boolean;
 
     /**
@@ -66,7 +67,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -333,6 +334,11 @@ export class PhaserGameController {
             console.log("move not possible: " + action + ", " + next_position.toString());
             return -1;
         } else {
+
+            if(isSymmetryMove) {
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
+            }
 
             //update visuals
             this.updateVisualsAfterMove()
@@ -739,7 +745,7 @@ export class PhaserGameController {
      */
     private createReactiveElements() {
         this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2, "ui_swap_btn", () => {
-            this.doMove(this.game.getCurrent(1), true);
+            this.encapsulateDoMove(this.game.getCurrent(1), true);
         }).setScale(0.15);
 
         this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game, this, true, 1);
@@ -847,9 +853,16 @@ export class PhaserGameController {
             this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
             this.current_hightlights[1].setPosition(cur1_btn.x, cur1_btn.y);
 
-            (this.player_icons[0] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x + 1, cur0_btn.y + 15);
+            //player 1 is in right side lts
+            if(cur0_btn.x > this.scene.renderer.width/2) {
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x - 1, cur0_btn.y + 15);
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x + 5, cur1_btn.y - 38);
+            } else {
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x + 1, cur0_btn.y + 15);
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x - 5, cur1_btn.y - 38);
+            }
+            
             (this.player_icons[1] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x , cur0_btn.y);
-            (this.player_icons[2] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x - 5, cur1_btn.y - 38);
             (this.player_icons[3] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x , cur1_btn.y);
         }
     }
