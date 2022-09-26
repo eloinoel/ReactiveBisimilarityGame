@@ -185,7 +185,7 @@ export class PhaserGameController {
      */
     setEnvironmentAndDoTimeout(env: Set<string>) {
         //set environment
-        this.setEnvironment(env);
+        this.setEnvironment(env, false);
 
         //doMove
         let legalMove = this.doMove(this.nextProcessAfterTimeout, false);
@@ -194,9 +194,9 @@ export class PhaserGameController {
         if(legalMove === -1) {
             let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-                this.game.setEnvironment(cur_pos.environment);
+                this.game.setEnvironment(cur_pos.environment, true);
             } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
-                this.game.resetEnvironment();
+                this.game.resetEnvironment(true);
             }
 
             //red blinking
@@ -290,7 +290,6 @@ export class PhaserGameController {
 
         if(moves.length === 0) {
             this.printError("doMove: no possible moves from current position")
-            //TODO: display visual feedback
             return -1;
         }
 
@@ -305,7 +304,7 @@ export class PhaserGameController {
                 next_position = moves.filter((position) => (cur_pos.isSymmetryMove(position) && position.process1 === next_process));
                 action = Constants.NO_ACTION;
             } else {
-                next_position = moves.filter((position) => (position.process1 === next_process));  //TODO: also test transition label
+                next_position = moves.filter((position) => (position.process1 === next_process));
                 if(!(next_position.length === 0)) {
                     action = (next_position[0] as SimulationDefenderNode).previousAction;
                 }
@@ -315,7 +314,7 @@ export class PhaserGameController {
                 return -1;
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-            next_position = moves.filter((position) => (position.process2 === next_process));  //TODO: also test transition label
+            next_position = moves.filter((position) => (position.process2 === next_process));
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
                 return -1;
@@ -639,11 +638,11 @@ export class PhaserGameController {
      * only execute after startGame() has been called
      * @param text 
      */
-     setEnvironment(env: Set<string>) {
+     setEnvironment(env: Set<string>, visualsUpdate = true) {
         if(this.game.isReactive()) {
-            this.game.setEnvironment(env);
+            this.game.setEnvironment(env, !visualsUpdate);
             //update visualization
-            if(this.game_initialized) {
+            if(this.game_initialized && visualsUpdate) {
                 this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
                 this.environment_panel.updatePanel();
                 this.movable_environment_panel.updatePanel()

@@ -461,13 +461,15 @@ export class ReactiveBisimilarityGame {
         return str;
     }
 
-    resetEnvironment() : number {
+    resetEnvironment(disablePrint = false) : number {
         if(this.reactive === false) {
             this.printError("resetEnvironment: method was called but game is not reactive.");
             return -1;
         } else {
             this.environment = new Set(SetOps.toArray(this.lts.getVisibleActions()).sort());
-            console.log("Environment was reset to {" + SetOps.toArray(this.environment) + "}.");
+            if(!disablePrint) {
+                console.log("Environment was reset to {" + SetOps.toArray(this.environment) + "}.");
+            }
             return 0;
         }
     }
