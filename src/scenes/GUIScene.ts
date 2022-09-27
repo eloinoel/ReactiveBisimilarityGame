@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import BaseScene from './BaseScene';
 import { Constants } from "../utils/Constants";
 import { UI_Button } from '../ui_elements/Button';
+import { RulesPopUp } from '../ui_elements/RulesPopUp';
 
 export default class GUIScene extends BaseScene {
     otherRunningScene!: Phaser.Scene;
@@ -19,7 +20,7 @@ export default class GUIScene extends BaseScene {
     }
 
     /* create function is used to add the objects to the game */
-    create(data: { otherRunningScene: Phaser.Scene }) {
+    create(data: { otherRunningScene: Phaser.Scene, levelType: number}) {
         this.otherRunningScene = data.otherRunningScene;
 
 
@@ -46,8 +47,7 @@ export default class GUIScene extends BaseScene {
         })}, "Restart");
 
         let infoyBtn = new UI_Button(this, this.renderer.width - 1.5* Constants.UI_offset, "ui_questionmark_btn", () => {
-            //TODO:Display Popup
-            console.log("TODO: display rules popup")
+            let tmp = new RulesPopUp(this, data.levelType);
         }, "Rules", false);
 
         let buttons = [];

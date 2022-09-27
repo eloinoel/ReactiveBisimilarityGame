@@ -20,7 +20,8 @@ export default class Level3_1 extends BaseScene {
         this.background = bg;
         //this.background.setInteractive();
 
-        this.scene.launch("GUIScene", { otherRunningScene: this })
+        /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
+        this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 2})
 
         this.setupLTS();
     }

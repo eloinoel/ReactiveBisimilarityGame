@@ -23,6 +23,7 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("ui_tick_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/tick.png");
         this.load.image("ui_level_map_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/list_bulleted.png");
         this.load.image("ui_questionmark_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/help.png");
+        this.load.image("ui_cross_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cross.png");
         //this.load.image("ui_swap_btn", "assets/switch.png")
         this.load.image("ui_swap_btn", "assets/Transition/symmetry_arrow.png")
 
@@ -44,10 +45,17 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("background_dark_gradient_green", 'assets/background_parallax/dark_gradient_green.png');
 
 
-        //characters
+        //characters/icons
         this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 64, frameHeight: 96});
         this.load.spritesheet("purple_wizard", "assets/characters/tinyPurpleWizard/MAGE.png", {frameWidth: 150, frameHeight: 150})
-        
+        this.load.image("purple_wizard_icon", 'assets/characters/tinyPurpleWizard/mage_icon.png');
+        this.load.image("witch_icon", 'assets/characters/Blue_witch/witch_icon.png');
+        this.load.image("fire_arrow_icon", 'assets/Transition/fire_arrow_icon.png');
+        this.load.image("water_arrow_icon", 'assets/Transition/water_arrow_icon.png');
+        this.load.image("plant_arrow_icon", 'assets/Transition/plant_arrow_icon.png');
+        this.load.image("timeout_arrow_icon", 'assets/Transition/timeout_arrow_icon.png');
+        this.load.image("tau_arrow_icon", 'assets/Transition/tau_arrow_icon.png');
+
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');
         this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');

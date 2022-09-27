@@ -5,8 +5,12 @@ import { PhaserGameController } from "../../utils/PhaserGameController";
 import { LevelDescription } from "../../ui_elements/LevelDescription";
 
 export default class Level1_1 extends BaseScene {
+
+    levelType: number;
+
     constructor() {
         super('Sim_Level1');
+        this.levelType = 3;
     }
 
     preload() {
@@ -20,7 +24,8 @@ export default class Level1_1 extends BaseScene {
         bg.scale = this.renderer.width / bg.width;
         this.background = bg;
 
-        this.scene.launch("GUIScene", { otherRunningScene: this })
+        /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
+        this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 0})
 
         this.setupLTS();
     }

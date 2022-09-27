@@ -2,11 +2,14 @@ import BaseScene from "../BaseScene";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 import { LevelDescription } from "../../ui_elements/LevelDescription";
+import { RulesPopUp } from "../../ui_elements/RulesPopUp";
 
 /**
  * Introducing hidden action
  */
 export default class Level3_6 extends BaseScene {
+
+    
 
     constructor() {
         super('ReBisim_Level6');
@@ -23,7 +26,10 @@ export default class Level3_6 extends BaseScene {
         bg.scale = this.renderer.width / bg.width;
         this.background = bg;
 
-        this.scene.launch("GUIScene", { otherRunningScene: this })
+        /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
+        this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 3})
+
+        let tmp = new RulesPopUp(this, 3)
 
         this.setupLTS();
     }

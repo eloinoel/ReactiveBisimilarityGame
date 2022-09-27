@@ -1,15 +1,17 @@
 import { RoundRectangle, Sizer } from "phaser3-rex-plugins/templates/ui/ui-components";
+import Level1_1 from "../scenes/SimulationLevels/Level1_1";
 import { Constants } from "../utils/Constants";
 
 export class RulesPopUp extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;
-    private dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/3.8, 230);
+    private dimensions;
 
     private textStyle: Phaser.Types.GameObjects.Text.TextStyle;
 
     private sizer: Sizer;
-    private replay_btn!: ReplayButton;
+    private exit_btn!: ExitButton;
+    private grey_bg: Phaser.GameObjects.Rectangle;
 
     /**
      * 
@@ -19,20 +21,47 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
     constructor(scene: Phaser.Scene, levelType: number) {
         super(scene, scene.renderer.width/2, scene.renderer.height/2);
 
-        this.setSize(this.dimensions.x, this.dimensions.y);
-
-
-        this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black};
-
         this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2);
-        this.sizer = this.createPanel();
+        switch(levelType) {
+            case 0:
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.3);
+                break;
+            case 1:
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.1);
+                break;
+            case 2:
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.35, this.scene.renderer.height/1.6);
+                break;
+            case 3:
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.26, this.scene.renderer.height/1.34);
+                this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2 + 35);
+                break;
+            default:
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.3);
+        }
 
+        this.setSize(this.dimensions.x, this.dimensions.y);
+        this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black};
         
 
-        scene.add.existing(this);
+        this.grey_bg = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.4).setOrigin(0.5).setDepth(7);
+        this.sizer = this.createPanel(levelType);
+
+        
+        //add close Button
+        this.exit_btn = new ExitButton(this.scene, this.coordinates.x + this.dimensions.x/2 -22, this.coordinates.y - this.dimensions.y/2 + 22, () => {this.destroyPopup()}, this.textStyle);
+        
+        //can also close by clicking anywhere on screen
+        this.scene.time.delayedCall(100, () => {
+            let listener = this.scene.input.addListener('pointerup', () => {
+                this.destroyPopup()
+                scene.input.removeListener('pointerup', undefined, "popUpListener");
+            }, "popUpListener")
+        })
+        
     }
 
-    private createPanel(): Sizer {
+    private createPanel(levelType: number): Sizer {
 
         let sizer = new Sizer(this.scene, {
             x: this.coordinates.x, 
@@ -40,33 +69,116 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             width: this.dimensions.x,
             height: this.dimensions.y,
             orientation: 'y',
-            space: {item: 5, top: 10, bottom: 10, left: 7, right: 7}
+            space: {item: 5, top: 15, bottom: 5, left: 15, right: 15}
         })
         sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
         
         //title
-        sizer.add(this.scene.add.text(0, 0, "You win!", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"})
+        switch(levelType) {
+            case 0:
+                sizer.add(this.scene.add.text(0, 0, "Simulation Rules", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
+                break;
+            case 1:
+                sizer.add(this.scene.add.text(0, 0, "Bisimulation Rules", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
+                break;
+            case 2:
+            case 3:
+                sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation Rules", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
+                break;
+            default:
+                sizer.add(this.scene.add.text(0, 0, "Unknown Gamemode Rules :)", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
+        }
+        sizer.add(this.scene.add.text(0, 0, "Goal: Make the defender unable to simulate your spells", this.textStyle).setFontSize(22).setResolution(2), {padding: {top: 10, bottom: 10}})
+        
+        /* Attacker Rules */
+        let atk_icon = this.scene.add.image(0, 0, "witch_icon").setOrigin(0.5).setScale(0.7);
 
-        //Moves needed
-        sizer.add(this.scene.add.text(0, 0, "Moves needed: " + this.movesNeeded, this.textStyle).setResolution(2).setFontSize(20), {padding: {top: 10, bottom: 3},})
+        sizer.add(new Sizer(this.scene, { orientation: 'x'})
+        .add(atk_icon, {padding: {right: 5}})
+        .add(this.scene.add.text(0, 0, "Attacker Rules:", this.textStyle).setFontSize(26).setResolution(2).setFontStyle('bold'))
+        , {align: 'left'});
 
-        //Feedback
-        if(this.stars === 1) {
-            sizer.add(this.scene.add.text(0, 0, "There is room for improvement!", this.textStyle).setResolution(2).setFontSize(20))
-        } else if(this.stars === 2) {
-            sizer.add(this.scene.add.text(0, 0, "Well done!", this.textStyle).setResolution(2).setFontSize(20))
-        } else if(this.stars === 3) {
-            sizer.add(this.scene.add.text(0, 0, "Perfect score!", this.textStyle).setResolution(2).setFontSize(20))
+        //rules
+        let atk_rule_normal = new Sizer(this.scene, { orientation: 'x'})
+        .add(this.scene.add.text(0, 0, "    • Cast ", this.textStyle).setFontSize(22).setResolution(2))
+        .add(this.scene.add.image(0, 0, "fire_arrow_icon", ).setOrigin(0.5).setScale(0.08))
+        .add(this.scene.add.text(0, 0, ", ", this.textStyle).setFontSize(22).setResolution(2))
+        .add(this.scene.add.image(0, 0, "water_arrow_icon", ).setOrigin(0.5).setScale(0.08))
+        .add(this.scene.add.text(0, 0, " or ", this.textStyle).setFontSize(22).setResolution(2))
+        .add(this.scene.add.image(0, 0, "plant_arrow_icon", ).setOrigin(0.5).setScale(0.08))
+        .add(this.scene.add.text(0, 0, " basic magic spells ", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold'))
+        
+        sizer.add(atk_rule_normal, {align: 'left'});
+
+        //symmetry swap
+        if(levelType >= 1) {
+            let atk_rule_symmetry = new Sizer(this.scene, { orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "    • Use ", this.textStyle).setFontSize(22).setResolution(2))
+            .add(this.scene.add.image(0, 0, "ui_swap_btn", ).setOrigin(0.5).setScale(0.07))
+            .add(this.scene.add.text(0, 0, " to swap sides", this.textStyle).setFontSize(22).setResolution(2))
+
+            sizer.add(atk_rule_symmetry, {align: 'left'});
         }
 
-        //Stars
-        sizer.add(this.createStarsContainer(this.stars), {padding: {top: 3, bottom: 3}});
+        //timeout
+        if(levelType >= 2) {
+            let atk_rule_timeout = new Sizer(this.scene, { orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "    • Cast ", this.textStyle).setFontSize(22).setResolution(2))
+            .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.08))
+            .add(this.scene.add.text(0, 0, " time magic spell", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold'))
 
-        //Buttons
-        sizer.add(new Sizer(this.scene)
-            .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Replay", this.textStyle), {padding: {top: 10, right: 7}})
-            .add(this.next_level_btn = new ReplayButton(this.scene, 0, 0, this.next_level_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Next Level", this.textStyle), {padding: {top: 10, left: 7}})
-        );
+            let timeout_cond1 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "        • condition: no basic spell is possible (disable from selection)", this.textStyle).setFontSize(20).setResolution(2))
+            let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "        • consequence: disabled basic spells ", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, "won't be possible after ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
+            .add(this.scene.add.text(0, 0, "this spell,", this.textStyle).setFontSize(20).setResolution(2))
+
+            let timeout_cond3 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "                       unless ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
+            .add(this.scene.add.text(0, 0, "no basic spell is possible by the selection ", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, "(idling)", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('italic'))
+
+            //if no basic magic spell is possible
+            sizer.add(atk_rule_timeout, {align: 'left'});
+            sizer.add(timeout_cond1, {align: 'left', padding: {top: 5}})
+            sizer.add(timeout_cond2, {align: 'left'})
+            sizer.add(timeout_cond3, {align: 'left'})
+        }
+
+        //hidden action
+        if(levelType >= 3) {
+            let atk_rule_tau = new Sizer(this.scene, { orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "    • Cast ", this.textStyle).setFontSize(22).setResolution(2))
+            .add(this.scene.add.image(0, 0, "tau_arrow_icon", ).setOrigin(0.5).setScale(0.08))
+            .add(this.scene.add.text(0, 0, " portal magic spell", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold'))
+
+            let timeout_cond1 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "        • basic spell that cannot be disabled", this.textStyle).setFontSize(20).setResolution(2))
+            let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "        • transfers ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
+            .add(this.scene.add.text(0, 0, "disabled-spell-properties from previous time magic to the next state", this.textStyle).setFontSize(20).setResolution(2))
+
+            sizer.add(atk_rule_tau, {align: 'left', padding: {top: 5}});
+            sizer.add(timeout_cond1, {align: 'left', padding: {top: 5}})
+            sizer.add(timeout_cond2, {align: 'left'})
+        }
+
+        /* Defender Rules */
+        let def_icon = this.scene.add.image(0, 0, "purple_wizard_icon", 0).setOrigin(0.5).setScale(0.7);
+        sizer.add(new Sizer(this.scene, { orientation: 'x'})
+        .add(def_icon, {padding: {right: 5}})
+        .add(this.scene.add.text(0, 0, "Defender Rules:", this.textStyle).setFontSize(26).setResolution(2).setFontStyle('bold'))
+        , {align: 'left', padding: {top: 10}});
+
+        //rules
+        sizer.add(new Sizer(this.scene, { orientation: 'x'})
+        .add(this.scene.add.text(0, 0, "    • Simulates ", this.textStyle).setFontSize(22).setResolution(2))
+        .add(this.scene.add.text(0, 0, "magic spells ", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('italic'))
+        .add(this.scene.add.text(0, 0, "of the attacker", this.textStyle).setFontSize(22).setResolution(2))
+        , {align: 'left'});
+
+        //sizer.add(this.scene.add.text(0, 0, "< Click anywhere to close this window >", this.textStyle).setFontSize(16).setResolution(2), {padding: {top: 50}})
 
         sizer.setDepth(8)
         sizer.layout();
@@ -74,53 +186,43 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
         return sizer;
     }
 
-    private createStarsContainer(num_stars: number): Sizer {
-        let sizer = new Sizer(this.scene, {orientation: 'x'})
-
-        let star_scale = 0.08
-        for(let i = 0; i < num_stars && i < 3; i++) {
-            sizer.add(this.scene.add.image(0, 0, "star").setScale(star_scale))
-        }
-        for(let i = num_stars; i < 3; i++) {
-            sizer.add(this.scene.add.image(0, 0, "star_empty").setScale(star_scale))
-        }
-
-        return sizer;
-    }
-
     destroyPopup() {
-        this.replay_btn.destroyButton();
-        this.next_level_btn.destroyButton();
-        this.sizer.destroy()
-        this.destroy();
+        if(this !== undefined) {
+            this.exit_btn.destroyButton();
+            this.sizer.destroy();
+            this.grey_bg.destroy();
+            this.destroy();
+        }
     }
 }
 
-export class ReplayButton extends Phaser.GameObjects.Container {
+export class ExitButton extends Phaser.GameObjects.Container {
 
-    private background: RoundRectangle;
-    private dimensions = new Phaser.Math.Vector2(140, 35);
+    private background: Phaser.GameObjects.Arc;
+    private icon: Phaser.GameObjects.Image;
+    private dimensions = new Phaser.Math.Vector2(50, 50);
+    private default_scale = 0.8;
 
-    text: Phaser.GameObjects.Text;
-
-    constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, bg_clr: string, border_clr = bg_clr, text: string, textStyle: Phaser.Types.GameObjects.Text.TextStyle) {
+    constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, textStyle: Phaser.Types.GameObjects.Text.TextStyle) {
         super(scene, x, y);
+        let bg_clr = Constants.COLORS_BLUE_LIGHT.c3;
 
 
         this.setSize(this.dimensions.x, this.dimensions.y);
-        this.background = scene.add.existing(new RoundRectangle(scene, 0, 0, this.dimensions.x, this.dimensions.y, 10, Constants.convertColorToNumber(bg_clr)))
-        if(bg_clr !== border_clr) {
-            this.background.setStrokeStyle(4, Constants.convertColorToNumber(border_clr));
-        }
+        this.icon = scene.add.image(0, 0, "ui_cross_btn").setScale(0.25).setTint(Constants.convertColorToNumber(Constants.COLORPACK_FINAL.white))
+        this.background = scene.add.circle(0, 0, 20, Constants.convertColorToNumber(bg_clr)).setOrigin(0.5).setAlpha(1);
         
-        this.text = scene.add.text(0, 0, text, textStyle).setOrigin(0.5).setResolution(2).setFontSize(22).setFontStyle('bold');
+        
+        //this.background.setStrokeStyle(4, Constants.convertColorToNumber(bg_clr));
+
 
         this.add(this.background)
-        this.add(this.text);
+        this.add(this.icon);
+
 
         scene.add.existing(this);
 
-        this.setDepth(1);
+        this.setDepth(9).setScale(this.default_scale);
         this.setInteractive();
 
         /** make image button interactive
@@ -131,27 +233,27 @@ export class ReplayButton extends Phaser.GameObjects.Container {
          *    pointerdown - just click
          */
         this.on('pointerover', () => {
-            this.scale = 1.1
-            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
+            this.scale = this.default_scale
+            this.background.fillColor = Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)
         })
         this.on('pointerdown', () => {
-            this.scale = 0.95
-            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.6)
+            this.scale = this.default_scale -0.1
+            
         })
         this.on('pointerup', () => {
             actionOnClick();
-            this.scale = 1.1
-            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(0.8)
+            scene.input.removeListener('pointerup', undefined, "popUpListener");
+            this.scale = this.default_scale
+            this.background.fillColor = Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)
         })
         this.on('pointerout', () => {
-            this.scale = 1
-            this.background.setFillStyle(Constants.convertColorToNumber(bg_clr)).setAlpha(1)
+            this.scale = this.default_scale
+            this.background.fillColor = Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c3)
         })
     }
 
     destroyButton() {
-        this.text.destroy();
-        this.background.destroy();
+        //this.background.destroy();
         this.destroy();
     }
 }
