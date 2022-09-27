@@ -29,8 +29,6 @@ export default class Level3_6 extends BaseScene {
         /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
         this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 3})
 
-        let tmp = new RulesPopUp(this, 3)
-
         this.setupLTS();
     }
 

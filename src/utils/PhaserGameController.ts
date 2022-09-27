@@ -493,7 +493,7 @@ export class PhaserGameController {
 
     printAttackerShortestPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
-            let path = this.ai_controller.getShortestPath();
+            let path = this.ai_controller.getShortestPathFromBfs();
             if(path !== undefined) {
                 let length = 0;
                 let path_string = "";

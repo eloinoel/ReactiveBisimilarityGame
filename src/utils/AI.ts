@@ -205,7 +205,7 @@ export class AI {
 
                             queue.push(current.adjacent[i].node);
                         } else {
-                            dist.set(current.adjacent[i].node, Infinity)
+                            dist.set(current.adjacent[i].node, Infinity)    //TODO: this isnt categorically a cycle
                             //reached starting node of bfs, which has no predecessor
                             if(pred.get(current.adjacent[i].node) === undefined) {
                                 pred.set(current.adjacent[i].node, current);
@@ -344,6 +344,7 @@ export class AI {
     /**
      * performs breadths first search and returns shortest paths to attacker winning region leafs
      * requires winning region algorithm to be performed before
+     * DOESNT TAKE INTO ACCOUNT DEFENDERS CHOICES AND THEREFORE IS A BAD IMPLEMENTATION
      * @param curPosition 
      * @returns (Array of winning leafs, predecessor path, distance to source)
      */
@@ -406,14 +407,14 @@ export class AI {
                             }
                         }
                     } else {
-                        this.printError("modifiedBfs: visited list returned undefined node")
+                        this.printError("Bfs_attacker: visited list returned undefined node")
                     }
                 }
             }
 
             return [winning_leafs, pred, dist];
         } else {
-            this.printError("modifiedBfs: graph uninitialized")
+            this.printError("Bfs_attacker: graph uninitialized")
         }
         return undefined;
     }
@@ -421,7 +422,7 @@ export class AI {
     /** TODO: method isnt correct, always chooses optimal path for the attacker even if the defender wouldnt choose same path
      * returns shortest path of moves in which the player can win in
      */
-    getShortestPath(curPosition?: GamePosition): Node<any>[] | undefined {
+    getShortestPathFromBfs(curPosition?: GamePosition): Node<any>[] | undefined {
         if(curPosition === undefined && this.game.getPlay().length > 0) {
             curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
         }
@@ -456,6 +457,103 @@ export class AI {
             return path;
         }
         return undefined;
+    }
+
+    launchModifiedMinMax(curPosition?: GamePosition) {
+        if(this.graph !== undefined) {
+
+            let nodes = this.graph.getNodes();
+
+            //graph contains position
+            if(curPosition === undefined) {
+                curPosition = this.game.getPlay()[0];
+            }
+            let sourceNode = nodes.find(node => (node.data[0].samePosition(curPosition!)))
+            if(sourceNode === undefined || sourceNode.adjacent.length === 0) {
+                return undefined;
+            }
+
+            //initiate
+            let visited = new Map<Node<[GamePosition, Node<any>[], number]>, boolean>();
+            let dist = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
+            let curBestPath = new Map<Node<[GamePosition, Node<any>[], number]>, [number, Node<any>]>(); //maps to current best path length and the next adjacent node on this path
+            let pred = new Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>(); //construct path from destination to source
+
+            //all vertices unvisited, path not yet constructed
+            for(let i = 0; i < nodes.length; i++) {
+                dist.set(nodes[i], -1);
+                visited.set(nodes[i], false);
+                pred.set(nodes[i], undefined!);
+                curBestPath.set(nodes[i], [-1, undefined!]);
+            }
+
+            //start bfs at source
+            visited.set(sourceNode, true);
+            dist.set(sourceNode, 0);
+        } else {
+            this.printError("modifiedMinMax: graph uninitialized")
+        }
+        return undefined;
+    }
+
+    /**
+     * 
+     * @param node current node
+     */
+    private minMax(callingNode: Node<[GamePosition, Node<any>[], number]>, curNode: Node<[GamePosition, Node<any>[], number]>, visited: Map<Node<[GamePosition, Node<any>[], number]>, boolean>, dist: Map<Node<[GamePosition, Node<any>[], number]>, number>,
+         curBestPath: Map<Node<[GamePosition, Node<any>[], number]>, [number, Node<any>]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>): number {
+        
+        /* recursion anchor */
+
+        //cycle
+        if(visited.get(curNode)) {
+
+            //TODO: this doesnt work because game positions can be reached from different branches!
+            return Infinity;
+        }
+
+        //leaf
+        if(curNode.adjacent.length === 0) {
+            let dist_val = dist.get(callingNode)! + 1;  //leaf evaluation is path cost
+            visited.set(curNode, true);
+            dist.set(curNode, dist_val);
+            pred.set(curNode, callingNode);
+            curBestPath.set(curNode, [dist_val, curNode])
+            return dist_val;
+        }
+
+
+        /* maximizing player - defender */
+        if(curNode.data[0].activePlayer === Player.Defender) {
+            let maxEval = -1;    //min Value that is not possible except in root
+            for(let i = 0; i < curNode.adjacent.length; i++) {
+                let child_eval = this.minMax(curNode, curNode.adjacent[i].node, visited, dist, curBestPath, pred);
+                maxEval = this.max(maxEval, child_eval);
+            }
+
+
+        /* minimizing player - attacker */
+        } else {
+
+        }
+
+
+    }
+
+    private max(val0: number, val1: number) {
+        if(val0 > val1) {
+            return val0;
+        } else {
+            return val1;
+        }
+    }
+
+    private min(val0: number, val1: number) {
+        if(val0 <= val1) {
+            return val0;
+        } else {
+            return val1;
+        }
     }
     
 
