@@ -293,7 +293,9 @@ export class AI {
     }
 
     
-    private propagatePathCost(node: Node<[GamePosition, Node<any>[], number]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>, curBestPath: Map<Node<[GamePosition, Node<any>[], number]>, [number, boolean, Node<any>]>) {
+    
+
+    /* private propagatePathCost(node: Node<[GamePosition, Node<any>[], number]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>, curBestPath: Map<Node<[GamePosition, Node<any>[], number]>, [number, boolean, Node<any>]>) {
         
         let current = pred.get(node)!;
         let nodeBestPath = curBestPath.get(node)!;
@@ -319,15 +321,18 @@ export class AI {
                 if(Boolean(node.data[2]) === true) {
 
                     //current best path leads to attacker winning region
-                    if(currentBest[1] /* && !currentBest[2].data[0].samePosition(node.data[0]) */) {  //not the leaf node
+                    if(Boolean(currentBest[1])) {
                         curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
 
                     //current best path leads to defender winning region
-                    } else if(!currentBest[1] /* && !currentBest[2].data[0].samePosition(node.data[0]) */) {
+                    } else if(!Boolean(currentBest[1])) {
                         let max = this.max(nodeBestPath[0], currentBest[0]);
                         //take the maximum path
                         if(max === nodeBestPath[0]) {
                             curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+                        } else {
+                            //attacker will never take worse path
+                            break;
                         }
                     } else {
                         console.log("works as intended, remove debug")
@@ -336,11 +341,14 @@ export class AI {
                 //leaf node in defender winning region
                 } else {
                     //current best path leads to attacker winning region
-                    if(currentBest[1] /* && !currentBest[2].data[0].samePosition(node.data[0]) */) {
+                    if(Boolean(currentBest[1])) {
                         let max = this.max(nodeBestPath[0], currentBest[0]);
                         //take the maximum path
                         if(max === nodeBestPath[0]) {
                             curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+                        } else {
+                            //attacker will never take worse path
+                            break;
                         }
                         
                     }//else case not relevant
@@ -357,6 +365,9 @@ export class AI {
                         //take the maximum path
                         if(min === nodeBestPath[0]) {
                             curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+                        } else {
+                            //defender will never take worse path
+                            break;
                         }
                    // }
                 //node in defender winning region
@@ -374,6 +385,40 @@ export class AI {
             current = pred.get(current)!;
         }
         console.log(debug)
+    } */
+
+
+    private propagatePathCost(leaf_node: Node<[GamePosition, Node<any>[], number]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>, succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>) {
+        let successor = leaf_node
+        let current = pred.get(leaf_node)!;
+        let node_entry = succ_values.get(leaf_node);
+
+        if(node_entry === undefined) {
+            this.printError("propagatePathCost: called with undefined leaf node");
+            return;
+        }
+        
+        while(current !== undefined) {
+            let succ_list = succ_values.get(current)!.successors;
+            let succ_entry = succ_list.find((succ) => (succ.node === successor));
+            //successor not in list
+            if(succ_entry === undefined) {
+                succ_list.push({node: successor, cost: node_entry.bestValue, attackerWinningRegion: Boolean(leaf_node.data[2])})
+            } else {
+                succ_entry.cost = node_entry.bestValue;
+                succ_entry.attackerWinningRegion = Boolean(leaf_node.data);
+            }
+
+            //if the new path changed anything in the current node's evaluation, propagate further
+            let best_changed = this.updateBest(succ_values, current, successor, leaf_node);
+            if(!best_changed) {
+                break;
+            }
+        }
+    }
+
+    private updateBest(succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>, current: Node<[GamePosition, Node<any>[], number]>, successor: Node<[GamePosition, Node<any>[], number]>, leaf_node: Node<[GamePosition, Node<any>[], number]>): boolean {
+        return false;
     }
 
     private minMaxBfs(curPosition?: GamePosition) {
@@ -418,14 +463,14 @@ export class AI {
                 if(current!.adjacent.length === 0) {
                     console.log("bfs: leaf case, dist: " + dist.get(current));
                     curBestPath.set(current, [dist.get(current)!, Boolean(current.data[2]), current]);
-                    this.propagatePathCost(current, pred, curBestPath);
+                    //this.propagatePathCost(current, pred, curBestPath);
                 }
                 //in defender winning region
                 if(current!.data[2] === 0) {
                     console.log("bfs: defender winning region case")
                     dist.set(current!, Infinity);
                     curBestPath.set(current, [Infinity, Boolean(current.data[2]), current]);
-                    this.propagatePathCost(current, pred, curBestPath);
+                    //this.propagatePathCost(current, pred, curBestPath);
                 }
 
                 for(let i = 0; i < current.adjacent.length; i++) {
