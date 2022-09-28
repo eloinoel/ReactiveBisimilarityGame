@@ -100,7 +100,7 @@ export class AI {
         //game graph is initialized
         if(this.graph !== undefined) {
             //recursion starts at defender nodes without winning moves
-            let G_d = this.graph.getNodes().sort((a, b) => a.adjacent.length - b.adjacent.length);
+            let G_d = this.graph.getNodes().sort((a, b) => a.adjacent.length - b.adjacent.length).filter(node => (node.data[0].activePlayer === Player.Defender));
             let num_map = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
 
             //init num_map and reset nodes
@@ -283,53 +283,6 @@ export class AI {
         }
     }
 
-    
-
-
-
-    /**
-     * TODO:
-     * traverses the game graph and assigns every node a blunder score in the interval [0, 1], 
-     * 0 meaning that the node is in the winning region of the defender and 1 meaning that the attacker only has winning moves to choose from with no possibility of losing, 
-     * essentially functions like the common minimax algorithm when in the winning region of the defender
-     * @param node 
-     * @param depth 
-     */
-    calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
-        //graph initialized
-        if(this.graph !== undefined) {
-            //terminal node (leaf)
-            if(node.adjacent.length === 0) {
-                //Defender stuck
-                if(node.data[0].activePlayer === Player.Defender) {
-                    node.data[2] = 1;
-                    return 1;
-                //Attacker stuck
-                } else {
-                    this.printError("calculateBlunderScore: Attacker stuck but this should not be possible (Symmetry Move)")
-                    node.data[2] = 0;
-                    return 0;
-                }
-            }
-            //TODO: cycle
-
-
-            //maximizing player === attacker
-            if(node.data[0].activePlayer === Player.Attacker) {
-                let maxEvaluation = 0;
-                //
-                for(let i = 0; i < node.adjacent.length; i++) {
-
-                }
-            //minimizing player === defender
-            } else {
-                let minEvaluation = 1;
-            }
-
-        } else {
-            this.printError("calculateBlunderScore: graph not initialized");
-        }
-    }
 
     private getShortestPathString(path: Node<[GamePosition, Node<any>[], number]>[]): string {
         let path_string = "";
@@ -337,6 +290,203 @@ export class AI {
             path_string = path_string.concat(path[i].data[0].toString() + ", ");
         }
         return path_string;
+    }
+
+    
+    private propagatePathCost(node: Node<[GamePosition, Node<any>[], number]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>, curBestPath: Map<Node<[GamePosition, Node<any>[], number]>, [number, boolean, Node<any>]>) {
+        
+        let current = pred.get(node)!;
+        let nodeBestPath = curBestPath.get(node)!;
+        console.log("----------------propagate(" + node.data[0].toString() + "), dist = " + nodeBestPath[0] +"------------")    //TODO: remove debug
+        //console.log(nodeBestPath)
+        let previous: Node<[GamePosition, Node<any>[], number]> = node;
+
+        let debug = []
+        debug.push(node.data[0])    //TODO:remove debug
+        //propagate result on shortest path to root
+        while(current !== undefined) {
+            let currentBest = curBestPath.get(current)!;
+            //console.log(currentBest)
+
+            //no entry for current node yet
+            if(currentBest[0] === -1) {
+                curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+            }
+
+            //current is defender - maximizing player
+            else if(current.data[0].activePlayer === Player.Defender) {
+                //leaf node in attacker winning region
+                if(Boolean(node.data[2]) === true) {
+
+                    //current best path leads to attacker winning region
+                    if(currentBest[1] /* && !currentBest[2].data[0].samePosition(node.data[0]) */) {  //not the leaf node
+                        curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+
+                    //current best path leads to defender winning region
+                    } else if(!currentBest[1] /* && !currentBest[2].data[0].samePosition(node.data[0]) */) {
+                        let max = this.max(nodeBestPath[0], currentBest[0]);
+                        //take the maximum path
+                        if(max === nodeBestPath[0]) {
+                            curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+                        }
+                    } else {
+                        console.log("works as intended, remove debug")
+                    }
+
+                //leaf node in defender winning region
+                } else {
+                    //current best path leads to attacker winning region
+                    if(currentBest[1] /* && !currentBest[2].data[0].samePosition(node.data[0]) */) {
+                        let max = this.max(nodeBestPath[0], currentBest[0]);
+                        //take the maximum path
+                        if(max === nodeBestPath[0]) {
+                            curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+                        }
+                        
+                    }//else case not relevant
+                }
+
+            //attacker node - minimizing player
+            } else if(current.data[0].activePlayer === Player.Attacker) {
+                //node in attacker winning region?
+                if(Boolean(node.data[2]) === true) {
+
+                    //not leaf node
+                    //if(!currentBest[2].data[0].samePosition(node.data[0])) {
+                        let min = this.min(nodeBestPath[0], currentBest[0]);
+                        //take the maximum path
+                        if(min === nodeBestPath[0]) {
+                            curBestPath.set(current, [nodeBestPath[0], nodeBestPath[1], previous])
+                        }
+                   // }
+                //node in defender winning region
+                } else {
+                    //egal, weil Algorithmus in attacker winning region beginnt
+                    break;
+                }
+            } else {
+                this.printError("propagatePathCost: Error in node");
+                return;
+            }
+
+            debug.push(current.data[0]) //TODO: remove debug
+            previous = current;
+            current = pred.get(current)!;
+        }
+        console.log(debug)
+    }
+
+    private minMaxBfs(curPosition?: GamePosition) {
+        if(this.graph !== undefined) {
+
+            let nodes = this.graph.getNodes();
+
+            //graph contains position
+            if(curPosition === undefined) {
+                curPosition = this.game.getPlay()[0];
+            }
+            let sourceNode = nodes.find(node => (node.data[0].samePosition(curPosition!)))
+            if(sourceNode === undefined || sourceNode.adjacent.length === 0) {
+                return undefined;
+            }
+
+            //initiate
+            let visited = new Map<Node<[GamePosition, Node<any>[], number]>, boolean>();
+            let dist = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
+            let curBestPath = new Map<Node<[GamePosition, Node<any>[], number]>, [number, boolean, Node<any>]>(); //maps to current best path length, if the path leads to an attacker winning region leaf and the next adjacent node on this path
+            let pred = new Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>(); //construct path from destination to source
+
+            //all vertices unvisited, path not yet constructed
+            for(let i = 0; i < nodes.length; i++) {
+                dist.set(nodes[i], -1);
+                visited.set(nodes[i], false);
+                pred.set(nodes[i], undefined!);
+                curBestPath.set(nodes[i], [-1, false, undefined!]);
+            }
+
+            //start bfs at source
+            visited.set(sourceNode, true);
+            dist.set(sourceNode, 0);
+
+            let queue: Node<[GamePosition, Node<any>[], number]>[] = [];
+            queue.push(sourceNode);
+
+            while(queue.length !== 0) {
+                let current = queue.shift()!;
+
+                //leaf
+                if(current!.adjacent.length === 0) {
+                    console.log("bfs: leaf case, dist: " + dist.get(current));
+                    curBestPath.set(current, [dist.get(current)!, Boolean(current.data[2]), current]);
+                    this.propagatePathCost(current, pred, curBestPath);
+                }
+                //in defender winning region
+                if(current!.data[2] === 0) {
+                    console.log("bfs: defender winning region case")
+                    dist.set(current!, Infinity);
+                    curBestPath.set(current, [Infinity, Boolean(current.data[2]), current]);
+                    this.propagatePathCost(current, pred, curBestPath);
+                }
+
+                for(let i = 0; i < current.adjacent.length; i++) {
+                    let visited_neighbor_yet = visited.get(current.adjacent[i].node);
+                    if(visited_neighbor_yet !== undefined) {
+                        if(!visited_neighbor_yet) {
+                            visited.set(current.adjacent[i].node, true);    //visited node
+                            dist.set(current.adjacent[i].node, dist.get(current!)! + 1); //update dist
+                            pred.set(current.adjacent[i].node, current);    //update predecessor on shortest path
+                            queue.push(current.adjacent[i].node);
+
+                        } else {
+                            //reached starting node of bfs, which has no predecessor
+                            /* if(pred.get(current.adjacent[i].node) === undefined) {
+                                pred.set(current.adjacent[i].node, current);
+                            } */
+                            //dont treat as leaf
+                            //if(i has path to current) --> cycle
+                        }
+                    } else {
+                        this.printError("Bfs_attacker: visited list returned undefined node")
+                    }
+                }
+            }
+
+            return curBestPath;
+        } else {
+            this.printError("MinMaxBFS: graph uninitialized")
+        }
+
+        return undefined;
+    }
+
+    printBestPathResults(curPosition?: GamePosition) {
+
+        if(curPosition === undefined) {
+            curPosition = this.game.getPlay()[this.game.getPlay().length - 1]
+        }
+
+        let result = this.minMaxBfs(curPosition);
+
+        if(result === undefined) {
+            console.log("bestPathResult: undefined");
+        } else {
+            let current = this.graphHasNode(curPosition!)!;
+            let root = result.get(current!)
+            console.log("------------Root-----------")
+            console.log(root);
+
+            console.log("------------Result-----------")
+            console.log(result)
+
+            console.log("------------Path-----------")
+            let path = [];
+            path.push(current.data[0])
+            while(result.get(current!)![2] !== current) {
+                path.push(result.get(current!)![2].data[0])
+                current = result.get(current!)![2]
+            }
+            console.log(path)
+        }
     }
 
 
@@ -459,7 +609,7 @@ export class AI {
         return undefined;
     }
 
-    launchModifiedMinMax(curPosition?: GamePosition) {
+    /* launchModifiedMinMax(curPosition?: GamePosition) {
         if(this.graph !== undefined) {
 
             let nodes = this.graph.getNodes();
@@ -494,51 +644,102 @@ export class AI {
             this.printError("modifiedMinMax: graph uninitialized")
         }
         return undefined;
-    }
+    } */
 
     /**
      * 
-     * @param node current node
+     * @param callingNode previous node
+     * @param curNode current node
+     * @param visited maps to boolean
+     * @param dist path cost
+     * @param curBestPath 
+     * @returns 
      */
-    private minMax(callingNode: Node<[GamePosition, Node<any>[], number]>, curNode: Node<[GamePosition, Node<any>[], number]>, visited: Map<Node<[GamePosition, Node<any>[], number]>, boolean>, dist: Map<Node<[GamePosition, Node<any>[], number]>, number>,
-         curBestPath: Map<Node<[GamePosition, Node<any>[], number]>, [number, Node<any>]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>): number {
+    /* private minMax(callingNode: Node<[GamePosition, Node<any>[], number]>, curNode: Node<[GamePosition, Node<any>[], number]>, visited: Map<Node<[GamePosition, Node<any>[], number]>, boolean>, dist: Map<Node<[GamePosition, Node<any>[], number]>, number>,
+         curBestPath: Map<Node<[GamePosition, Node<any>[], number]>, [number, Node<any>]>): number {
         
-        /* recursion anchor */
+        //recursion anchor
 
         //cycle
-        if(visited.get(curNode)) {
+        if(visited.get(curNode)) { //TODO: cycle detection algorithm
 
             //TODO: this doesnt work because game positions can be reached from different branches!
             return Infinity;
         }
 
+        let dist_val = dist.get(callingNode)! + 1;
+        visited.set(curNode, true);
+        dist.set(curNode, dist_val);
+
         //leaf
         if(curNode.adjacent.length === 0) {
-            let dist_val = dist.get(callingNode)! + 1;  //leaf evaluation is path cost
-            visited.set(curNode, true);
-            dist.set(curNode, dist_val);
-            pred.set(curNode, callingNode);
+              //leaf evaluation is path cost
             curBestPath.set(curNode, [dist_val, curNode])
             return dist_val;
         }
 
-
-        /* maximizing player - defender */
+        //maximizing player - defender
         if(curNode.data[0].activePlayer === Player.Defender) {
             let maxEval = -1;    //min Value that is not possible except in root
             for(let i = 0; i < curNode.adjacent.length; i++) {
                 let child_eval = this.minMax(curNode, curNode.adjacent[i].node, visited, dist, curBestPath, pred);
                 maxEval = this.max(maxEval, child_eval);
             }
-
-
-        /* minimizing player - attacker */
+            return maxEval;
+        //minimizing player - attacker
         } else {
 
         }
 
 
+    } */
+
+    
+    /**
+     * TODO:
+     * traverses the game graph and assigns every node a blunder score in the interval [0, 1], 
+     * 0 meaning that the node is in the winning region of the defender and 1 meaning that the attacker only has winning moves to choose from with no possibility of losing, 
+     * essentially functions like the common minimax algorithm when in the winning region of the defender
+     * @param node 
+     * @param depth 
+     */
+     calculateBlunderScore(node: Node<[GamePosition, Node<any>[], number]>) {
+        //graph initialized
+        if(this.graph !== undefined) {
+            //terminal node (leaf)
+            if(node.adjacent.length === 0) {
+                //Defender stuck
+                if(node.data[0].activePlayer === Player.Defender) {
+                    node.data[2] = 1;
+                    return 1;
+                //Attacker stuck
+                } else {
+                    this.printError("calculateBlunderScore: Attacker stuck but this should not be possible (Symmetry Move)")
+                    node.data[2] = 0;
+                    return 0;
+                }
+            }
+            //TODO: cycle
+
+
+            //maximizing player === attacker
+            if(node.data[0].activePlayer === Player.Attacker) {
+                let maxEvaluation = 0;
+                //
+                for(let i = 0; i < node.adjacent.length; i++) {
+
+                }
+            //minimizing player === defender
+            } else {
+                let minEvaluation = 1;
+            }
+
+        } else {
+            this.printError("calculateBlunderScore: graph not initialized");
+        }
     }
+
+
 
     private max(val0: number, val1: number) {
         if(val0 > val1) {

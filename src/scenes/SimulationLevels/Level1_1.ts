@@ -60,6 +60,8 @@ export default class Level1_1 extends BaseScene {
         game_controller.addTransition("q0", "q2", "a");
 
         game_controller.startGame(this, "p0", "q0", false, false, [6 , 3]);
+        game_controller.ai_controller.printGraph()
+        //game_controller.ai_controller.printBestPathResults()
 
 
     }

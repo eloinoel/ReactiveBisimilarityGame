@@ -33,7 +33,7 @@ export class PhaserGameController {
     private environment_panel!: EnvironmentPanel;
     private movable_environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
-    private ai_controller!: AI; 
+    ai_controller!: AI;     //TODO: set private
 
     private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
     private num_moves: number; //the number of moves a player currently made
@@ -67,7 +67,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
