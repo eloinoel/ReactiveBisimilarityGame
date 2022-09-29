@@ -404,8 +404,6 @@ export class AI {
             tmp = tmp.concat("\n")
         }) 
         console.log(tmp) */
-        
-        
 
         let debug = []
         debug.push(leaf_node.data[0].toString()); //TODO:remove debug
@@ -442,14 +440,14 @@ export class AI {
         }
         console.log(debug); //TODO: remove debug
         
-        /* let tmp = "last updated node: "
+        let tmp = "last updated node: "
         let tmp_result = succ_values.get(successor)!;
         tmp = tmp.concat(successor.data[0].toString() + " = bestValue: " + tmp_result.bestValue + ", attackerWinning: " + tmp_result.attackerWinningRegion + ", successors(" + tmp_result.successors.length + "): ")
         let succ_list = tmp_result.successors
         for(let j = 0; j < succ_list.length; j++) {
             tmp = tmp.concat("node: " + succ_list[j].node.data[0].toString() + ", cost: " + succ_list[j].cost + ", winning: " + succ_list[j].attackerWinningRegion + " | ")
         }
-        console.log(tmp) */
+        console.log(tmp)
     }
 
     private updateBest(succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, attackerWinningRegion: boolean, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>, current: Node<[GamePosition, Node<any>[], number]>): boolean {
@@ -507,7 +505,7 @@ export class AI {
                 }
                 let max = atk_win[0].cost;
                 for(let i = 1; i < atk_win.length; i++) {
-                    if(atk_win[i].cost < max) {
+                    if(atk_win[i].cost > max) {
                         max = atk_win[i].cost;
                     }
                 }
@@ -570,6 +568,7 @@ export class AI {
                     //curBestPath.set(current, [dist.get(current)!, Boolean(current.data[2]), current]);
                     curBestPath.set(current, {bestValue: dist.get(current)!, attackerWinningRegion: Boolean(current.data[2]), successors: []});
                     this.propagatePathCost(current, pred, curBestPath);
+                    continue;
                 }
                 //in defender winning region
                 else if(current!.data[2] === 0) {
@@ -578,6 +577,7 @@ export class AI {
                     //curBestPath.set(current, [Infinity, Boolean(current.data[2]), current]);
                     curBestPath.set(current, {bestValue: dist.get(current)!, attackerWinningRegion: false, successors: []});
                     this.propagatePathCost(current, pred, curBestPath);
+                    continue;
                 }
 
                 for(let i = 0; i < current.adjacent.length; i++) {
@@ -606,6 +606,17 @@ export class AI {
                     
                 }
             }
+
+            /* let tmp = ""; //TODO: remove debug
+            pred.forEach((value, key) => {
+                if(value != undefined) {
+                    tmp = tmp.concat(key.data[0].toString() + ", pred: " + value.data[0].toString())
+                } else {
+                    tmp = tmp.concat(key.data[0].toString() + ", pred: undefined");
+                }
+                tmp = tmp.concat("\n")
+            }) 
+            console.log(tmp) */
 
             return curBestPath;
         } else {
@@ -679,7 +690,7 @@ export class AI {
     private resultToString(result: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, attackerWinningRegion: boolean, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>) {
         let tmp = "";
         result.forEach((value, key) => {
-            tmp = tmp.concat(key.data[0].toString() + " = bestValue: " + value.bestValue + ", attackerWinning: " + value.attackerWinningRegion + ", successors(" + value.successors.length + "): ")
+            tmp = tmp.concat(key.data[0].toString() + " = bestValue: " + value.bestValue + ", attackerWinning: " + value.attackerWinningRegion + ", real winning region: " + key.data[2] + ", successors(" + value.successors.length + "): ")
             let succ_list = value.successors
             for(let j = 0; j < succ_list.length; j++) {
                 tmp = tmp.concat("node: " + succ_list[j].node.data[0].toString() + ", cost: " + succ_list[j].cost + ", winning: " + succ_list[j].attackerWinningRegion + " | ")
