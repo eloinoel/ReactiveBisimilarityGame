@@ -73,6 +73,7 @@ export default class Level3_7 extends BaseScene {
 
 
         game_controller.startGame(this, "p0", "q0", true, true, [4, 3]);
-        game_controller.printAIGraph();
+        //game_controller.printAIGraph();
+        game_controller.printAttackerShortestMinMaxPath()
     }
 }

@@ -60,5 +60,6 @@ export default class Level1_3 extends BaseScene {
         game_controller.addTransition("q4", "q3", "a");
 
         game_controller.startGame(this, "p0", "q0", false, false, [3, 2]);
+        game_controller.printAttackerShortestMinMaxPath()
     }
 }

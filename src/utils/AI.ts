@@ -388,10 +388,27 @@ export class AI {
     } */
 
 
-    private propagatePathCost(leaf_node: Node<[GamePosition, Node<any>[], number]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>, succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>) {
+    private propagatePathCost(leaf_node: Node<[GamePosition, Node<any>[], number]>, pred: Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>, succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, attackerWinningRegion: boolean, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>) {
         let successor = leaf_node
         let current = pred.get(leaf_node)!;
         let node_entry = succ_values.get(leaf_node);
+
+        /* let tmp = ""; //TODO: remove debug
+        pred.forEach((value, key) => {
+            
+            if(value != undefined) {
+                tmp = tmp.concat(key.data[0].toString() + ", pred: " + value.data[0].toString())
+            } else {
+                tmp = tmp.concat(key.data[0].toString() + ", pred: undefined");
+            }
+            tmp = tmp.concat("\n")
+        }) 
+        console.log(tmp) */
+        
+        
+
+        let debug = []
+        debug.push(leaf_node.data[0].toString()); //TODO:remove debug
 
         if(node_entry === undefined) {
             this.printError("propagatePathCost: called with undefined leaf node");
@@ -399,29 +416,115 @@ export class AI {
         }
         
         while(current !== undefined) {
+
+            debug.push(current.data[0].toString())  //TODO: remove debug
+
+            let successor_values_to_update_with = succ_values.get(successor)!;
             let succ_list = succ_values.get(current)!.successors;
-            let succ_entry = succ_list.find((succ) => (succ.node === successor));
+            let succ_entry = succ_list.find((succ) => (succ.node.data[0].samePosition(successor.data[0])));
             //successor not in list
             if(succ_entry === undefined) {
-                succ_list.push({node: successor, cost: node_entry.bestValue, attackerWinningRegion: Boolean(leaf_node.data[2])})
+                succ_list.push({node: successor, cost: successor_values_to_update_with.bestValue, attackerWinningRegion: successor_values_to_update_with.attackerWinningRegion})
+            //update values
             } else {
-                succ_entry.cost = node_entry.bestValue;
-                succ_entry.attackerWinningRegion = Boolean(leaf_node.data);
+                succ_entry.cost = successor_values_to_update_with.bestValue;
+                succ_entry.attackerWinningRegion = successor_values_to_update_with.attackerWinningRegion;
             }
 
             //if the new path changed anything in the current node's evaluation, propagate further
-            let best_changed = this.updateBest(succ_values, current, successor, leaf_node);
+            let best_changed = this.updateBest(succ_values, current);
             if(!best_changed) {
                 break;
             }
+
+            successor = current;
+            current = pred.get(current)!;
         }
+        console.log(debug); //TODO: remove debug
+        
+        /* let tmp = "last updated node: "
+        let tmp_result = succ_values.get(successor)!;
+        tmp = tmp.concat(successor.data[0].toString() + " = bestValue: " + tmp_result.bestValue + ", attackerWinning: " + tmp_result.attackerWinningRegion + ", successors(" + tmp_result.successors.length + "): ")
+        let succ_list = tmp_result.successors
+        for(let j = 0; j < succ_list.length; j++) {
+            tmp = tmp.concat("node: " + succ_list[j].node.data[0].toString() + ", cost: " + succ_list[j].cost + ", winning: " + succ_list[j].attackerWinningRegion + " | ")
+        }
+        console.log(tmp) */
     }
 
-    private updateBest(succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>, current: Node<[GamePosition, Node<any>[], number]>, successor: Node<[GamePosition, Node<any>[], number]>, leaf_node: Node<[GamePosition, Node<any>[], number]>): boolean {
+    private updateBest(succ_values: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, attackerWinningRegion: boolean, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>, current: Node<[GamePosition, Node<any>[], number]>): boolean {
+        let current_succ_entry = succ_values.get(current)!;
+        let curBest = current_succ_entry.bestValue;
+        let curWinning = current_succ_entry.attackerWinningRegion;
+        let succ_list = current_succ_entry.successors;
+
+        let atk_win = succ_list.filter(succ => (succ.attackerWinningRegion === true));
+        let def_win = succ_list.filter(succ => (succ.attackerWinningRegion === false))
+
+        //minimizing player
+        if(current.data[0].activePlayer === Player.Attacker) {
+
+            if(atk_win.length > 0) {
+                //find min value
+                let min = atk_win[0].cost;
+                for(let i = 1; i < atk_win.length; i++) {
+                    if(atk_win[i].cost < min) {
+                        min = atk_win[i].cost;
+                    }
+                }
+                current_succ_entry.bestValue = min;
+                current_succ_entry.attackerWinningRegion = true;
+            } else {
+                if(def_win.length === 0) {
+                    this.printError("updateBest: no successors in list")
+                    return false
+                }
+                let min = def_win[0].cost;
+                for(let i = 1; i < def_win.length; i++) {
+                    if(def_win[i].cost < min) {
+                        min = def_win[i].cost;
+                    }
+                }
+                current_succ_entry.bestValue = min;
+                current_succ_entry.attackerWinningRegion = false;
+            }
+        //maximizing player
+        } else {
+            if(def_win.length > 0) {
+                //find max value
+                let max = def_win[0].cost;
+                for(let i = 1; i < def_win.length; i++) {
+                    if(def_win[i].cost > max) {
+                        max = def_win[i].cost;
+                    }
+                }
+                current_succ_entry.bestValue = max;
+                current_succ_entry.attackerWinningRegion = false;
+            } else {
+                if(atk_win.length === 0) {
+                    this.printError("updateBest: no successors in list")
+                    return false
+                }
+                let max = atk_win[0].cost;
+                for(let i = 1; i < atk_win.length; i++) {
+                    if(atk_win[i].cost < max) {
+                        max = atk_win[i].cost;
+                    }
+                }
+                current_succ_entry.bestValue = max;
+                current_succ_entry.attackerWinningRegion = true;
+            }
+        }
+
+        //check if something changed
+        if(curBest !== current_succ_entry.bestValue || curWinning !== current_succ_entry.attackerWinningRegion) {
+            return true;
+        }
         return false;
     }
 
     private minMaxBfs(curPosition?: GamePosition) {
+        console.log("---------------MINMAX Debug----------------")
         if(this.graph !== undefined) {
 
             let nodes = this.graph.getNodes();
@@ -438,7 +541,8 @@ export class AI {
             //initiate
             let visited = new Map<Node<[GamePosition, Node<any>[], number]>, boolean>();
             let dist = new Map<Node<[GamePosition, Node<any>[], number]>, number>();
-            let curBestPath = new Map<Node<[GamePosition, Node<any>[], number]>, [number, boolean, Node<any>]>(); //maps to current best path length, if the path leads to an attacker winning region leaf and the next adjacent node on this path
+            //let curBestPath = new Map<Node<[GamePosition, Node<any>[], number]>, [number, boolean, Node<any>]>(); //maps to current best path length, if the path leads to an attacker winning region leaf and the next adjacent node on this path
+            let curBestPath = new Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, attackerWinningRegion: boolean, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>();
             let pred = new Map<Node<[GamePosition, Node<any>[], number]>, Node<[GamePosition, Node<any>[], number]>>(); //construct path from destination to source
 
             //all vertices unvisited, path not yet constructed
@@ -446,7 +550,8 @@ export class AI {
                 dist.set(nodes[i], -1);
                 visited.set(nodes[i], false);
                 pred.set(nodes[i], undefined!);
-                curBestPath.set(nodes[i], [-1, false, undefined!]);
+                let succ_list: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[] = []
+                curBestPath.set(nodes[i], {bestValue: -1, attackerWinningRegion: Boolean(nodes[i].data[2]), successors: succ_list});
             }
 
             //start bfs at source
@@ -460,21 +565,24 @@ export class AI {
                 let current = queue.shift()!;
 
                 //leaf
-                if(current!.adjacent.length === 0) {
-                    console.log("bfs: leaf case, dist: " + dist.get(current));
-                    curBestPath.set(current, [dist.get(current)!, Boolean(current.data[2]), current]);
-                    //this.propagatePathCost(current, pred, curBestPath);
+                if(current!.adjacent.length === 0 && current!.data[2] === 1) {
+                    console.log("bfs: leaf case " + current.data[0].toString() + ", dist: " + dist.get(current));
+                    //curBestPath.set(current, [dist.get(current)!, Boolean(current.data[2]), current]);
+                    curBestPath.set(current, {bestValue: dist.get(current)!, attackerWinningRegion: Boolean(current.data[2]), successors: []});
+                    this.propagatePathCost(current, pred, curBestPath);
                 }
                 //in defender winning region
-                if(current!.data[2] === 0) {
-                    console.log("bfs: defender winning region case")
-                    dist.set(current!, Infinity);
-                    curBestPath.set(current, [Infinity, Boolean(current.data[2]), current]);
-                    //this.propagatePathCost(current, pred, curBestPath);
+                else if(current!.data[2] === 0) {
+                    console.log("bfs: defender winning region case " + current.data[0].toString() + ", dist: " + dist.get(current))
+                    //dist.set(current!, Infinity);
+                    //curBestPath.set(current, [Infinity, Boolean(current.data[2]), current]);
+                    curBestPath.set(current, {bestValue: dist.get(current)!, attackerWinningRegion: false, successors: []});
+                    this.propagatePathCost(current, pred, curBestPath);
                 }
 
                 for(let i = 0; i < current.adjacent.length; i++) {
                     let visited_neighbor_yet = visited.get(current.adjacent[i].node);
+                    //let count = current.adjacent.length;
                     if(visited_neighbor_yet !== undefined) {
                         if(!visited_neighbor_yet) {
                             visited.set(current.adjacent[i].node, true);    //visited node
@@ -483,6 +591,8 @@ export class AI {
                             queue.push(current.adjacent[i].node);
 
                         } else {
+                            //console.log("visited case: " + current.adjacent[i].node.data[0].toString() + ", current: " + current.data[0].toString())
+                            //count--;
                             //reached starting node of bfs, which has no predecessor
                             /* if(pred.get(current.adjacent[i].node) === undefined) {
                                 pred.set(current.adjacent[i].node, current);
@@ -493,6 +603,7 @@ export class AI {
                     } else {
                         this.printError("Bfs_attacker: visited list returned undefined node")
                     }
+                    
                 }
             }
 
@@ -521,17 +632,77 @@ export class AI {
             console.log(root);
 
             console.log("------------Result-----------")
-            console.log(result)
+            //console.log(result)
+            console.log(this.resultToString(result))
 
-            console.log("------------Path-----------")
+            /* console.log("------------Path-----------")
             let path = [];
             path.push(current.data[0])
             while(result.get(current!)![2] !== current) {
                 path.push(result.get(current!)![2].data[0])
                 current = result.get(current!)![2]
             }
-            console.log(path)
+            console.log(path) */
         }
+    }
+
+    getMinMaxAttackerPath(curPosition?: GamePosition) {
+        let path = [];
+        if(curPosition === undefined) {
+            curPosition = this.game.getPlay()[this.game.getPlay().length - 1]
+        }
+
+        let result = this.minMaxBfs(curPosition);
+        
+
+        if(result === undefined) {
+            console.log("bestPathResult: undefined");
+        } else {
+            let current = this.graphHasNode(curPosition!)!;
+            let root = result.get(current!)
+            
+            
+            path.push(current.data[0])
+            let next = result.get(current!)!.successors.find(succ => (succ.cost === root!.bestValue && succ.attackerWinningRegion === root!.attackerWinningRegion))
+            while(next != undefined) {
+                path.push(next.node.data[0])
+                next = result.get(next!.node)!.successors.find(succ => (succ.cost === root!.bestValue && succ.attackerWinningRegion === root!.attackerWinningRegion))
+
+            }
+
+            console.log(this.resultToString(result))
+        }
+
+        return path;
+    }
+
+    private resultToString(result: Map<Node<[GamePosition, Node<any>[], number]>, {bestValue: number, attackerWinningRegion: boolean, successors: {node: Node<any>, cost: number, attackerWinningRegion: boolean}[]}>) {
+        let tmp = "";
+        result.forEach((value, key) => {
+            tmp = tmp.concat(key.data[0].toString() + " = bestValue: " + value.bestValue + ", attackerWinning: " + value.attackerWinningRegion + ", successors(" + value.successors.length + "): ")
+            let succ_list = value.successors
+            for(let j = 0; j < succ_list.length; j++) {
+                tmp = tmp.concat("node: " + succ_list[j].node.data[0].toString() + ", cost: " + succ_list[j].cost + ", winning: " + succ_list[j].attackerWinningRegion + " | ")
+            }
+            tmp = tmp.concat("\n")
+        })
+        return tmp
+    }
+
+    printAttackerShortestMinMaxPath() {
+        let path = this.getMinMaxAttackerPath();        
+        let length = 0;
+        let path_string = "";
+        let previous = undefined;   //for detecting symmetry moves
+        for(let i = 0; i < path.length; i++) {
+            if(path[i].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].activePlayer === Player.Attacker)) {
+                length++;
+            }
+            previous = path[i].activePlayer;
+            path_string = path_string.concat(path[i].toString() + ", ");
+        }
+        path_string = path_string.concat("; moves: " + length + "; pathlen: " + (path.length - 1));
+        console.log(path_string);
     }
 
 
