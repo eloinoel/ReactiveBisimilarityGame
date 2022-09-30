@@ -5,7 +5,7 @@ import { LtsStateButton, Simple_Button } from '../ui_elements/Button';
 import { FixedLengthTransition, Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
-import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
+import { AttackerNode, GamePosition, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
 import { SetOps } from "./SetOps";
@@ -13,6 +13,7 @@ import { LevelDescription } from "../ui_elements/LevelDescription";
 import { AI } from "./AI";
 import { WinPopup, LosePopup } from "../ui_elements/EndGamePopup";
 import BaseScene from "../scenes/BaseScene";
+import GUIScene from "../scenes/GUIScene";
 
 export class PhaserGameController {
     private game: ReactiveBisimilarityGame;
@@ -39,6 +40,8 @@ export class PhaserGameController {
     private num_moves: number; //the number of moves a player currently made
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
+
+    private replayPulseTween!: Phaser.Tweens.Tween;
 
     /**shows debug UI if set to true */
     debug: boolean;
@@ -67,7 +70,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -337,7 +340,6 @@ export class PhaserGameController {
             console.log("move not possible: " + action + ", " + next_position.toString());
             return -1;
         } else {
-
             if(isSymmetryMove) {
                 (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
                 (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
@@ -361,7 +363,6 @@ export class PhaserGameController {
                         wintext.destroy();
                     }); */
                     this.launchEndScreen(true);
-                    return 0;
                 //AI makes a move
                 } else {
                     let defender_move = this.ai_controller.getNextMove(cur_pos);
@@ -389,6 +390,8 @@ export class PhaserGameController {
                 }
                 
             }
+            this.scene.events.emit('clickedLtsButton')
+            return 0
         }
         return 1;
     }
@@ -613,6 +616,22 @@ export class PhaserGameController {
         } else {
             this.level_description.setTurn(true);
         }
+
+        //replay
+        if(this.ai_controller.getWinningRegionOfPosition() === false && this.replayPulseTween === undefined) {
+            let guiscene = this.scene.scene.get('GUIScene');
+            let replayBtn = (guiscene as GUIScene).replay_btn;
+            let scale = replayBtn.scale;
+
+            this.replayPulseTween = this.scene.tweens.add({
+                targets: replayBtn,
+                duration: 700,
+                scale: scale + 0.15,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1,
+            })
+        }
     }
     /**
      * Method not needed in project
@@ -804,9 +823,53 @@ export class PhaserGameController {
         })
     }
 
-    //TODO:
+    /**
+     * gets the current position, calculates the next moves and makes the buttons pulsate until they are clicked
+     */
     pulsateNextMoveButtons() {
+        if(this.game_initialized && this.game.getPlay().length > 0) {
+            let possibleMoves = this.game.possibleMoves(undefined, true);
+            let tmp: string[] = [];
+            possibleMoves.forEach((entry) => {
+                tmp.push(entry.process1);
+            })
 
+            //get unique processes
+            let button_captions = tmp.filter((item, index, array) => (array.indexOf(item) === index))
+            let buttons = []
+            let scale = 1;
+            //add tween for each button
+            for(let i = 0; i < button_captions.length; i++) {
+                let button = this.stateBtns.get(button_captions[i]);
+                if(button !== undefined) {
+                    scale = button.scale
+                    this.scene.tweens.add({
+                        targets: button,
+                        duration: 700,
+                        scale: scale + 0.1,
+                        ease: Phaser.Math.Easing.Quadratic.InOut,
+                        yoyo: true,
+                        loop: -1,
+                    })
+                } else {
+                    this.printError("pulsateNextMoveButtons: could not get button from label: " + button_captions[i])
+                }
+            }
+
+            let listener = this.scene.events.on('clickedLtsButton', () => {
+                console.log("test")
+                let tweens = this.scene.tweens.getAllTweens();
+                let pulse_tweens = tweens.filter(tween => tween.targets[0] instanceof LtsStateButton);
+                console.log(pulse_tweens.length)
+                for(let i = 0; i < pulse_tweens.length; i++) {
+                    let button = pulse_tweens[i].targets[0];
+                    pulse_tweens[i].complete();
+                    (button as LtsStateButton).setScale(scale)
+                }
+                this.scene.events.off('clickedLtsButton')
+                this.pulsateNextMoveButtons()
+            })
+        }
     }
 
     /**

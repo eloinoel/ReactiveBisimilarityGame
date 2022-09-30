@@ -28,6 +28,8 @@ export default class Level1_1 extends BaseScene {
         this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 0})
 
         this.setupLTS();
+
+
     }
 
     update(time: number, delta: number): void {
@@ -65,6 +67,6 @@ export default class Level1_1 extends BaseScene {
         game_controller.printAttackerShortestMinMaxPath()
         console.log("expected moves: 3")
 
-
+        game_controller.pulsateNextMoveButtons()
     }
 }

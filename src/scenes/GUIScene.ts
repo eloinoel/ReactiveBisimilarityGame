@@ -6,6 +6,7 @@ import { RulesPopUp } from '../ui_elements/RulesPopUp';
 
 export default class GUIScene extends BaseScene {
     otherRunningScene!: Phaser.Scene;
+    replay_btn!: UI_Button;
 
     constructor() {
         super('GUIScene');
@@ -41,7 +42,7 @@ export default class GUIScene extends BaseScene {
             })
         })
 
-        let replayBtn = new UI_Button(this, this.renderer.width - 3.5* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
+        this.replay_btn = new UI_Button(this, this.renderer.width - 3.5* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
             console.clear()
             this.restartLevel();
         })}, "Restart");
@@ -51,7 +52,7 @@ export default class GUIScene extends BaseScene {
         }, "Rules", false);
 
         let buttons = [];
-        buttons.push(homeBtn, backBtn, replayBtn, infoyBtn);
+        buttons.push(homeBtn, backBtn, this.replay_btn, infoyBtn);
         for(let i = 0; i < buttons.length; i++) {
             this.fadeImage((buttons[i] as unknown) as Phaser.GameObjects.Image, undefined, Constants.camFadeSpeed);
             this.fadeImage((buttons[i].text as unknown) as Phaser.GameObjects.Image, undefined, Constants.camFadeSpeed);

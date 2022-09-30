@@ -93,6 +93,24 @@ export class AI {
     }
 
     /**
+     * 
+     * @param position 
+     * @returns true if in attacker winning region
+     */
+    getWinningRegionOfPosition(position?: GamePosition): boolean | undefined{
+        if(this.graph !== undefined && this.game.getPlay().length > 0) {
+            if(position == undefined) {
+                position = this.game.getPlay()[this.game.getPlay().length - 1];
+            }
+            let node = this.graphHasNode(position);
+            if(node !== undefined) {
+                return Boolean(node.data[2])
+            }
+        }
+        return undefined;
+    }
+
+    /**
      * Algorithm by Benjamin Bisping, see Master's Thesis "Computing Coupled Similarity" or sources in Bachelor's Thesis accompanying this software in github repository
      * Computes winning regions on game move graphs in simple games
      */
