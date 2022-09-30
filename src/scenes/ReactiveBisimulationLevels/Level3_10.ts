@@ -70,19 +70,8 @@ export default class Level3_10 extends BaseScene {
 
 
         game_controller.startGame(this, "p0", "q1", true, true, [8, 7]);
-        //game_controller.printAttackerShortestPath()
-        //game_controller.ai_controller.printBestPathResults();
-        /* let path = game_controller.ai_controller.getMinMaxAttackerPath()
-        console.log(path)
-        let tmp = "";
-        for(let i = 0; i < path.length; i++) {
-
-            tmp = tmp.concat(path[i].toString() + ", ");
-
-            
-        }
-        tmp = tmp.concat("\n");
-        console.log(tmp) */
+        
         game_controller.printAttackerShortestMinMaxPath()
+        console.log("expected moves: 7")
     }
 }

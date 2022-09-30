@@ -52,8 +52,8 @@ export default {
   dom: {
     createContainer: true
   },
-  scene: [PreloaderScene, /* ParallaxScene, MainMenuScene, LevelMapScene, CreditsScene, Level1_1, Level1_2,
-   Level1_3, Level1_4, Level2_1, */ Level2_2, Level2_3, Level2_4, Level3_1, Level3_2, Level3_3, Level3_4, Level3_5,
+  scene: [PreloaderScene, /* ParallaxScene, MainMenuScene, */ LevelMapScene, CreditsScene, Level1_1, Level1_2,
+   Level1_3, Level1_4, Level2_1, Level2_2, Level2_3, Level2_4, Level3_1, Level3_2, Level3_3, Level3_4, Level3_5,
    Level3_6, Level3_7, Level3_8,Level3_9, Level3_10, GUIScene, TestScene, DemoScene],
   render: {
     //pixelArt: true,

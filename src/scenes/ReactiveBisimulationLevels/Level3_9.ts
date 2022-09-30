@@ -66,18 +66,8 @@ export default class Level3_9 extends BaseScene {
 
         game_controller.startGame(this, "p0", "q0", true, true, [7, 5]);
 
-        /* let path = game_controller.ai_controller.getMinMaxAttackerPath()
-        console.log(path)
-        let tmp = "";
-        for(let i = 0; i < path.length; i++) {
-
-            tmp = tmp.concat(path[i].toString() + ", ");
-
-            
-        }
-        tmp = tmp.concat("\n");
-        console.log(tmp) */
         game_controller.printAttackerShortestMinMaxPath()
+        console.log("expected moves: 5")
         
     }
 }

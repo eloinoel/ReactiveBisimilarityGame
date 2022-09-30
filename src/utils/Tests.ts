@@ -127,7 +127,6 @@ export class Tests {
         ai_controller.generateGraph();
         ai_controller.determineWinningRegion();
         ai_controller.printGraph()
-        ai_controller.printAttackerShortestMinMaxPath()
     }
 
     getSymmetryLTS(): ReactiveBisimilarityGame {

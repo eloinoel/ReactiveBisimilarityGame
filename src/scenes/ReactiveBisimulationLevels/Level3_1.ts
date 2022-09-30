@@ -54,5 +54,8 @@ export default class Level3_1 extends BaseScene {
         game_controller.addTransition("q1", "q3", "a");
 
         game_controller.startGame(this, "p0", "q0", true, true, [3, 2]);
+
+        game_controller.printAttackerShortestMinMaxPath()
+        console.log("expected moves: 2")
     }
 }
