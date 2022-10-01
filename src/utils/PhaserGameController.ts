@@ -5,7 +5,7 @@ import { LtsStateButton, Simple_Button } from '../ui_elements/Button';
 import { FixedLengthTransition, Transition } from '../ui_elements/Transition';
 import { Constants } from './Constants';
 import { TextEdit } from 'phaser3-rex-plugins/plugins/textedit';
-import { AttackerNode, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
+import { AttackerNode, GamePosition, Player, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode } from "./GamePosition";
 import { ScrollableTextArea } from "../ui_elements/ScrollableTextArea";
 import { EnvironmentPanel } from "../ui_elements/EnvironmentPanel";
 import { SetOps } from "./SetOps";
@@ -13,6 +13,7 @@ import { LevelDescription } from "../ui_elements/LevelDescription";
 import { AI } from "./AI";
 import { WinPopup, LosePopup } from "../ui_elements/EndGamePopup";
 import BaseScene from "../scenes/BaseScene";
+import GUIScene from "../scenes/GUIScene";
 
 export class PhaserGameController {
     private game: ReactiveBisimilarityGame;
@@ -25,19 +26,24 @@ export class PhaserGameController {
     private stateBtns: Map<string, LtsStateButton>; //map from state names to visual buttons references
     private scene: Phaser.Scene;    
     private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
+    private player_icons: Phaser.GameObjects.GameObject[];  //0:_player icon sprite, 1: geometryMaskObject, 2: opponent icon sprite, 3: mask2
     private environment_container!: Phaser.GameObjects.Container;  //text object displaying the current environment
     private current_position!: Phaser.GameObjects.Container;  //text object displaying current game position 
     private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
     private switch_button!: Phaser.GameObjects.Container;
     private environment_panel!: EnvironmentPanel;
+    private movable_environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
-    private ai_controller!: AI; 
+    ai_controller!: AI;     //TODO: set private
 
     private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
     private num_moves: number; //the number of moves a player currently made
 
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
+    private replayPulseTween!: Phaser.Tweens.Tween;
+
+    /**shows debug UI if set to true */
     debug: boolean;
 
     /**
@@ -57,13 +63,14 @@ export class PhaserGameController {
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.nextProcessAfterTimeout = "";
         this.current_hightlights = [];
+        this.player_icons = [];
         /* this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
         this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -144,6 +151,7 @@ export class PhaserGameController {
             this.createHighlights(p0, p1);
             this.createReactiveElements();
             this.environment_panel.disable(); //only enable on timeout
+            this.movable_environment_panel.disable()
             if(!reactive) {
                 this.environment_container.setVisible(false);
                 this.environment_panel.makeInvisible();
@@ -180,7 +188,7 @@ export class PhaserGameController {
      */
     setEnvironmentAndDoTimeout(env: Set<string>) {
         //set environment
-        this.setEnvironment(env);
+        this.setEnvironment(env, false);
 
         //doMove
         let legalMove = this.doMove(this.nextProcessAfterTimeout, false);
@@ -189,12 +197,28 @@ export class PhaserGameController {
         if(legalMove === -1) {
             let cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-                this.game.setEnvironment(cur_pos.environment);
+                this.game.setEnvironment(cur_pos.environment, true);
             } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
-                this.game.resetEnvironment();
+                this.game.resetEnvironment(true);
             }
+
+            //red blinking
+            
+            this.movable_environment_panel.redBlinking();
+            this.scene.time.delayedCall(400, () => {
+                this.movable_environment_panel.disable()
+                this.movable_environment_panel.makeInvisible()
+                this.environment_panel.updatePanel();
+                this.movable_environment_panel.updatePanel();
+            })
+            
+        } else {
+            this.movable_environment_panel.disable()
+            this.environment_panel.updatePanel();
+            this.movable_environment_panel.updatePanel();
+            this.movable_environment_panel.swooshAnimation(this.environment_panel.getPanelPosition())
         }
-        this.environment_panel.updatePanel();
+
         return legalMove;
     }
 
@@ -214,8 +238,9 @@ export class PhaserGameController {
         //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
             //revert any changes made to the environment by timeout action
-            if(this.environment_panel.isEnabled()) {
-                this.environment_panel.disable();
+            if(this.movable_environment_panel.isEnabled()) {
+                this.movable_environment_panel.disable();
+                this.movable_environment_panel.makeInvisible()
 
                 //environment wasn't changed if it is still enabled
                 /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
@@ -231,9 +256,25 @@ export class PhaserGameController {
             let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
             //timeout action, can only occur in these node types
             if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
+                //this.movable_environment_panel.stopAllTweens();
+                this.movable_environment_panel.disable();
+                this.movable_environment_panel.makeInvisible()
                 //enable Environment Change UI
-                this.nextProcessAfterTimeout = next_process;
-                this.environment_panel.enable();
+                //get position 
+                let p1_btn = this.stateBtns.get(cur_pos.process1);
+                let p2_btn = this.stateBtns.get(next_process);
+                if(p1_btn !== undefined && p2_btn !== undefined) {
+                    this.nextProcessAfterTimeout = next_process;
+                    let vector = new Phaser.Math.Vector2(p2_btn.x - p1_btn.x, p2_btn.y - p1_btn.y);
+                    let center = new Phaser.Math.Vector2(p1_btn.x, p1_btn.y).add(vector.clone().scale(0.5)); 
+                    this.movable_environment_panel.stopAllTweens()
+                    this.movable_environment_panel.setPanelPosition(center)
+                    this.movable_environment_panel.enable();
+                    this.movable_environment_panel.makeVisible();
+                    (this.scene as BaseScene).background.setInteractive()
+                } else {
+                    this.printError("encapsulateDoMove: cannot display environment panel, buttons were not found");
+                }
             } else {
                 return this.doMove(next_process, isSymmetryMove);
             }
@@ -256,7 +297,6 @@ export class PhaserGameController {
 
         if(moves.length === 0) {
             this.printError("doMove: no possible moves from current position")
-            //TODO: display visual feedback
             return -1;
         }
 
@@ -271,7 +311,7 @@ export class PhaserGameController {
                 next_position = moves.filter((position) => (cur_pos.isSymmetryMove(position) && position.process1 === next_process));
                 action = Constants.NO_ACTION;
             } else {
-                next_position = moves.filter((position) => (position.process1 === next_process));  //TODO: also test transition label
+                next_position = moves.filter((position) => (position.process1 === next_process));
                 if(!(next_position.length === 0)) {
                     action = (next_position[0] as SimulationDefenderNode).previousAction;
                 }
@@ -281,7 +321,7 @@ export class PhaserGameController {
                 return -1;
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-            next_position = moves.filter((position) => (position.process2 === next_process));  //TODO: also test transition label
+            next_position = moves.filter((position) => (position.process2 === next_process));
             if(next_position.length === 0) {
                 this.printError("doMove: no possible move to process " + next_process);
                 return -1;
@@ -300,6 +340,11 @@ export class PhaserGameController {
             console.log("move not possible: " + action + ", " + next_position.toString());
             return -1;
         } else {
+            if(isSymmetryMove) {
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
+                this.scene.events.emit('clickedSymmetryButton')
+            }
 
             //update visuals
             this.updateVisualsAfterMove()
@@ -319,7 +364,6 @@ export class PhaserGameController {
                         wintext.destroy();
                     }); */
                     this.launchEndScreen(true);
-                    return 0;
                 //AI makes a move
                 } else {
                     let defender_move = this.ai_controller.getNextMove(cur_pos);
@@ -347,6 +391,11 @@ export class PhaserGameController {
                 }
                 
             }
+            if(!isSymmetryMove) {
+                this.scene.events.emit('clickedLtsButton')
+                this.scene.events.emit('clickedButton', this.stateBtns.get(next_process))
+            }
+            return 0
         }
         return 1;
     }
@@ -356,9 +405,7 @@ export class PhaserGameController {
      * end screen Popup
      * @param win 
      */
-    launchEndScreen(win: boolean) {
-        //TODO: set private
-
+    private launchEndScreen(win: boolean) {
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
             if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
@@ -388,10 +435,8 @@ export class PhaserGameController {
                     localStorage.setItem("levels", JSON.stringify(levels));
                 }
 
-                
-
                 //grey overlay
-                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7);
 
                 //open popup
                 let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
@@ -426,7 +471,7 @@ export class PhaserGameController {
             console.log("The defender wins the game!");
 
             //grey overlay
-            let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(2);
+            let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(4);
 
             //open popup
             let pop = new LosePopup(this.scene, () => {
@@ -455,7 +500,7 @@ export class PhaserGameController {
 
     printAttackerShortestPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
-            let path = this.ai_controller.getShortestPath();
+            let path = this.ai_controller.getShortestPathFromBfs();
             if(path !== undefined) {
                 let length = 0;
                 let path_string = "";
@@ -477,6 +522,33 @@ export class PhaserGameController {
             this.printError("printAttackerShortestPath: AI not initialized.");
         }
     }
+
+    printAttackerShortestMinMaxPath() {
+        if(this.ai_controller !== undefined && this.ai_controller !== null) {
+            let path = this.ai_controller.launchModifiedMinMax();
+
+            if(path !== undefined) {
+                let length = 0;
+                let path_string = "";
+                let previous = undefined;   //for detecting symmetry moves
+                for(let i = 0; i < path.length; i++) {
+                    if(path[i].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].activePlayer === Player.Attacker)) {
+                        length++;
+                    }
+                    previous = path[i].activePlayer;
+                    path_string = path_string.concat(path[i].toString() + ", ");
+                }
+                path_string = path_string.concat("; moves: " + length + "; pathlen: " + (path.length - 1));
+                console.log(path_string);
+            } else {
+                this.printError("printAttackerShortestMindMaxPath: returned path is undefined")
+            }
+            
+        } else {
+            this.printError("printAttackerShortestMinMaxPath: AI not initialized.");
+        }
+    }
+
     /**
      * returns the name of the scene for the specified level index
      * @param index 
@@ -534,6 +606,7 @@ export class PhaserGameController {
         if(this.game.isReactive()) {
             this.updateEnvironmentContainer();
             this.environment_panel.updatePanel();
+            this.movable_environment_panel.updatePanel()
         }
         if(this.debug) {
             this.updateCurrentPositionField();
@@ -547,8 +620,25 @@ export class PhaserGameController {
         } else {
             this.level_description.setTurn(true);
         }
+
+        //replay btn pulse when in defender winning region
+        if(this.ai_controller.getWinningRegionOfPosition() === false && this.replayPulseTween === undefined) {
+            let guiscene = this.scene.scene.get('GUIScene');
+            let replayBtn = (guiscene as GUIScene).replay_btn;
+            let scale = replayBtn.scale;
+
+            this.replayPulseTween = this.scene.tweens.add({
+                targets: replayBtn,
+                duration: 700,
+                scale: scale + 0.15,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1,
+            })
+        }
     }
     /**
+     * Method not needed in project
      * TODO: check if switching game mode is possible in current game state
      * if @reactive = true, @bisimilar is not checked in the internal game engine
      * @param reactive 
@@ -589,6 +679,7 @@ export class PhaserGameController {
             //update visualization
             this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
             this.environment_panel.updatePanel();
+            this.movable_environment_panel.updatePanel()
             this.updatePossibleMovesField();
 
         } else {
@@ -601,13 +692,14 @@ export class PhaserGameController {
      * only execute after startGame() has been called
      * @param text 
      */
-     setEnvironment(env: Set<string>) {
+     setEnvironment(env: Set<string>, visualsUpdate = true) {
         if(this.game.isReactive()) {
-            this.game.setEnvironment(env);
+            this.game.setEnvironment(env, !visualsUpdate);
             //update visualization
-            if(this.game_initialized) {
+            if(this.game_initialized && visualsUpdate) {
                 this.updateEnvironmentContainer(); //if some illegal characters are given, reset to previous
                 this.environment_panel.updatePanel();
+                this.movable_environment_panel.updatePanel()
                 this.updatePossibleMovesField();
             }
         } else {
@@ -626,30 +718,96 @@ export class PhaserGameController {
             let p0_button = this.stateBtns.get(p0);
             if(p0_button !== undefined) {
                 this.current_hightlights[0] = this.scene.add.circle(p0_button.x, p0_button.y, 36).setDepth(0);
-                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2));
+                this.current_hightlights[0].setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setVisible(this.debug);
             } else {
                 this.printError("startGame: " + p0 + " is not in stateBtns list.");
+                return
             }
 
             let p1_button = this.stateBtns.get(p1)
             if(p1_button !== undefined) {
                 this.current_hightlights[1] = this.scene.add.circle(p1_button.x, p1_button.y, 36).setDepth(0);
-                this.current_hightlights[1].setStrokeStyle(4,  Constants.convertColorToNumber(Constants.COLORS_RED.c4));
+                this.current_hightlights[1].setStrokeStyle(4,  Constants.convertColorToNumber(Constants.COLORS_RED.c4)).setVisible(this.debug);
             } else {
                 this.printError("startGame: " + p1 + " is not in stateBtns list.");
+                return
             }
+
+            //create animated player icon
+            let player_anim = this.scene.anims.create({
+                key: 'witch_idle_animation',
+                frames: this.scene.anims.generateFrameNumbers('witch_idle', {frames: [0, 1, 2, 3, 4, 5]}),
+                frameRate: 6,
+                repeat: -1
+            })
+            if(player_anim !== false) { 
+                this.player_icons[0] = this.scene.add.sprite(p0_button.x+1, p0_button.y + 15, 'witch_idle').setScale(0.95).setOrigin(0.5).setDepth(4);
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).play('witch_idle_animation');
+
+                const shape = this.scene.make.graphics({
+                    x: p0_button.x,
+                    y: p0_button.y,
+                    add: false
+                });
+                shape.fillStyle(0xffffff);
+                shape.arc(0, 0, 29, 0, Math.PI*2);
+                shape.fillPath().setDepth(6);
+                this.player_icons[1] = shape;
+                //let debug = this.scene.add.circle(p0_button.x, p0_button.y, 31, 0x6666ff).setDepth(6)
+                
+                let mask = shape.createGeometryMask();
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).mask = mask;
+
+            } else { this.printError("createHighlights: could not generate player animation"); }
+
+            //create animated opponent icon
+            let opponent_anim = this.scene.anims.create({
+                key: 'wizard_idle_animation',
+                frames: this.scene.anims.generateFrameNumbers('purple_wizard', {frames: [0, 1, 2, 3, 4, 5, 6, 7]}),
+                frameRate: 6,
+                repeat: -1
+                
+            })
+            if(opponent_anim !== false) { 
+                this.player_icons[2] = this.scene.add.sprite(p1_button.x - 5, p1_button.y - 38, 'purple_wizard').setScale(0.95).setOrigin(0.5).setDepth(4);
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).play('wizard_idle_animation').toggleFlipX();
+
+                const shape = this.scene.make.graphics({
+                    x: p1_button.x,
+                    y: p1_button.y,
+                    add: false
+                });
+                shape.fillStyle(0xffffff);
+                shape.arc(0, 0, 29, 0, Math.PI*2);
+                shape.fillPath().setDepth(6);
+                this.player_icons[3] = shape;
+                //let debug = this.scene.add.circle(p0_button.x, p0_button.y, 31, 0x6666ff).setDepth(6)
+                
+                let mask = shape.createGeometryMask();
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).mask = mask;
+
+            } else { this.printError("createHighlights: could not generate player animation"); }
         }
     }
 
     /**
-     * symmetry move button
+     * symmetry move button && environment panel
      */
     private createReactiveElements() {
         this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2, "ui_swap_btn", () => {
-            this.doMove(this.game.getCurrent(1), true);
-        }).setScale(0.15);
+            this.encapsulateDoMove(this.game.getCurrent(1), true);
+        }).setScale(0.14);
 
-        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 60, this.game, this);
+        this.environment_panel = new EnvironmentPanel(this.scene, this.scene.renderer.width/2, this.scene.renderer.height - 100, this.game, this, true, 1);
+
+        this.movable_environment_panel = new EnvironmentPanel(this.scene, 0, 0, this.game, this, false, 0.7).makeInvisible();
+        
+        (this.scene as BaseScene).background.on('pointerdown', () => {
+            this.movable_environment_panel.disable();
+            this.movable_environment_panel.makeInvisible()
+            this.movable_environment_panel.update();
+            (this.scene as BaseScene).background.disableInteractive()
+        })
     }
 
     /**
@@ -667,6 +825,109 @@ export class PhaserGameController {
                 this.setEnvironmentFromString((text_obj as Phaser.GameObjects.Text).text);
             })
         })
+    }
+
+    /**
+     * gets the current position, calculates the next moves and makes the buttons pulsate until they are clicked
+     */
+    pulsateNextMoveButtons() {
+        if(this.game_initialized && this.game.getPlay().length > 0) {
+            let possibleMoves = this.game.possibleMoves(undefined, true);
+            let tmp: string[] = [];
+            possibleMoves.forEach((entry) => {
+                tmp.push(entry.process1);
+            })
+
+            //get unique processes
+            let button_captions = tmp.filter((item, index, array) => (array.indexOf(item) === index))
+            let buttons = []
+            let scale = 1;
+            //add tween for each button
+            for(let i = 0; i < button_captions.length; i++) {
+                let button = this.stateBtns.get(button_captions[i]);
+                if(button !== undefined) {
+                    scale = button.scale
+                    this.scene.tweens.add({
+                        targets: button,
+                        duration: 700,
+                        scale: scale + 0.1,
+                        ease: Phaser.Math.Easing.Quadratic.InOut,
+                        yoyo: true,
+                        loop: -1,
+                    })
+                } else {
+                    this.printError("pulsateNextMoveButtons: could not get button from label: " + button_captions[i])
+                }
+            }
+
+            this.scene.events.on('clickedLtsButton', () => {
+                let tweens = this.scene.tweens.getAllTweens();
+                let pulse_tweens = tweens.filter(tween => tween.targets[0] instanceof LtsStateButton);
+                console.log(pulse_tweens.length)
+                for(let i = 0; i < pulse_tweens.length; i++) {
+                    let button = pulse_tweens[i].targets[0];
+                    pulse_tweens[i].complete();
+                    (button as LtsStateButton).setScale(scale)
+                }
+                this.scene.events.off('clickedLtsButton')
+                this.pulsateNextMoveButtons()
+            })
+        }
+    }
+
+    /**
+     * makes the symmetry swap button pulsate until its clicked once
+     */
+    pulsateSymmetrySwapBtn() {
+        if(this.game_initialized && this.switch_button !== undefined) {
+            //add tween
+            let scale = this.switch_button.scale
+            let tween = this.scene.tweens.add({
+                targets: this.switch_button,
+                duration: 700,
+                scale: scale + 0.04,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1,
+            })
+
+            this.scene.events.on('clickedSymmetryButton', () => {
+                tween.complete()
+                this.switch_button.setScale(scale);
+                this.scene.events.off('clickedSymmetryButton')
+            })
+        }
+    }
+
+    /**
+     * TODO: makes any Button pulsate until its clicked
+     */
+    pulsateProcessBtn(process: string) {
+        if(this.game_initialized) {
+
+            let button = this.stateBtns.get(process)
+            if(button === undefined) {
+                this.printError('pulsateProcessBtn: button ' + process + " not found")
+                return;
+            }
+            //add tween
+            let scale = button.scale
+            let tween = this.scene.tweens.add({
+                targets: button,
+                duration: 700,
+                scale: scale + 0.1,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1,
+            })
+
+            this.scene.events.on('clickedButton', () => {
+                console.log('test')
+                tween.complete()
+                button!.setScale(scale);
+                this.scene.events.off('clickedButton')
+            }, button)
+        }
     }
 
     /**
@@ -744,6 +1005,18 @@ export class PhaserGameController {
         if(cur0_btn !== undefined && cur1_btn !== undefined) {
             this.current_hightlights[0].setPosition(cur0_btn.x, cur0_btn.y);
             this.current_hightlights[1].setPosition(cur1_btn.x, cur1_btn.y);
+
+            //player 1 is in right side lts
+            if(cur0_btn.x > this.scene.renderer.width/2) {
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x - 1, cur0_btn.y + 15);
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x + 5, cur1_btn.y - 38);
+            } else {
+                (this.player_icons[0] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x + 1, cur0_btn.y + 15);
+                (this.player_icons[2] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x - 5, cur1_btn.y - 38);
+            }
+            
+            (this.player_icons[1] as Phaser.GameObjects.Sprite).setPosition(cur0_btn.x , cur0_btn.y);
+            (this.player_icons[3] as Phaser.GameObjects.Sprite).setPosition(cur1_btn.x , cur1_btn.y);
         }
     }
 

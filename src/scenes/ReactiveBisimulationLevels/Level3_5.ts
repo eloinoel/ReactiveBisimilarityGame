@@ -17,8 +17,10 @@ export default class Level3_5 extends BaseScene {
 
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
+        this.background = bg;
 
-        this.scene.launch("GUIScene", { otherRunningScene: this })
+        /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
+        this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 2})
 
         this.setupLTS();
     }
@@ -63,5 +65,8 @@ export default class Level3_5 extends BaseScene {
         game_controller.addTransition("q3", "q2", "a");
 
         game_controller.startGame(this, "p0", "q0", true, true, [6, 5]);
+
+        game_controller.printAttackerShortestMinMaxPath()
+        console.log("expected moves: 5")
     }
 }

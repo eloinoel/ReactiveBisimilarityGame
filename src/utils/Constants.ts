@@ -26,6 +26,9 @@ export class Constants {
     static COLOR_BORDEAUX = Phaser.Display.Color.GetColor(200, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).g, Phaser.Display.Color.ColorToRGBA(Constants.convertColorToNumber(Constants.COLORPACK_1.red_pink)).b);
     static COLORS_PARALLAX = {white: '#9db8b9', dark_blue: '#12273b', lighter_blue: '#085b87', very_dark_blue: '#0f1326'}
 
+    static COLORPACK_FINAL = {white: "#EEEEEE", white_blue: "#E4F9F5", teal_greenish: "#30E3CA", teal_darker: "#11999E", teal: "#08D9D6", grey_tealish: "#40514E", grey: "#393E46",
+     black: "#222831", red_pink: "#FF2E63", red_purple: "#B91646", red_bordeaux: "#c82e63", green_dark: "#3b845c", green: '#00A97B', green_light: '#00ffd2'}
+
 
     static textStyle = "Monospace";
     static UI_height = 60;

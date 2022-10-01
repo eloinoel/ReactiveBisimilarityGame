@@ -150,33 +150,7 @@ export class CreditsScrollableArea extends Phaser.GameObjects.Container {
         }).layout()
     }
 
-    updatePanel (content: string) {
-        let sizer = this.panel.getElement('panel');
-        let scene = this.panel.scene;
-    
-        (sizer as FixWidthSizer).clear(true);
-        
-        var lines = content.split('\n');
-        for (var li = 0, lcnt = lines.length; li < lcnt; li++) {
-            var words = lines[li].split(' ');
-            for (var wi = 0, wcnt = words.length; wi < wcnt; wi++) {
-                (sizer as FixWidthSizer).add(
-                    scene.add.text(0, 0, words[wi], {
-                        fontFamily:Constants.textStyle,
-                        color: Constants.COLORPACK_1.black,
-                        fontStyle: 'bold'
-                    }).setFontSize(20)
-                );
-            }
-            if (li < (lcnt - 1)) {
-                (sizer as FixWidthSizer).addNewLine();
-            }
-        }
-    
-    
-        this.panel.layout();
-        return this.panel;
-    }
+
 
     addNewLine(text_obj: Phaser.GameObjects.Text) {
         let sizer = this.panel.getElement('panel');

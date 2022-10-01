@@ -23,7 +23,9 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("ui_tick_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/tick.png");
         this.load.image("ui_level_map_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/list_bulleted.png");
         this.load.image("ui_questionmark_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/help.png");
-        this.load.image("ui_swap_btn", "assets/switch.png")
+        this.load.image("ui_cross_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cross.png");
+        //this.load.image("ui_swap_btn", "assets/switch.png")
+        this.load.image("ui_swap_btn", "assets/Transition/symmetry_arrow.png")
 
         //LTS
         this.load.image("circle", 'assets/DemoScene/Circle03.png');
@@ -35,12 +37,29 @@ export default class Preloader extends Phaser.Scene {
 
         //background
         this.load.image("background_demo", 'assets/dark_blue_sky.jpg');
+        this.load.image("background_mountain_water", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_1/game_background_1.png');
+        this.load.image("background_mountain_desert", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_2/game_background_2.png');
+        this.load.image("background_forest", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_3/game_background_3.1.png');
+        this.load.image("background_swamp", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_4/game_background_4.png');
+        this.load.image("background_dark_gradient", 'assets/background_parallax/dark_gradient.png');
+        this.load.image("background_dark_gradient_green", 'assets/background_parallax/dark_gradient_green.png');
 
-        //characters
-        this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 32, frameHeight: 57});
-        this.load.spritesheet("hellhound_idle", "assets/characters/gothicvania\ patreon\ collection/gothicvania\ patreon\ collection/Hell-Hound-Files/PNG/hell-hound-idle.png", {frameWidth: 64, frameHeight: 32})
-        this.load.spritesheet("dark_magician_idle", "assets/characters/Wizard\ Pack/Wizard\ Pack/Idle.png", {frameWidth: 231, frameHeight: 190})
-        
+
+        //characters/icons
+        this.load.spritesheet("witch_idle", "assets/characters/Blue_witch/B_witch_idle.png", {frameWidth: 64, frameHeight: 96});
+        this.load.spritesheet("purple_wizard", "assets/characters/tinyPurpleWizard/MAGE.png", {frameWidth: 150, frameHeight: 150})
+        this.load.image("purple_wizard_icon", 'assets/characters/tinyPurpleWizard/mage_icon.png');
+        this.load.image("witch_icon", 'assets/characters/Blue_witch/witch_icon.png');
+        this.load.image("fire_arrow_icon", 'assets/Transition/fire_arrow_icon.png');
+        this.load.image("water_arrow_icon", 'assets/Transition/water_arrow_icon.png');
+        this.load.image("plant_arrow_icon", 'assets/Transition/plant_arrow_icon.png');
+        this.load.image("timeout_arrow_icon", 'assets/Transition/timeout_arrow_icon.png');
+        this.load.image("tau_arrow_icon", 'assets/Transition/tau_arrow_icon.png');
+        this.load.image("environment_panel", "assets/Transition/environment_panel.png")
+        this.load.image("environment_panel_disabled", "assets/Transition/env_panel_disabled.png")
+        this.load.image("environment_panel_no_spell_possible", "assets/Transition/env_no_spell_possible.png")
+        this.load.image("timeouted_timeouts", "assets/Transition/timeouted_timeouts.png")
+
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');
         this.load.image("star_empty", 'assets/UI/Stars/Empty\ Star\ Grey.png');
@@ -49,6 +68,7 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("fire_icon", 'assets/fire.png');
         this.load.image("water_icon", 'assets/water-drop.png');
         this.load.image("leaf_icon", 'assets/leaf2.png');
+        this.load.image("sand_clock", 'assets/Transition/sand_clock.png')
 
         //arrows
         this.load.image("fire_arrow", 'assets/Transition/fire_arrow.png')

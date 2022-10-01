@@ -3,6 +3,7 @@ import BaseScene from './BaseScene';
 import { Constants } from "../utils/Constants";
 import { UI_Button } from '../ui_elements/Button';
 import { CreditsScrollableArea } from '../ui_elements/ScrollableTextArea';
+import RoundRectangle from 'phaser3-rex-plugins/plugins/roundrectangle';
 
 export default class CreditsScene extends BaseScene {
     
@@ -81,7 +82,7 @@ export default class CreditsScene extends BaseScene {
 
 
         for(let i = 0; i < this.toFadeIn.length; i++) {
-            this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*25);
+            let tween = this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*25);
         }
 
         this.input.keyboard.on('keydown-ESC', (event:KeyboardEvent) => {

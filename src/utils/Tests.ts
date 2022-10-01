@@ -66,7 +66,7 @@ export class Tests {
         console.log("----------------- Restricted Symmetry Moves -----------------")
     }
 
-    testAI() {
+    /* testAI() {
         console.log("----------------- AI Tests -----------------");
         let game  = this.getReactiveLTS01();
         let ai_controller = new AI(game);
@@ -119,6 +119,66 @@ export class Tests {
         console.log("nextMove: " + ai_controller2.getNextMove());
         console.log("shortestPathLength: " + ai_controller2.getShortestPathLength());
         //console.log("shortestPathLength: " + ai_controller.getShortestPathLength())        
+    } */
+
+    testStarsAlgorithm() {
+        let game  = this.getSymmetryLTS2();
+        let ai_controller = new AI(game);
+        ai_controller.generateGraph();
+        ai_controller.determineWinningRegion();
+        ai_controller.printGraph()
+    }
+
+    getSymmetryLTS(): ReactiveBisimilarityGame {
+        /**
+         *         p0                  q0
+         *       a/                  a/  \b
+         *      p1                  q1    q2
+         */
+         let lts = new LTSController
+         lts.addState("p0");
+         lts.addState("p1");
+ 
+         lts.addTransition("p0", "p1", "a");
+
+ 
+         lts.addState("q0");
+         lts.addState("q1");
+         lts.addState("q2");
+
+         lts.addTransition("q0", "q1", "a");
+         lts.addTransition("q0", "q2", "b");
+ 
+         return new ReactiveBisimilarityGame("p0", "q0", lts, false, true);
+    }
+
+    getSymmetryLTS2(): ReactiveBisimilarityGame {
+        /**
+         *         p0                   q0
+         *       a/  \a                a/
+         *      p1    p2             q1
+         *     b/                   b/
+         *    p3                   q2
+         */
+         let lts = new LTSController
+         lts.addState("p0");
+         lts.addState("p1");
+         lts.addState("p2");
+         lts.addState("p3");
+ 
+         lts.addTransition("p0", "p1", "a");
+         lts.addTransition("p0", "p2", "a");
+         lts.addTransition("p1", "p3", "b");
+
+ 
+         lts.addState("q0");
+         lts.addState("q1");
+         lts.addState("q2");
+
+         lts.addTransition("q0", "q1", "a");
+         lts.addTransition("q1", "q2", "b");
+ 
+         return new ReactiveBisimilarityGame("p0", "q0", lts, false, true);
     }
 
     /**

@@ -17,8 +17,10 @@ export default class Level2_2 extends BaseScene {
 
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
+        this.background = bg;
 
-        this.scene.launch("GUIScene", { otherRunningScene: this })
+        /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
+        this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 1})
 
         this.setupLTS();
     }
@@ -50,6 +52,9 @@ export default class Level2_2 extends BaseScene {
         game_controller.addTransition("q1", "q1", "b");
         game_controller.addTransition("q1", "q2", "b");
 
-        game_controller.startGame(this, "p0", "q0", false, true);
+        game_controller.startGame(this, "p0", "q0", false, true, [5, 4]);
+        //game_controller.printAIGraph()
+        game_controller.printAttackerShortestMinMaxPath()
+        console.log("expected moves: 4")
     }
 }

@@ -3,10 +3,15 @@ import { UI_Button } from "../../ui_elements/Button";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 import { LevelDescription } from "../../ui_elements/LevelDescription";
+import { IntroScreen } from "../../ui_elements/IntroScreen";
 
 export default class Level1_1 extends BaseScene {
+
+    levelType: number;
+
     constructor() {
         super('Sim_Level1');
+        this.levelType = 3;
     }
 
     preload() {
@@ -18,10 +23,14 @@ export default class Level1_1 extends BaseScene {
 
         let bg = this.add.image(0, 0, "background_demo").setOrigin(0).setDepth(0);
         bg.scale = this.renderer.width / bg.width;
+        this.background = bg;
 
-        this.scene.launch("GUIScene", { otherRunningScene: this })
+        /** 0: simulation, 1: bisimulation, 2: reactive bisimulation, 3: reactive bisimulation with tau-actions */
+        this.scene.launch("GUIScene", { otherRunningScene: this, levelType: 0})
 
         this.setupLTS();
+
+
     }
 
     update(time: number, delta: number): void {
@@ -55,6 +64,12 @@ export default class Level1_1 extends BaseScene {
 
         game_controller.startGame(this, "p0", "q0", false, false, [6 , 3]);
 
+        new IntroScreen(this, 0);
+        //game_controller.ai_controller.printGraph()
+        //game_controller.ai_controller.printBestPathResults()
+        game_controller.printAttackerShortestMinMaxPath()
+        console.log("expected moves: 3")
 
+        game_controller.pulsateNextMoveButtons()
     }
 }

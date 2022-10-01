@@ -2,9 +2,11 @@ import Phaser from 'phaser';
 import BaseScene from './BaseScene';
 import { Constants } from "../utils/Constants";
 import { UI_Button } from '../ui_elements/Button';
+import { RulesPopUp } from '../ui_elements/RulesPopUp';
 
 export default class GUIScene extends BaseScene {
     otherRunningScene!: Phaser.Scene;
+    replay_btn!: UI_Button;
 
     constructor() {
         super('GUIScene');
@@ -19,7 +21,7 @@ export default class GUIScene extends BaseScene {
     }
 
     /* create function is used to add the objects to the game */
-    create(data: { otherRunningScene: Phaser.Scene }) {
+    create(data: { otherRunningScene: Phaser.Scene, levelType: number}) {
         this.otherRunningScene = data.otherRunningScene;
 
 
@@ -40,18 +42,17 @@ export default class GUIScene extends BaseScene {
             })
         })
 
-        let replayBtn = new UI_Button(this, this.renderer.width - 3.5* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
+        this.replay_btn = new UI_Button(this, this.renderer.width - 3.5* Constants.UI_offset, "ui_replay_btn", () => {this.fade(false, () => {
             console.clear()
             this.restartLevel();
         })}, "Restart");
 
         let infoyBtn = new UI_Button(this, this.renderer.width - 1.5* Constants.UI_offset, "ui_questionmark_btn", () => {
-            //TODO:Display Popup
-            console.log("TODO: display rules popup")
+            let tmp = new RulesPopUp(this, data.levelType);
         }, "Rules", false);
 
         let buttons = [];
-        buttons.push(homeBtn, backBtn, replayBtn, infoyBtn);
+        buttons.push(homeBtn, backBtn, this.replay_btn, infoyBtn);
         for(let i = 0; i < buttons.length; i++) {
             this.fadeImage((buttons[i] as unknown) as Phaser.GameObjects.Image, undefined, Constants.camFadeSpeed);
             this.fadeImage((buttons[i].text as unknown) as Phaser.GameObjects.Image, undefined, Constants.camFadeSpeed);
