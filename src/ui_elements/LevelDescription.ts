@@ -15,8 +15,8 @@ export class LevelDescription extends Phaser.GameObjects.Container {
 
         this.level_x = scene.add.text(0, 0, "Level " + level, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.5).setFontSize(25).setResolution(2).setStroke('#A3A3A3', 1);
         this.level_type = scene.add.text(0, 40, level_type, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold'}).setOrigin(0.5).setFontSize(33).setResolution(2).setStroke('#A3A3A3', 1);
-        this.enemy_turn = scene.add.text(0, 80, "Opponent's turn", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.4, 0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
-        this.player_turn = scene.add.text(0, 80, "Your turn", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.4, 0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
+        this.enemy_turn = scene.add.text(0, 85, "Opponent's turn", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.4, 0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
+        this.player_turn = scene.add.text(0, 85, "Your turn", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setOrigin(0.4, 0.5).setFontSize(30).setResolution(2).setStroke('#A3A3A3', 1);
         this.img_player = scene.add.image(this.player_turn.x - 90, this.player_turn.y + 10, "witch_idle", 0).setOrigin(0.5);
         this.img_opponent = scene.add.image(this.enemy_turn.x - 135, this.enemy_turn.y - 40, "purple_wizard", 0).setFlipX(true).setScale(1);
 

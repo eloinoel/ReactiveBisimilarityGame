@@ -10,7 +10,7 @@ export class IntroScreen extends Phaser.GameObjects.Container {
 
     private sizer: Sizer;
     private grey_bg: Phaser.GameObjects.Rectangle;
-    private referencesToDestroy: Phaser.GameObjects.GameObject[];
+    private fadeTweens: Phaser.Tweens.Tween[];
 
     /**
      * 
@@ -41,13 +41,13 @@ export class IntroScreen extends Phaser.GameObjects.Container {
 
         this.setSize(this.dimensions.x, this.dimensions.y);
         this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white};
-        
+        this.fadeTweens = []        
 
         this.grey_bg = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.95).setOrigin(0.5).setDepth(7);
         this.grey_bg.setInteractive().on('pointerup', () => {
-            this.destroyPopup()
+            this.fadeOut(this.destroyPopup)
         });
-        this.sizer = this.createPanel(levelType);        
+        this.sizer = this.createPanel(levelType);
     }
 
     private createPanel(levelType: number): Sizer {
@@ -63,12 +63,7 @@ export class IntroScreen extends Phaser.GameObjects.Container {
         //debug
         sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4)).setAlpha(0.0)))
         
-        
-
-        let atk_icon = this.scene.add.image(0, 0, "witch_icon").setOrigin(0.5).setScale(0.7);
-        
-        this.referencesToDestroy.push(atk_icon);
-        
+    
         //intro types
         switch(levelType) {
             //simulation
@@ -166,26 +161,8 @@ export class IntroScreen extends Phaser.GameObjects.Container {
             default:
                 sizer.add(this.scene.add.text(0, 0, "Unknown Gamemode :)", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
         }
-        
-        /* Attacker Rules */
-
-
-
-
-
-        //rules
-/*         let atk_rule_normal = new Sizer(this.scene, { orientation: 'x'})
-        .add(this.scene.add.text(0, 0, "    • Cast ", this.textStyle).setFontSize(22).setResolution(2))
-        .add(this.scene.add.image(0, 0, "fire_arrow_icon", ).setOrigin(0.5).setScale(0.08))
-        .add(this.scene.add.text(0, 0, ", ", this.textStyle).setFontSize(22).setResolution(2))
-        .add(this.scene.add.image(0, 0, "water_arrow_icon", ).setOrigin(0.5).setScale(0.08))
-        .add(this.scene.add.text(0, 0, " or ", this.textStyle).setFontSize(22).setResolution(2))
-        .add(this.scene.add.image(0, 0, "plant_arrow_icon", ).setOrigin(0.5).setScale(0.08))
-        .add(this.scene.add.text(0, 0, " basic magic spells ", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold')) */
-        
 
         sizer.add(this.scene.add.text(0, 0, "< Click to continue >", this.textStyle).setFontSize(20).setResolution(2))
-
         sizer.setDepth(8)
         sizer.layout();
 
@@ -194,12 +171,30 @@ export class IntroScreen extends Phaser.GameObjects.Container {
 
     destroyPopup() {
         if(this !== undefined) {
-            for(let i = 0; i < this.referencesToDestroy.length; i++) {
-                this.referencesToDestroy[i].destroy()
-            }
             this.sizer.destroy();
             this.grey_bg.destroy();
             this.destroy();
         }
+    }
+
+    fadeOut(fn = () => {}) {
+        
+        //tweens
+        this.grey_bg.alpha = 1;
+        this.sizer.alpha = 1;
+        let a = this.scene.tweens.add({
+            targets: this.grey_bg,
+            duration: 500,
+            alpha: 0,
+        })
+        this.fadeTweens.push(a);
+
+        let b = this.scene.tweens.add({
+            targets: this.sizer,
+            duration: 500,
+            alpha: 0,
+            onComplete: () => {fn}
+        })
+        this.fadeTweens.push(b);
     }
 }
