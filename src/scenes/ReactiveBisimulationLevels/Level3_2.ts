@@ -2,6 +2,7 @@ import BaseScene from "../BaseScene";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 import { LevelDescription } from "../../ui_elements/LevelDescription";
+import { IntroScreen } from "../../ui_elements/IntroScreen";
 
 export default class Level3_2 extends BaseScene {
     constructor() {
@@ -61,6 +62,7 @@ export default class Level3_2 extends BaseScene {
         game_controller.addTransition("q2", "q5", "b");
 
         game_controller.startGame(this, "p0", "q0", true, true, [4, 3]);
+        new IntroScreen(this, 3);
 
         game_controller.printAttackerShortestMinMaxPath()
         console.log("expected moves: 3")

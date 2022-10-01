@@ -3,6 +3,7 @@ import { UI_Button } from "../../ui_elements/Button";
 import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 import { LevelDescription } from "../../ui_elements/LevelDescription";
+import { IntroScreen } from "../../ui_elements/IntroScreen";
 
 export default class Level1_1 extends BaseScene {
 
@@ -62,6 +63,8 @@ export default class Level1_1 extends BaseScene {
         game_controller.addTransition("q0", "q2", "a");
 
         game_controller.startGame(this, "p0", "q0", false, false, [6 , 3]);
+
+        new IntroScreen(this, 0);
         //game_controller.ai_controller.printGraph()
         //game_controller.ai_controller.printBestPathResults()
         game_controller.printAttackerShortestMinMaxPath()

@@ -222,11 +222,14 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             onComplete: () => {this.makeInvisible(); this.inFadeTween = false;}
         })
 
-        this.tweenList.push(tw0, tw1);
+        this.tweenList.push(tw0);
+        this.tweenList.push(tw1);
     }
 
     stopAllTweens() {
-        this.scene.tweens.killAll()
+        for(let i = 0; i < this.tweenList.length; i++) {
+            this.tweenList[i].complete()
+        }
     }
 
     private createPanel() {

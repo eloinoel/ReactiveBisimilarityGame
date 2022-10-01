@@ -343,6 +343,7 @@ export class PhaserGameController {
             if(isSymmetryMove) {
                 (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
                 (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
+                this.scene.events.emit('clickedSymmetryButton')
             }
 
             //update visuals
@@ -390,7 +391,10 @@ export class PhaserGameController {
                 }
                 
             }
-            this.scene.events.emit('clickedLtsButton')
+            if(!isSymmetryMove) {
+                this.scene.events.emit('clickedLtsButton')
+                this.scene.events.emit('clickedButton', this.stateBtns.get(next_process))
+            }
             return 0
         }
         return 1;
@@ -617,7 +621,7 @@ export class PhaserGameController {
             this.level_description.setTurn(true);
         }
 
-        //replay
+        //replay btn pulse when in defender winning region
         if(this.ai_controller.getWinningRegionOfPosition() === false && this.replayPulseTween === undefined) {
             let guiscene = this.scene.scene.get('GUIScene');
             let replayBtn = (guiscene as GUIScene).replay_btn;
@@ -787,7 +791,7 @@ export class PhaserGameController {
     }
 
     /**
-     * symmetry move button
+     * symmetry move button && environment panel
      */
     private createReactiveElements() {
         this.switch_button = new Simple_Button(this.scene , this.scene.renderer.width/2, this.scene.renderer.height/2, "ui_swap_btn", () => {
@@ -856,8 +860,7 @@ export class PhaserGameController {
                 }
             }
 
-            let listener = this.scene.events.on('clickedLtsButton', () => {
-                console.log("test")
+            this.scene.events.on('clickedLtsButton', () => {
                 let tweens = this.scene.tweens.getAllTweens();
                 let pulse_tweens = tweens.filter(tween => tween.targets[0] instanceof LtsStateButton);
                 console.log(pulse_tweens.length)
@@ -869,6 +872,61 @@ export class PhaserGameController {
                 this.scene.events.off('clickedLtsButton')
                 this.pulsateNextMoveButtons()
             })
+        }
+    }
+
+    /**
+     * makes the symmetry swap button pulsate until its clicked once
+     */
+    pulsateSymmetrySwapBtn() {
+        if(this.game_initialized && this.switch_button !== undefined) {
+            //add tween
+            let scale = this.switch_button.scale
+            let tween = this.scene.tweens.add({
+                targets: this.switch_button,
+                duration: 700,
+                scale: scale + 0.04,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1,
+            })
+
+            this.scene.events.on('clickedSymmetryButton', () => {
+                tween.complete()
+                this.switch_button.setScale(scale);
+                this.scene.events.off('clickedSymmetryButton')
+            })
+        }
+    }
+
+    /**
+     * TODO: makes any Button pulsate until its clicked
+     */
+    pulsateProcessBtn(process: string) {
+        if(this.game_initialized) {
+
+            let button = this.stateBtns.get(process)
+            if(button === undefined) {
+                this.printError('pulsateProcessBtn: button ' + process + " not found")
+                return;
+            }
+            //add tween
+            let scale = button.scale
+            let tween = this.scene.tweens.add({
+                targets: button,
+                duration: 700,
+                scale: scale + 0.1,
+                ease: Phaser.Math.Easing.Quadratic.InOut,
+                yoyo: true,
+                loop: -1,
+            })
+
+            this.scene.events.on('clickedButton', () => {
+                console.log('test')
+                tween.complete()
+                button!.setScale(scale);
+                this.scene.events.off('clickedButton')
+            }, button)
         }
     }
 

@@ -3,6 +3,7 @@ import { Constants } from "../../utils/Constants";
 import { PhaserGameController } from "../../utils/PhaserGameController";
 import { LevelDescription } from "../../ui_elements/LevelDescription";
 import { RulesPopUp } from "../../ui_elements/RulesPopUp";
+import { IntroScreen } from "../../ui_elements/IntroScreen";
 
 /**
  * Introducing hidden action
@@ -68,6 +69,7 @@ export default class Level3_6 extends BaseScene {
         game_controller.addTransition("q3", "q5", "c");
 
         game_controller.startGame(this, "p0", "q0", true, true, [4, 3]);
+        new IntroScreen(this, 5)
         game_controller.printAttackerShortestMinMaxPath()
         console.log("expected moves: 3")
     }

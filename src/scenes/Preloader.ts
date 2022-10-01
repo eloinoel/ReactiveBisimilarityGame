@@ -55,6 +55,10 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("plant_arrow_icon", 'assets/Transition/plant_arrow_icon.png');
         this.load.image("timeout_arrow_icon", 'assets/Transition/timeout_arrow_icon.png');
         this.load.image("tau_arrow_icon", 'assets/Transition/tau_arrow_icon.png');
+        this.load.image("environment_panel", "assets/Transition/environment_panel.png")
+        this.load.image("environment_panel_disabled", "assets/Transition/env_panel_disabled.png")
+        this.load.image("environment_panel_no_spell_possible", "assets/Transition/env_no_spell_possible.png")
+        this.load.image("timeouted_timeouts", "assets/Transition/timeouted_timeouts.png")
 
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');
