@@ -128,7 +128,7 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             .add(this.scene.add.text(0, 0, " time magic spell", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold'))
 
             let timeout_cond1 = new Sizer(this.scene, {orientation: 'x'})
-            .add(this.scene.add.text(0, 0, "        • condition: no basic spell is possible (disable from selection)", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, "        • condition: no basic spell is possible in current state (disable from selection)", this.textStyle).setFontSize(20).setResolution(2))
             let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
             .add(this.scene.add.text(0, 0, "        • consequence: disabled basic spells ", this.textStyle).setFontSize(20).setResolution(2))
             .add(this.scene.add.text(0, 0, "won't be possible after ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))

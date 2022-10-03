@@ -37,7 +37,6 @@ export class IntroScreen extends Phaser.GameObjects.Container {
             default:
                 this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.3);
         }
-        this.referencesToDestroy = []
 
         this.setSize(this.dimensions.x, this.dimensions.y);
         this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white};
@@ -70,12 +69,17 @@ export class IntroScreen extends Phaser.GameObjects.Container {
             case 0:
                 sizer.add(this.scene.add.text(0, 0, "Simulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
 
+                sizer.add(new Sizer(this.scene, { orientation: 'x'})
+                .add(this.scene.add.text(0, 0, "Cast magic spells by clicking on a neighbouring state ", this.textStyle).setFontSize(26).setResolution(3))
+                .add(this.scene.add.image(0, 0, "magic_and_state", ).setOrigin(0.5).setScale(0.7))
+                , {align: 'center', padding: {top: -40}});
+
                 let def_icon = this.scene.add.image(0, 0, "purple_wizard_icon", 0).setOrigin(0.5).setScale(0.7);
                 sizer.add(new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "Make ", this.textStyle).setFontSize(26).setResolution(3))
+                .add(this.scene.add.text(0, 0, "and make ", this.textStyle).setFontSize(26).setResolution(3))
                 .add(def_icon)
-                .add(this.scene.add.text(0, 0, " unable to copy your magic spells", this.textStyle).setFontSize(26).setResolution(3))
-                , {align: 'center', });
+                .add(this.scene.add.text(0, 0, " unable to copy your spell sequence", this.textStyle).setFontSize(26).setResolution(3))
+                , {align: 'center', padding: {top: -50}});
                 break;
             //symmetry move
             case 1:
@@ -108,11 +112,18 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 .add(this.scene.add.text(0, 0, "• The disabled spells will remain disabled until another spell is cast ", this.textStyle).setFontSize(22).setResolution(2))
                 .add(this.scene.add.image(0, 0, "environment_panel_disabled", ).setOrigin(0.5).setScale(0.8))
 
-                //if no basic magic spell is possible
                 sizer.add(atk_rule_timeout, {align: 'center'});
                 sizer.add(timeout_cond1, {align: 'center'})
                 sizer.add(timeout_cond2, {align: 'center'})
                 sizer.add(timeout_cond3, {align: 'center', padding: {top: -40}})
+
+                sizer.add(new Sizer(this.scene, { orientation: 'x'})
+                .add(this.scene.add.text(0, 0, "In this example ", this.textStyle).setFontSize(22).setResolution(2))
+                .add(this.scene.add.image(0, 0, "timeout_disabling", ).setOrigin(0.5).setScale(0.6))
+                .add(this.scene.add.text(0, 0, " only ", this.textStyle).setFontSize(22).setResolution(2))
+                .add(this.scene.add.image(0, 0, "fire_icon", ).setOrigin(0.5).setScale(0.07))
+                .add(this.scene.add.text(0, 0, " would have to be disabled ", this.textStyle).setFontSize(22).setResolution(2))
+                , {align: 'center', padding: {top: -60}});
                 break;
             case 3:
                 sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
