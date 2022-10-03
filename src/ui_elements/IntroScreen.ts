@@ -10,7 +10,6 @@ export class IntroScreen extends Phaser.GameObjects.Container {
 
     private sizer: Sizer;
     private grey_bg: Phaser.GameObjects.Rectangle;
-    private fadeTweens: Phaser.Tweens.Tween[];
 
     /**
      * 
@@ -40,13 +39,13 @@ export class IntroScreen extends Phaser.GameObjects.Container {
 
         this.setSize(this.dimensions.x, this.dimensions.y);
         this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white};
-        this.fadeTweens = []        
 
         this.grey_bg = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.95).setOrigin(0.5).setDepth(7);
-        this.grey_bg.setInteractive().on('pointerup', () => {
-            this.fadeOut(this.destroyPopup)
-        });
         this.sizer = this.createPanel(levelType);
+
+        this.grey_bg.setInteractive().on('pointerup', () => {
+            this.fadeOut(this.scene)
+        });
     }
 
     private createPanel(levelType: number): Sizer {
@@ -96,12 +95,12 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
 
                 let atk_rule_timeout = new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "Cast ", this.textStyle).setFontSize(26).setResolution(2))
-                .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.08))
-                .add(this.scene.add.text(0, 0, " time magic spells", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "Cast ", this.textStyle).setFontSize(28).setResolution(2))
+                .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.1))
+                .add(this.scene.add.text(0, 0, " time magic spells", this.textStyle).setFontSize(28).setResolution(2))
 
                 let timeout_cond1 = new Sizer(this.scene, {orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "• These are only possible when no other magic can be cast from the current state", this.textStyle).setFontSize(22).setResolution(2))
+                .add(this.scene.add.text(0, 0, "• For that, all other possible magic in the current state has to be disabled", this.textStyle).setFontSize(22).setResolution(2))
                 let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
                 .add(this.scene.add.text(0, 0, "• You can disable other magic spells ", this.textStyle).setFontSize(22).setResolution(2))
                 .add(this.scene.add.image(0, 0, "environment_panel", ).setOrigin(0.5).setScale(1))
@@ -166,8 +165,12 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 let atk_rule_8 = new Sizer(this.scene, { orientation: 'x'})
                 .add(this.scene.add.text(0, 0, " to transfer time magic restrictions to the next state", this.textStyle).setFontSize(26).setResolution(2))
 
+                let atk_rule_9 = new Sizer(this.scene, { orientation: 'x'})
+                .add(this.scene.add.text(0, 0, "portal magic cannot be disabled by time magic", this.textStyle).setFontSize(26).setResolution(2))
+
                 sizer.add(atk_rule_7, {align: 'center'});
                 sizer.add(atk_rule_8, {align: 'center'});
+                sizer.add(atk_rule_9, {align: 'center'});
                 break;
             default:
                 sizer.add(this.scene.add.text(0, 0, "Unknown Gamemode :)", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
@@ -180,32 +183,21 @@ export class IntroScreen extends Phaser.GameObjects.Container {
         return sizer;
     }
 
-    destroyPopup() {
-        if(this !== undefined) {
-            this.sizer.destroy();
-            this.grey_bg.destroy();
-            this.destroy();
-        }
-    }
-
-    fadeOut(fn = () => {}) {
+    fadeOut(scene: Phaser.Scene, fn = () => {}) {
         
         //tweens
         this.grey_bg.alpha = 1;
         this.sizer.alpha = 1;
-        let a = this.scene.tweens.add({
+        let a = scene.tweens.add({
             targets: this.grey_bg,
             duration: 500,
             alpha: 0,
         })
-        this.fadeTweens.push(a);
 
-        let b = this.scene.tweens.add({
+        let b = scene.tweens.add({
             targets: this.sizer,
             duration: 500,
             alpha: 0,
-            onComplete: () => {fn}
         })
-        this.fadeTweens.push(b);
     }
 }

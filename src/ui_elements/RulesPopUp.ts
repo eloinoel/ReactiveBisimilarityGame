@@ -30,7 +30,7 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
                 this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.1);
                 break;
             case 2:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.35, this.scene.renderer.height/1.6);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.2, this.scene.renderer.height/1.6);
                 break;
             case 3:
                 this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.26, this.scene.renderer.height/1.34);
@@ -44,19 +44,30 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
         this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black};
         
 
-        this.grey_bg = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.4).setOrigin(0.5).setDepth(7);
+        this.grey_bg = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.4).setOrigin(0.5).setDepth(7).setInteractive();
         this.sizer = this.createPanel(levelType);
+
+
 
         
         //add close Button
-        this.exit_btn = new ExitButton(this.scene, this.coordinates.x + this.dimensions.x/2 -22, this.coordinates.y - this.dimensions.y/2 + 22, () => {this.destroyPopup()}, this.textStyle);
+        this.exit_btn = new ExitButton(this.scene, this.coordinates.x + this.dimensions.x/2 -22, this.coordinates.y - this.dimensions.y/2 + 22, () => {
+            this.fadeOut(() => {
+                this.destroyPopup()
+                scene.input.removeListener('pointerup', undefined, this);
+            })
+        }, this.textStyle);
+
+        this.fadeIn()
         
         //can also close by clicking anywhere on screen
         this.scene.time.delayedCall(100, () => {
             let listener = this.scene.input.addListener('pointerup', () => {
-                this.destroyPopup()
-                scene.input.removeListener('pointerup', undefined, "popUpListener");
-            }, "popUpListener")
+                this.fadeOut(() => {
+                    this.destroyPopup()
+                    scene.input.removeListener('pointerup', undefined, this);
+                })
+            }, this)
         })
         
     }
@@ -128,7 +139,7 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             .add(this.scene.add.text(0, 0, " time magic spell", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold'))
 
             let timeout_cond1 = new Sizer(this.scene, {orientation: 'x'})
-            .add(this.scene.add.text(0, 0, "        • condition: no basic spell is possible in current state (disable from selection)", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, "        • condition: Disable all basic spells that are possible in the current state", this.textStyle).setFontSize(20).setResolution(2))
             let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
             .add(this.scene.add.text(0, 0, "        • consequence: disabled basic spells ", this.textStyle).setFontSize(20).setResolution(2))
             .add(this.scene.add.text(0, 0, "won't be possible after ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
@@ -193,6 +204,58 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             this.grey_bg.destroy();
             this.destroy();
         }
+    }
+
+    fadeOut(fn = () => {}) {
+        
+        //tweens
+        this.grey_bg.alpha = 1;
+        this.sizer.alpha = 1;
+        this.exit_btn.alpha = 1;
+
+        let a = this.scene.tweens.add({
+            targets: this.grey_bg,
+            duration: 250,
+            alpha: 0,
+        })
+
+        let c = this.scene.tweens.add({
+            targets: this.exit_btn,
+            duration: 250,
+            alpha: 0,
+        })
+
+        let b = this.scene.tweens.add({
+            targets: this.sizer,
+            duration: 250,
+            alpha: 0,
+            onComplete: () => {fn()}
+        })
+    }
+
+    fadeIn() {
+        //tweens
+        this.grey_bg.alpha = 0;
+        this.sizer.alpha = 0;
+        this.exit_btn.alpha = 0;
+
+        let a = this.scene.tweens.add({
+            targets: this.grey_bg,
+            duration: 250,
+            alpha: 1,
+        })
+
+        let c = this.scene.tweens.add({
+            targets: this.exit_btn,
+            duration: 250,
+            alpha: 1,
+        })
+
+        let b = this.scene.tweens.add({
+            targets: this.sizer,
+            duration: 250,
+            alpha: 1,
+        })
     }
 }
 
