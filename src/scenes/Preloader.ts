@@ -59,6 +59,8 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("environment_panel_disabled", "assets/Transition/env_panel_disabled.png")
         this.load.image("environment_panel_no_spell_possible", "assets/Transition/env_no_spell_possible.png")
         this.load.image("timeouted_timeouts", "assets/Transition/timeouted_timeouts.png")
+        this.load.image("magic_and_state", "assets/Transition/magic_states.png")
+        this.load.image("timeout_disabling", "assets/Transition/timeout_disabling.png")
 
         //highscore
         this.load.image("star", 'assets/UI/Stars/Star.png');

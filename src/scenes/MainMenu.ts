@@ -20,10 +20,16 @@ export default class MainMenu extends BaseScene {
 
         this.toFadeIn = []
 
-        let playButton = this.add.text(this.renderer.width/2, this.renderer.height/2- 30, "Play", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(50).setOrigin(0.5).setDepth(1);
+        let title = this.add.text(this.renderer.width/2, 60, "A Video Game about", {fontFamily: Constants.textStyle/* , fontStyle: 'italic' */, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24).setOrigin(0.5).setDepth(1);
+        let title1 = this.add.text(this.renderer.width/2, 110, "Reactive Bisimilarity", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(50).setOrigin(0.5).setDepth(1);
+        this.toFadeIn.push(title);
+        this.toFadeIn.push(title1);
+
+
+        let playButton = this.add.text(this.renderer.width/2, this.renderer.height/2- 20, "Play", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(50).setOrigin(0.5).setDepth(1);
         this.toFadeIn.push(playButton);
 
-        let options_button = this.add.text(this.renderer.width/2, this.renderer.height/2 + 35, "Credits", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(38).setOrigin(0.5).setDepth(1);
+        let options_button = this.add.text(this.renderer.width/2, this.renderer.height/2 + 45, "Credits", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(38).setOrigin(0.5).setDepth(1);
         this.toFadeIn.push(options_button);
 
         for(let i = 0; i < this.toFadeIn.length; i++) {
