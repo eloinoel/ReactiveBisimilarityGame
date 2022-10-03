@@ -1,49 +1,22 @@
-Fantasy RPG character pack & Icons - franuka, https://franuka.itch.io/
-UI_Buttons - https://blackdragon1727.itch.io/
-Pixeled UI - BetaDv, https://betadv.itch.io/
-Pixelart_book - Foxel Indie Dev, https://foxeldev.itch.io/
-2D_heart_animation - DonHellsing, https://donhellsing.itch.io/
-
 Blue Witch - https://9e0.itch.io/witches-pack
 Tiny Purple Wizard- https://hajileee.itch.io/hajileees-fantasy-characters-pack-magic-set
-The Dawn parallax - https://saurabhkgp.itch.io/the-dawn-parallax-background
-Parallax mountain pack - https://ansimuz.itch.io/mountain-dusk-parallax-background
-Flat Night Background Sunset - https://swapnilrane24.itch.io/night-background-2
-Sarah Clark Environment blue bg - https://www.artstation.com/artwork/Oovn0k
-Free Pixel Art Hill - https://edermunizz.itch.io/free-pixel-art-hill
 Free-Horizontal-Game-Backgrounds - https://free-game-assets.itch.io/free-horizontal-game-backgrounds
-
-UI Assets pack - https://statoasty.itch.io/ui-assets-pack-srt
 Wenrexa Interface UI KIT #4 - https://wenrexa.itch.io/ui-different02
-Wenrexa Assets GUI Dark Miko - https://wenrexa.itch.io/darkmiko
-Shapeforms Audio Free Sound Effects - https://shapeforms.itch.io/shapeforms-audio-free-sfx
-UI Soundpack - Nathan Gibson, https://ellr.itch.io/universal-ui-soundpack
-EVil Wizard 2 - https://luizmelo.itch.io/evil-wizard-2
-gothicvania patreon collection - https://ansimuz.itch.io/gothicvania-patreon-collection
-Wizard Pack - https://luizmelo.itch.io/wizard-pack
-
-
 dark blue sky image - Jeremy Bishop, https://unsplash.com/photos/G9i_plbfDgk
 world map - https://pin.it/1XkedXH
-Gamefxexport - https://ppeldo.itch.io/2d-pixel-art-game-spellmagic-fx
-
 Iconsforgamesgameassetpack - https://www.gamedeveloperstudio.com/graphics/viewgraphic.php?page-name=Icons-for-games-game-asset-pack&item=195s4a451z1x9n2a6u, Robert Brooks
-web-buttons-with-stone-texture - https://www.freepik.com/free-vector/web-buttons-with-stone-texture-menu-icons_27222809.htm#query=arrow%20ui&position=8&from_view=search
-arrow swap - https://www.flaticon.com/free-icon/switch_466154?related_id=466154&origin=search
-
- stars - https://simple-wares.itch.io/basic-bars-buttons-asset-pack/
-
+stars - https://simple-wares.itch.io/basic-bars-buttons-asset-pack/
 water drop - <a href="https://www.flaticon.com/free-icons/water" title="water icons">Water icons created by Freepik - Flaticon</a>
 fire - <a href="https://www.flaticon.com/free-icons/fire" title="fire icons">Fire icons created by Freepik - Flaticon</a>
-leaf - <a href="https://www.flaticon.com/free-icons/leaf" title="leaf icons">Leaf icons created by Pixel perfect - Flaticon</a>
 leaf2 - <a href="https://www.flaticon.com/free-icons/leaf" title="leaf icons">Leaf icons created by Pixel perfect - Flaticon</a>
-
 Transition arrow - <a href="https://www.flaticon.com/free-icon/next_2413462" title="next icons">Next icons created by iconixar - Flaticon</a>
-water splash - https://www.freepik.com/free-vector/water-splash-set-aqua-liquid-dynamic-motion_7058981.htm#query=water%20splash&position=5&from_view=search
-leaves - https://unsplash.com/photos/DdVCpBoHlv0
-portal - <a href="https://www.cppng.com/freepng/5622/">Portal Transparent Background CPPNG.com</a>
-link icon - https://www.flaticon.com/free-icon/foreign_376007?term=link&page=1&position=14&page=1&position=14&related_id=376007&origin=search
 sand clock - https://www.flaticon.com/free-icon/sand-clock_2838686?term=sand%20clock&page=1&position=63&page=1&position=63&related_id=2838686&origin=search
+
+Pixelart_book - Foxel Indie Dev, https://foxeldev.itch.io/
+Shapeforms Audio Free Sound Effects - https://shapeforms.itch.io/shapeforms-audio-free-sfx
+UI Soundpack - Nathan Gibson, https://ellr.itch.io/universal-ui-soundpack
+
+
 
 Fonts
 Sukuriburu - https://soultyragevin.itch.io/sukuriburu-font
