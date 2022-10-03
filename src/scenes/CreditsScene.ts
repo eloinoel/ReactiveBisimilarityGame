@@ -46,6 +46,12 @@ export default class CreditsScene extends BaseScene {
         this.toFadeIn.push((this.add.text(this.renderer.width/2 - 10, 100, "This game is part of a bachelor project", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(30).setOrigin(0.5)));
         this.toFadeIn.push(this.getLinkIcon("https://github.com/eloinoel/ReactiveBisimilarityGame").setPosition(980, 100) as unknown as Phaser.GameObjects.Text)
 
+        //built with phaser
+        let logo = this.add.image(this.renderer.width/2 + 80, this.renderer.height - 50, "logo").setOrigin(0.5).setScale(0.3)
+        let built_with = this.add.text(this.renderer.width/2 - 70, this.renderer.height - 50, "Built with", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(20).setOrigin(0.5).setDepth(1).setResolution(2);
+        this.toFadeIn.push(built_with);
+        this.toFadeIn.push(logo)
+
         //scrollable area
         let scrollable_area = new CreditsScrollableArea(this, this.renderer.width/2, this.renderer.height/2 + 40, this.renderer.width - 50, this.renderer.height - 250)
         this.toFadeIn.push(scrollable_area.getSlider()[0])
@@ -115,17 +121,13 @@ export default class CreditsScene extends BaseScene {
         this.toFadeIn.push(scrollable_area.addText(this.getLinkIcon("https://www.flaticon.com/free-icon/sand-clock_2838686") as unknown as Phaser.GameObjects.Text));
         this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "                                       Freepik", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
 
-        this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "Other Assets                                        Eloi Sandt", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
+        this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "Other Assets                                          Eloi Sandt", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(23)));
 
-        //built with phaser
-        let logo = this.add.image(this.renderer.width/2 + 80, this.renderer.height - 50, "logo").setOrigin(0.5).setScale(0.3)
-        let built_with = this.add.text(this.renderer.width/2 - 70, this.renderer.height - 50, "Built with", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(20).setOrigin(0.5).setDepth(1).setResolution(2);
-        this.toFadeIn.push(built_with);
-        this.toFadeIn.push(logo)
+
 
 
         for(let i = 0; i < this.toFadeIn.length; i++) {
-            let tween = this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*25);
+            let tween = this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*20);
         }
 
         this.input.keyboard.on('keydown-ESC', (event:KeyboardEvent) => {
@@ -140,9 +142,9 @@ export default class CreditsScene extends BaseScene {
     }
 
     getLinkIcon(url: string) {
-        let scale = 0.043;
-        let icon = this.add.image(0, 0, "link_icon").setInteractive().setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white)).setScale(scale);
-        icon.tintFill = true;
+        let scale = 0.335;
+        let icon = this.add.image(0, 0, "link_icon").setInteractive().setScale(scale).setTint(Constants.convertColorToNumber(Constants.COLORPACK_1.white));
+        icon.tintFill = true
 
         let fn = () => {
             let s = window.open(url, '_blank');
@@ -159,7 +161,7 @@ export default class CreditsScene extends BaseScene {
 
         icon.on('pointerup', fn);
         icon.on('pointerout', () => {icon.setScale(scale)})
-        icon.on('pointerover', () => {icon.setScale(scale + 0.01)})
+        icon.on('pointerover', () => {icon.setScale(scale + 0.1)})
         return icon;
     }
 
