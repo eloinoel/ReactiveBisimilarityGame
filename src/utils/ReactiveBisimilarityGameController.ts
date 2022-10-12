@@ -474,6 +474,14 @@ export class ReactiveBisimilarityGame {
         }
     }
 
+    getCurrentPosition() {
+        if(this.getPlay().length > 0) {
+            return this.getPlay()[this.getPlay().length - 1];
+        } else {
+            return undefined
+        }
+    }
+
     /**
      * generates all following game positions for a given position
      * good for debugging purposes

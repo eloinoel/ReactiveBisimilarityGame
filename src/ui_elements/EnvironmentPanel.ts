@@ -18,7 +18,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private possibleActions;
     private curEnvironment;
     private game;
-    private phaserGameController;
+    private phaserGameController: PhaserGameController;
     private sizer_bg!: RoundRectangle;
 
     private blinkingRectangle!: RoundRectangle;
@@ -34,7 +34,6 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
     constructor(scene: Phaser.Scene, x: number, y: number, game: ReactiveBisimilarityGame, phaser_game: PhaserGameController, display_caption = true, scale = 1) {
         super(scene, x, y);
-
 
         this.coordinates = new Phaser.Math.Vector2(x, y);
         this.tweenList = []
@@ -241,6 +240,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
         this.tickButton = new Tick_Button(this.scene, this.coordinates.x + width/2 + 30*this.scale, this.coordinates.y, "ui_tick_btn", () => {
             let tmp = this.getActiveActions();
+            this.phaserGameController.resetEnvironmentSelectionHighlighting();
             let result = this.phaserGameController.setEnvironmentAndDoTimeout(new Set(tmp));
 
         }, Constants.COLORS_BLUE_LIGHT.c3, undefined, this.scale);
@@ -324,8 +324,12 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
                     if(this.panel_buttons.get(child)) {
                         ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setAlpha(1);
                         ((child as Label).getElement('background') as RoundRectangle).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3));
+                        this.phaserGameController.resetEnvironmentSelectionHighlighting()
+                        this.phaserGameController.highlightEnvironmentSelectionEffect(new Set(this.getActiveActions()));
                     //toggled off
                     } else {
+                        this.phaserGameController.resetEnvironmentSelectionHighlighting()
+                        this.phaserGameController.highlightEnvironmentSelectionEffect(new Set(this.getActiveActions()));
                         ((child as Label).getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)).setAlpha(0.5);
                         ((child as Label).getElement('background') as RoundRectangle).setStrokeStyle();
                     }
