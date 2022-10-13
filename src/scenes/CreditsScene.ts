@@ -106,12 +106,12 @@ export default class CreditsScene extends BaseScene {
         this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "                                  Simple Wares", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
 
         this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "Water and Fire Icon", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
-        this.toFadeIn.push(scrollable_area.addText(this.getLinkIcon("https://www.flaticon.com/") as unknown as Phaser.GameObjects.Text));
+        this.toFadeIn.push(scrollable_area.addText(this.getLinkIcon("https://www.flaticon.com/authors/freepik") as unknown as Phaser.GameObjects.Text));
         this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "                              Freepik", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
 
         this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "Leaf Icon", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
-        this.toFadeIn.push(scrollable_area.addText(this.getLinkIcon("https://www.flaticon.com/") as unknown as Phaser.GameObjects.Text));
-        this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "                                        Pixel Perfect", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
+        this.toFadeIn.push(scrollable_area.addText(this.getLinkIcon("https://www.flaticon.com/free-icon/leaf_861054?term=leaf&page=1&position=8&page=1&position=8&related_id=861054&origin=style") as unknown as Phaser.GameObjects.Text));
+        this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "                                        Good Ware", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
 
         this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "Transition Arrows", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
         this.toFadeIn.push(scrollable_area.addText(this.getLinkIcon("https://www.flaticon.com/free-icon/next_2413462") as unknown as Phaser.GameObjects.Text));
