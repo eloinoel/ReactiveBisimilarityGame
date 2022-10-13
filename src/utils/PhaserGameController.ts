@@ -126,7 +126,7 @@ export class PhaserGameController {
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
             let transition;
-            if(p0 === p1) {
+            if(p0 === p1 && (action === "a" || action === "c")) {
                 transition = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
             } else {
                 transition = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
@@ -524,12 +524,11 @@ export class PhaserGameController {
         let env = SetOps.toArray(environment_selection);
 
         //get all relevant buttons
-        //TODO: should be all outgoing transitions
-        let moves = this.game.possibleMoves(undefined, true).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!))); //filter out symmetry move
-        let timeouts = moves.filter((position) => (position as SimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION);
-        let possibleMoves = moves.filter((position) => env.includes((position as SimulationDefenderNode).previousAction) || (position as SimulationDefenderNode).previousAction === Constants.HIDDEN_ACTION || ((position as RestrictedSimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION && SetOps.areEqual((position as RestrictedSimulationDefenderNode).environment, environment_selection))); //possible moves for the environment selection
+        let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));;
+        let moves = this.game.possibleMoves(undefined, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!))); //filter out symmetry move
+        //let timeouts = moves.filter((position) => (position as SimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION);
+        let possibleMoves = moves.filter((position) => env.includes((position as SimulationDefenderNode).previousAction) || (position as SimulationDefenderNode).previousAction === Constants.HIDDEN_ACTION || ((position as RestrictedSimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION)); //possible moves for the environment selection
         
-
         /* console.log(possibleMoves)
         for(let i = 0; i < possibleMoves.length; i++) {
             if(possibleMoves[i] instanceof RestrictedSimulationDefenderNode) {
@@ -539,10 +538,13 @@ export class PhaserGameController {
             }
             
         } //TODO: delete debug*/
-        let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
+        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
+        let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
+        /* console.log(env)
+        console.log(generated_moves)
+        console.log(possibleMoves)
         console.log(not_possibleMoves) //TODO: delete debug
-
-        //TODO: timeouted timeout simulation chalenge
+        console.log(moves) */
 
         //get objects of not possible moves
         let buttons = [];
@@ -1014,9 +1016,6 @@ export class PhaserGameController {
         }
     }
 
-    /**
-     * TODO: makes any Button pulsate until its clicked
-     */
     pulsateProcessBtn(process: string) {
         if(this.game_initialized) {
 
