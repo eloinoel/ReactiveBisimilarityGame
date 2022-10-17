@@ -474,12 +474,21 @@ export class ReactiveBisimilarityGame {
         }
     }
 
+    getCurrentPosition() {
+        if(this.getPlay().length > 0) {
+            return this.getPlay()[this.getPlay().length - 1];
+        } else {
+            return undefined
+        }
+    }
+
     /**
      * generates all following game positions for a given position
      * good for debugging purposes
-     * @param process 
+     * @param process
+     * @param environment used to generate timeout moves
      */
-    possibleMoves(curPosition?: GamePosition, allEnvironmentCombinations: boolean = false): GamePosition[] {
+    possibleMoves(curPosition?: GamePosition, allEnvironmentCombinations: boolean = false, environment?: Set<string>): GamePosition[] {
         if(curPosition === undefined) {
             curPosition = this.play[this.play.length - 1];
         }
@@ -491,8 +500,11 @@ export class ReactiveBisimilarityGame {
             return moves;
         }
 
-        let potentialMoves = this.generateMoves(curPosition, allEnvironmentCombinations);
+        if(environment === undefined) {
+            environment = this.environment;
+        }
 
+        let potentialMoves = this.generateMoves(curPosition, allEnvironmentCombinations, environment);
 
         for(let i = 0; i < potentialMoves.length; i++) {
             if(curPosition.activePlayer === Player.Attacker) {
@@ -571,9 +583,10 @@ export class ReactiveBisimilarityGame {
                 * But calculating all permutations and throwing them into the isMovePossible()-method could technically explode the time complexity of the game, 
      * 
      * @param curPosition 
+     * @param environment used to generate timeout moves only
      * @returns 
      */
-    private generateMoves(curPosition: GamePosition, allEnvironmentCombinations: boolean = false): GamePosition[] {
+    generateMoves(curPosition: GamePosition, allEnvironmentCombinations: boolean = false, environment: Set<string>): GamePosition[] {
         let moves: GamePosition[] = [];
         let A = this.lts.getVisibleActions();
 
@@ -630,7 +643,7 @@ export class ReactiveBisimilarityGame {
                                 moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, environments[j]));
                             }
                         } else {
-                            moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, new Set(this.environment)));
+                            moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, new Set(environment)));
                         }
                     }
                 }
@@ -657,7 +670,7 @@ export class ReactiveBisimilarityGame {
                                 moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, environments[j]));
                             }
                         } else {
-                            moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, new Set(this.environment)));
+                            moves.push(new RestrictedSimulationDefenderNode(edges[i][1], curPosition.process2, Constants.TIMEOUT_ACTION, new Set(environment)));
                         }
                     }
                 }

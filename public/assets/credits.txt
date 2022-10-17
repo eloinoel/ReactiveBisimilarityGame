@@ -8,17 +8,10 @@ Iconsforgamesgameassetpack - https://www.gamedeveloperstudio.com/graphics/viewgr
 stars - https://simple-wares.itch.io/basic-bars-buttons-asset-pack/
 water drop - <a href="https://www.flaticon.com/free-icons/water" title="water icons">Water icons created by Freepik - Flaticon</a>
 fire - <a href="https://www.flaticon.com/free-icons/fire" title="fire icons">Fire icons created by Freepik - Flaticon</a>
-leaf2 - <a href="https://www.flaticon.com/free-icons/leaf" title="leaf icons">Leaf icons created by Pixel perfect - Flaticon</a>
+leaf2 - <a href="https://www.flaticon.com/free-icons/leaf" good wares
 Transition arrow - <a href="https://www.flaticon.com/free-icon/next_2413462" title="next icons">Next icons created by iconixar - Flaticon</a>
 sand clock - https://www.flaticon.com/free-icon/sand-clock_2838686?term=sand%20clock&page=1&position=63&page=1&position=63&related_id=2838686&origin=search
 
 Pixelart_book - Foxel Indie Dev, https://foxeldev.itch.io/
 Shapeforms Audio Free Sound Effects - https://shapeforms.itch.io/shapeforms-audio-free-sfx
 UI Soundpack - Nathan Gibson, https://ellr.itch.io/universal-ui-soundpack
-
-
-
-Fonts
-Sukuriburu - https://soultyragevin.itch.io/sukuriburu-font
-monogram - https://datagoblin.itch.io/
-peaberry - https://emhuo.itch.io/peaberry-pixel-font

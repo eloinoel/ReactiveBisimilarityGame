@@ -65,8 +65,6 @@ export default class Level1_1 extends BaseScene {
         game_controller.startGame(this, "p0", "q0", false, false, [6 , 3]);
 
         new IntroScreen(this, 0);
-        //game_controller.ai_controller.printGraph()
-        //game_controller.ai_controller.printBestPathResults()
         game_controller.printAttackerShortestMinMaxPath()
         console.log("expected moves: 3")
 

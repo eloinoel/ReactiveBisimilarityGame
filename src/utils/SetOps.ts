@@ -56,7 +56,7 @@ export class SetOps {
             if(!b.has(value)) { return false; }
         }
         for(let value of d) {
-            if(!b.has(value)) { return false; }
+            if(!a.has(value)) { return false; }
         }
         return true;
     }

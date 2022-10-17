@@ -24,6 +24,7 @@ export class PhaserGameController {
     private offset_between_vertices: Phaser.Math.Vector2; //distance between vertices
 
     private stateBtns: Map<string, LtsStateButton>; //map from state names to visual buttons references
+    private transitionObjects: Map<string, Phaser.GameObjects.Container>;
     private scene: Phaser.Scene;    
     private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
     private player_icons: Phaser.GameObjects.GameObject[];  //0:_player icon sprite, 1: geometryMaskObject, 2: opponent icon sprite, 3: mask2
@@ -35,6 +36,7 @@ export class PhaserGameController {
     private movable_environment_panel!: EnvironmentPanel;
     private level_description: LevelDescription;
     ai_controller!: AI;     //TODO: set private
+    private last_clicked_process!: string; //for environment selection panel highlights
 
     private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
     private num_moves: number; //the number of moves a player currently made
@@ -59,6 +61,7 @@ export class PhaserGameController {
         this.offset_between_vertices = offset_between_vertices;
         this.scene = scene;
         this.stateBtns = new Map<string, LtsStateButton>();
+        this.transitionObjects = new Map<string, Phaser.GameObjects.Container>();
         let lts = new LTSController();
         this.game = new ReactiveBisimilarityGame("", "", lts);
         this.nextProcessAfterTimeout = "";
@@ -70,7 +73,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -122,12 +125,13 @@ export class PhaserGameController {
 
         if(p0_button !== undefined && p1_button !== undefined) {
             this.game.lts.addTransition(p0, p1, action);
+            let transition;
             if(p0 === p1 && (action === "a" || action === "c")) {
-                const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
+                transition = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75);
             } else {
-                const tr_p0_p1 = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
+                transition = new FixedLengthTransition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, action, 1)
             }
-            /* const tr_p0_p1 = new Transition(this.scene, p0_button.x, p0_button.y, p1_button.x, p1_button.y, "arrow_tail", "arrow_middle", "arrow_head", action, 0.2, 75); */
+            this.transitionObjects.set("".concat(p0, action, p1), transition);
 
         } else {
             this.printError("addTransition: illegal arguments: " + p0 + ", " + p1);
@@ -237,6 +241,7 @@ export class PhaserGameController {
 
         //Attacker ---> if timeout, activate environment change panel otherwise doMove
         } else {
+            this.resetEnvironmentSelectionHighlighting()
             //revert any changes made to the environment by timeout action
             if(this.movable_environment_panel.isEnabled()) {
                 this.movable_environment_panel.disable();
@@ -256,6 +261,8 @@ export class PhaserGameController {
             let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
             //timeout action, can only occur in these node types
             if((cur_pos instanceof AttackerNode || RestrictedAttackerNode) && !isSymmetryMove && edgeLabel !== undefined && edgeLabel === Constants.TIMEOUT_ACTION) {
+                this.last_clicked_process = next_process;
+
                 //this.movable_environment_panel.stopAllTweens();
                 this.movable_environment_panel.disable();
                 this.movable_environment_panel.makeInvisible()
@@ -272,6 +279,7 @@ export class PhaserGameController {
                     this.movable_environment_panel.enable();
                     this.movable_environment_panel.makeVisible();
                     (this.scene as BaseScene).background.setInteractive()
+                    this.highlightEnvironmentSelectionEffect(new Set(this.movable_environment_panel.getActiveActions()))
                 } else {
                     this.printError("encapsulateDoMove: cannot display environment panel, buttons were not found");
                 }
@@ -485,6 +493,114 @@ export class PhaserGameController {
                 })
             });
         }
+    }
+
+    /** TODO:
+     * give visual feedback when player selects or deselects actions in the environment selection window
+     * @param curProcess 
+     * @param clickedProcess 
+     * @param environment_selection 
+     * @returns 
+     */
+    highlightEnvironmentSelectionEffect(environment_selection: Set<string>) {
+        console.log("hi")
+        let clickedProcess = this.last_clicked_process;
+        if(!this.game_initialized) {
+            this.printError("hightlightEnvironmentSelectionEffect: game not initialized");
+            return;
+        }
+        //test if timeout action between them
+        let curPosition = this.game.getCurrentPosition();
+        if(curPosition === undefined || curPosition instanceof SimulationDefenderNode || curPosition instanceof RestrictedSimulationDefenderNode) {
+            this.printError("hightlightEnvironmentSelectionEffect: curPosition illegal");
+        }
+
+        let curProcess = curPosition!.process1; 
+        if(!this.game.lts.hasTransition(curProcess, clickedProcess, Constants.TIMEOUT_ACTION)) {
+            this.printError("hightlightEnvironmentSelectionEffect: called method but no timeout action between processes");
+            return;
+        }
+
+        let env = SetOps.toArray(environment_selection);
+
+        //get all relevant buttons
+        let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));;
+        let moves = this.game.possibleMoves(undefined, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!))); //filter out symmetry move
+        //let timeouts = moves.filter((position) => (position as SimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION);
+        let possibleMoves = moves.filter((position) => env.includes((position as SimulationDefenderNode).previousAction) || (position as SimulationDefenderNode).previousAction === Constants.HIDDEN_ACTION || ((position as RestrictedSimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION)); //possible moves for the environment selection
+        
+        /* console.log(possibleMoves)
+        for(let i = 0; i < possibleMoves.length; i++) {
+            if(possibleMoves[i] instanceof RestrictedSimulationDefenderNode) {
+                console.log((possibleMoves[i] as RestrictedSimulationDefenderNode).environment)
+                console.log(environment_selection)
+                console.log(SetOps.areEqual((possibleMoves[i] as RestrictedSimulationDefenderNode).environment, environment_selection))
+            }
+            
+        } //TODO: delete debug*/
+        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
+        let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
+        /* console.log(env)
+        console.log(generated_moves)
+        console.log(possibleMoves)
+        console.log(not_possibleMoves) //TODO: delete debug
+        console.log(moves) */
+
+        //get objects of not possible moves
+        let buttons = [];
+        let edges = [];
+        for(let i = 0; i < not_possibleMoves.length; i++) {
+            let btn = this.stateBtns.get(not_possibleMoves[i].process1);
+            if(btn !== undefined) {
+                //buttons.push(btn);
+                btn.setAlpha(0.3);
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined statebutton")
+            }
+
+            let edge = this.transitionObjects.get("".concat(curProcess, (not_possibleMoves[i] as SimulationDefenderNode).previousAction, not_possibleMoves[i].process1));
+            if(edge !== undefined) {
+                //edges.push(edge);
+                edge.setAlpha(0.3)
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
+            }
+        }
+    }
+
+    resetEnvironmentSelectionHighlighting() {
+        if(!this.game_initialized) {
+            this.printError("hightlightEnvironmentSelectionEffect: game not initialized");
+            return;
+        }
+        //test if timeout action between them
+        let curPosition = this.game.getCurrentPosition();
+        if(curPosition === undefined || curPosition instanceof SimulationDefenderNode || curPosition instanceof RestrictedSimulationDefenderNode) {
+            this.printError("hightlightEnvironmentSelectionEffect: curPosition illegal");
+        }
+
+        let curProcess = curPosition!.process1; 
+        let adjacent = this.game.lts.getActionsAndDestinations(curProcess)
+
+        for(let i = 0; i < adjacent.length; i++) {
+            let btn = this.stateBtns.get(adjacent[i][1]);
+            if(btn !== undefined) {
+                //buttons.push(btn);
+                btn.setAlpha(1);
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined statebutton")
+            }
+
+            let edge = this.transitionObjects.get("".concat(curProcess, adjacent[i][0], adjacent[i][1]));
+            if(edge !== undefined) {
+                //edges.push(edge);
+                edge.setAlpha(1)
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
+            }
+        }
+
+
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
@@ -806,6 +922,7 @@ export class PhaserGameController {
             this.movable_environment_panel.disable();
             this.movable_environment_panel.makeInvisible()
             this.movable_environment_panel.update();
+            this.resetEnvironmentSelectionHighlighting();
             (this.scene as BaseScene).background.disableInteractive()
         })
     }
@@ -899,9 +1016,6 @@ export class PhaserGameController {
         }
     }
 
-    /**
-     * TODO: makes any Button pulsate until its clicked
-     */
     pulsateProcessBtn(process: string) {
         if(this.game_initialized) {
 

@@ -142,10 +142,10 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
 
                 let atk_rule_4 = new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "Beware that consecutive time spells are only possible, ", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "Beware that consecutive time spells are only possible ", this.textStyle).setFontSize(26).setResolution(2))
 
                 let atk_rule_5 = new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "if no other magic is castable after the last time spell", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "if no other basic magic is castable after the last time spell", this.textStyle).setFontSize(26).setResolution(2))
 
                 //let atk_rule_6 = new Sizer(this.scene, { orientation: 'x'})
                 //.add(this.scene.add.image(0, 0, "timeouted_timeouts", ).setOrigin(0.5).setScale(0.8))

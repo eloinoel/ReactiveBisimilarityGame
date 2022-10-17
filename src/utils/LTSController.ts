@@ -139,7 +139,7 @@ export class LTSController {
     }
 
     /**
-     * returns an array of tupels (edge list) containing the edgelabel and destination of the given node
+     * returns an array of tupels (edge list) containing the edgelabel and destination of a transition from the given node
      * @param node 
      * @returns 
      */
