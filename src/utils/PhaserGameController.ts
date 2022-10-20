@@ -73,7 +73,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -275,8 +275,8 @@ export class PhaserGameController {
                     let vector = new Phaser.Math.Vector2(p2_btn.x - p1_btn.x, p2_btn.y - p1_btn.y);
                     let center = new Phaser.Math.Vector2(p1_btn.x, p1_btn.y).add(vector.clone().scale(0.5)); 
                     this.movable_environment_panel.stopAllTweens()
-                    this.movable_environment_panel.setPanelPosition(center)
                     this.movable_environment_panel.enable();
+                    this.movable_environment_panel.setPanelPosition(center)
                     this.movable_environment_panel.makeVisible();
                     (this.scene as BaseScene).background.setInteractive()
                     this.highlightEnvironmentSelectionEffect(new Set(this.movable_environment_panel.getActiveActions()))
@@ -524,11 +524,14 @@ export class PhaserGameController {
         let env = SetOps.toArray(environment_selection);
 
         //get all relevant buttons
-        let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));;
+
+        //next moves from current
+        let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));
         let moves = this.game.possibleMoves(undefined, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!))); //filter out symmetry move
-        //let timeouts = moves.filter((position) => (position as SimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION);
         let possibleMoves = moves.filter((position) => env.includes((position as SimulationDefenderNode).previousAction) || (position as SimulationDefenderNode).previousAction === Constants.HIDDEN_ACTION || ((position as RestrictedSimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION)); //possible moves for the environment selection
-        
+        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
+        let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
+
         /* console.log(possibleMoves)
         for(let i = 0; i < possibleMoves.length; i++) {
             if(possibleMoves[i] instanceof RestrictedSimulationDefenderNode) {
@@ -538,15 +541,14 @@ export class PhaserGameController {
             }
             
         } //TODO: delete debug*/
-        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
-        let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
+
         /* console.log(env)
         console.log(generated_moves)
         console.log(possibleMoves)
         console.log(not_possibleMoves) //TODO: delete debug
         console.log(moves) */
 
-        //get objects of not possible moves
+        //get objects of not possible moves and gray out
         let buttons = [];
         let edges = [];
         for(let i = 0; i < not_possibleMoves.length; i++) {
@@ -566,6 +568,38 @@ export class PhaserGameController {
                 this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
             }
         }
+
+
+        //next moves after timeout
+        /* let position_after_timeout = new RestrictedAttackerNode(clickedProcess, curPosition!.process2, environment_selection); //process 2 is wrong but irrelevant
+        let future_generated_moves = this.game.generateMoves(position_after_timeout, true, environment_selection).filter((position) => !(position.process2 === clickedProcess));
+        let future_possible_moves = this.game.possibleMoves(position_after_timeout, true).filter((position) => !(position.process2 === clickedProcess));
+        let future_not_possible_moves = future_generated_moves.filter((position) => !(future_possible_moves.find(move => move.process1 === position.process1)));
+
+        console.log(future_generated_moves)
+        console.log(future_possible_moves)
+        //get objects of future not possible moves and gray out
+        buttons = [];
+        edges = []
+        for(let i = 0; i < future_not_possible_moves.length; i++) {
+            let btn = this.stateBtns.get(future_not_possible_moves[i].process1);
+            if(btn !== undefined) {
+                //buttons.push(btn);
+                btn.setAlpha(0.3);
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined future statebutton")
+            }
+
+            let edge = this.transitionObjects.get("".concat(clickedProcess, (future_not_possible_moves[i] as SimulationDefenderNode).previousAction, future_not_possible_moves[i].process1));
+            if(edge !== undefined) {
+                //edges.push(edge);
+                edge.setAlpha(0.3)
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined future edge")
+            }
+        } */
+
+
     }
 
     resetEnvironmentSelectionHighlighting() {
@@ -580,7 +614,7 @@ export class PhaserGameController {
         }
 
         let curProcess = curPosition!.process1; 
-        let adjacent = this.game.lts.getActionsAndDestinations(curProcess)
+        /* let adjacent = this.game.lts.getActionsAndDestinations(curProcess);
 
         for(let i = 0; i < adjacent.length; i++) {
             let btn = this.stateBtns.get(adjacent[i][1]);
@@ -598,7 +632,10 @@ export class PhaserGameController {
             } else {
                 this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
             }
-        }
+        } */
+
+        this.stateBtns.forEach(btn => { btn.setAlpha(1) })
+        this.transitionObjects.forEach(edge => { edge.setAlpha(1) })
 
 
     }
