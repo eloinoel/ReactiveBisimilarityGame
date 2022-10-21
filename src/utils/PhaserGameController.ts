@@ -346,6 +346,7 @@ export class PhaserGameController {
             }
 
             //update visuals
+            this.spellAnimation(action, cur_pos, next_position[0]);
             this.updateVisualsAfterMove()
 
 
@@ -397,6 +398,212 @@ export class PhaserGameController {
             return 0
         }
         return 1;
+    }
+
+    /**
+     * displays an animation when a move is performed
+     * @param action 
+     * @param cur_pos 
+     * @param next_pos 
+     * @returns 
+     */
+    private spellAnimation(action: string, cur_pos: GamePosition, next_pos: GamePosition) {
+        let c: Phaser.Math.Vector2;
+        let src;
+        let dest;
+        let anim_angle: number = 0;
+        let same_btn = false;
+
+        //get position, angle and type of animation
+        if((cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) && !(next_pos instanceof AttackerNode || next_pos instanceof RestrictedAttackerNode)) {
+            //same source and destination
+            if(cur_pos.process1 === next_pos.process1) {
+                src = this.stateBtns.get(cur_pos.process1);
+                if(src === undefined) {
+                    this.printError("spellAnimation: button not found")
+                    return;
+                }
+                c = new Phaser.Math.Vector2(src.x, src.y);
+                anim_angle = 0;
+                same_btn = true;
+            } else {
+                src = this.stateBtns.get(cur_pos.process1);
+                dest = this.stateBtns.get(next_pos.process1);
+                if(src === undefined || dest === undefined) {
+                    this.printError("spellAnimation: buttons not found")
+                    return;
+                }
+                let vec = new Phaser.Math.Vector2(dest.x - src.x, dest.y - src.y);
+                c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5)); 
+                anim_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(vec.angle()));
+            }
+        //defender makes a move
+        } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+            //same source and destination
+            if(cur_pos.process2 === next_pos.process2) {
+                src = this.stateBtns.get(cur_pos.process2);
+                if(src === undefined) {
+                    this.printError("spellAnimation: button not found")
+                    return;
+                }
+                c = new Phaser.Math.Vector2(src.x, src.y);
+                anim_angle = 0;
+                same_btn = true;
+            } else {
+                src = this.stateBtns.get(cur_pos.process2);
+                dest = this.stateBtns.get(next_pos.process2);
+                if(src === undefined || dest === undefined) {
+                    this.printError("spellAnimation: buttons not found")
+                    return;
+                }
+                let vec = new Phaser.Math.Vector2(dest.x - src.x, dest.y - src.y);
+                c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5)); 
+                anim_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(vec.angle()))
+            }
+        } else {
+            //symmetry move
+            return
+        }
+
+        
+        //play correct animation according to action
+        switch(action) {
+            case "a":
+            	if(!same_btn) {
+                    let fire_anim = this.scene.anims.create({
+                        key: 'fireball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('fireball_vfx', {frames: [0, 1, 2, 3]}),
+                        frameRate: 20,
+                        repeat: -1
+                    })
+                    if(fire_anim !== false) {
+                        let fireball = this.scene.add.sprite(src.x, src.y, 'fireball_vfx').setScale(1.8).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        fireball.play('fireball_anim')
+    
+                        this.scene.tweens.add({
+                            targets: fireball,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                fireball.destroy();
+                                (fire_anim as Phaser.Animations.Animation).destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: fire animation undefined")
+                        return;
+                    }
+                } else {
+                    //TODO:
+                }
+                break;
+            case "b":
+                if(!same_btn) {
+                    let water_anim = this.scene.anims.create({
+                        key: 'waterball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('waterball_vfx', {frames: [5, 6, 7, 8, 9]}),
+                        frameRate: 20,
+                        repeat: -1
+                    })
+                    if(water_anim !== false) {
+                        let waterball = this.scene.add.sprite(src.x, src.y, 'waterball_vfx', 5).setScale(1.1).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        waterball.play('waterball_anim')
+    
+                        this.scene.tweens.add({
+                            targets: waterball,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                waterball.destroy();
+                                (water_anim as Phaser.Animations.Animation).destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: water animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case "c":
+                if(!same_btn) {
+                    let spell_anim = this.scene.anims.create({
+                        key: 'plant_anim',
+                        frames: this.scene.anims.generateFrameNumbers('windplant_vfx', {frames: [0, 1, 2, 3, 4, 5]}),
+                        frameRate: 30,
+                        repeat: -1
+                    })
+                    if(spell_anim !== false) {
+                        let spell = this.scene.add.sprite(src.x, src.y, 'windplant_vfx', 0).setScale(1.5).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        spell.play('plant_anim')
+    
+                        this.scene.tweens.add({
+                            targets: spell,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                spell.destroy();
+                                (spell_anim as Phaser.Animations.Animation).destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: plant animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case Constants.TIMEOUT_ACTION:
+                if(!same_btn) {
+                    let spell_anim = this.scene.anims.create({
+                        key: 'thunder_anim',
+                        frames: this.scene.anims.generateFrameNumbers('thunder_vfx', {frames: [2, 3,  4, 5, 6, 7, 8, 9, 10, 11, 12]}),
+                        frameRate: 15,
+                        //repeat: -1
+                    })
+                    /* let spell_anim = this.scene.anims.create({
+                        key: 'thunderball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('thunderball_vfx', {frames: [0, 1, 2, 3, 4]}),
+                        frameRate: 30,
+                        repeat: -1
+                    }) */
+                    if(spell_anim !== false) {
+                        let vec = new Phaser.Math.Vector2((dest as LtsStateButton).x - src.x, (dest as LtsStateButton).y - src.y);
+                        c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5));
+                        anim_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(vec.angle() - Phaser.Math.PI2/4 ))
+                        let spell = this.scene.add.sprite(c.x, c.y, 'thunder_vfx').setScale(2.2).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        spell.scaleY = vec.length() / spell.height;
+                        spell.scaleX = 0.9;
+                        
+                        spell.play('thunder_anim')
+                        /* this.scene.tweens.add({
+                            targets: spell,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                spell.destroy();
+                                (spell_anim as Phaser.Animations.Animation).destroy();
+                            }
+                        }) */
+                    } else {
+                        this.printError("spellAnimation: timeout animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case Constants.HIDDEN_ACTION:
+                //TODO:
+                break;
+            default:
+                this.printError("spellAnimation: unknown action")
+                return
+        }
     }
 
     /**
