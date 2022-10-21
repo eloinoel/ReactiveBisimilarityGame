@@ -69,7 +69,7 @@ export default class Level3_10 extends BaseScene {
         game_controller.addTransition("q6", "q2", Constants.TIMEOUT_ACTION);
 
 
-        game_controller.startGame(this, "p0", "q1", true, true, [8, 7]);
+        game_controller.startGame(this, "p0", "q1", true, true, [9, 7]);
         
         game_controller.printAttackerShortestMinMaxPath()
         console.log("expected moves: 7")

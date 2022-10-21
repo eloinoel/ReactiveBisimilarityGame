@@ -247,15 +247,6 @@ export class PhaserGameController {
                 this.movable_environment_panel.disable();
                 this.movable_environment_panel.makeInvisible()
 
-                //environment wasn't changed if it is still enabled
-                /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-                    if(!SetOps.areEqual(cur_pos.environment, this.game.getEnvironment())) {
-                        this.game.setEnvironment(cur_pos.environment);
-                    }
-                } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
-                    
-                    this.game.resetEnvironment();
-                } */
             }
 
             let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
@@ -416,6 +407,7 @@ export class PhaserGameController {
     private launchEndScreen(win: boolean) {
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
+            console.log(current_level)
             if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
                 console.log("The attacker won the game!");
                 //get number of stars
@@ -444,29 +436,56 @@ export class PhaserGameController {
                 }
 
                 //grey overlay
-                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7);
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7).setInteractive();
 
-                //open popup
-                let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
-                    //replayAction
-                    (this.scene as BaseScene).fade(false, () => {
-                        pop.destroyPopup();
-                        bg_overlay.destroy();
-                        console.clear(); 
-                        this.scene.scene.stop("GUIScene"); 
-                        this.scene.scene.restart()
+                //last level
+                if(current_level === 17) {
+                    console.log("last level")
+                    //open popup
+                    let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
+                        //replayAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            console.clear(); 
+                            this.scene.scene.stop("GUIScene"); 
+                            this.scene.scene.restart()
+                        })
+                    }, () => {
+                        //nextLevelAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
+                            console.clear();
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            this.scene.scene.stop("GUIScene");
+                            this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
+                        })
+                    }, true);
+                } else {
+                    //open popup
+                    let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
+                        //replayAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            console.clear(); 
+                            this.scene.scene.stop("GUIScene"); 
+                            this.scene.scene.restart()
+                        })
+                    }, () => {
+                        //nextLevelAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
+                            console.clear();
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            this.scene.scene.stop("GUIScene");
+                            this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
+                        })
                     })
-                }, () => {
-                    //nextLevelAction
-                    (this.scene as BaseScene).fade(false, () => {
-                        localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
-                        console.clear();
-                        pop.destroyPopup();
-                        bg_overlay.destroy();
-                        this.scene.scene.stop("GUIScene");
-                        this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
-                    })
-                })
+                }
+                
             } else {
                 this.printError("launchEndScreen: currenLevel: " + current_level);
                 let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {

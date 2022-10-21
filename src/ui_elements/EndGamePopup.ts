@@ -16,7 +16,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
     private replay_btn!: ReplayButton;
     private next_level_btn!: ReplayButton;
 
-    constructor(scene: Phaser.Scene, stars: number, movesNeeded: number, replayAction = () => {console.log("replay action")}, nextLevelAction = () => {console.log("next level action")}) {
+    constructor(scene: Phaser.Scene, stars: number, movesNeeded: number, replayAction = () => {console.log("replay action")}, nextLevelAction = () => {console.log("next level action")}, lastLevel = false) {
         super(scene, scene.renderer.width/2, scene.renderer.height/2);
 
         this.setSize(this.dimensions.x, this.dimensions.y);
@@ -28,14 +28,14 @@ export class WinPopup extends Phaser.GameObjects.Container {
         this.textStyle = {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.black};
 
         this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2);
-        this.sizer = this.createPanel();
+        this.sizer = this.createPanel(lastLevel);
 
         
 
         scene.add.existing(this);
     }
 
-    private createPanel(): Sizer {
+    private createPanel(lastLevel: boolean): Sizer {
 
         let sizer = new Sizer(this.scene, {
             x: this.coordinates.x, 
@@ -43,7 +43,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
             width: this.dimensions.x,
             height: this.dimensions.y,
             orientation: 'y',
-            space: {item: 5, top: 10, bottom: 10, left: 7, right: 7}
+            space: {item: 5, top: 10, bottom: 15, left: 7, right: 7}
         })
         sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4))));
         
@@ -66,11 +66,21 @@ export class WinPopup extends Phaser.GameObjects.Container {
         sizer.add(this.createStarsContainer(this.stars), {padding: {top: 3, bottom: 3}});
 
         //Buttons
-        sizer.add(new Sizer(this.scene)
+
+        if(lastLevel) {
+            sizer.add(this.scene.add.text(0, 0, "Congratulations!", this.textStyle).setResolution(2).setFontSize(20),{padding: {top: 5, bottom: 3}})
+            sizer.add(this.scene.add.text(0, 0, "You have completed all the levels.", this.textStyle).setResolution(2).setFontSize(20), {padding: {bottom: 3}})
+            sizer.add(this.scene.add.text(0, 0, "You are truly a reactive master!", this.textStyle).setResolution(2).setFontSize(20))
+
+            sizer.add(new Sizer(this.scene)
+            .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Replay", this.textStyle), {padding: {top: 10, right: 7}}));
+        } else {
+            sizer.add(new Sizer(this.scene)
             .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Replay", this.textStyle), {padding: {top: 10, right: 7}})
             .add(this.next_level_btn = new ReplayButton(this.scene, 0, 0, this.next_level_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Next Level", this.textStyle), {padding: {top: 10, left: 7}})
         );
-
+        }
+        
         sizer.setDepth(8)
         sizer.layout();
 
