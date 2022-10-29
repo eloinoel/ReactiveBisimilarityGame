@@ -60,6 +60,6 @@ export default class Level2_1 extends BaseScene {
 
         game_controller.pulsateSymmetrySwapBtn();
         game_controller.printAttackerShortestMinMaxPath()
-        console.log("expected moves: 4")
+        //console.log("expected moves: 4")
     }
 }

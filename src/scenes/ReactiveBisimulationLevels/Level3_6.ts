@@ -71,6 +71,6 @@ export default class Level3_6 extends BaseScene {
         game_controller.startGame(this, "p0", "q0", true, true, [4, 3]);
         new IntroScreen(this, 5)
         game_controller.printAttackerShortestMinMaxPath()
-        console.log("expected moves: 3")
+        //console.log("expected moves: 3")
     }
 }

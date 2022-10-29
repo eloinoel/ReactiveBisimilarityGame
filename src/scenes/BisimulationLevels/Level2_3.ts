@@ -67,6 +67,6 @@ export default class Level2_3 extends BaseScene {
 
         game_controller.startGame(this, "p0", "q0", false, true, [8, 7]);
         game_controller.printAttackerShortestMinMaxPath()
-        console.log("expected moves: 7")
+        //console.log("expected moves: 7")
     }
 }

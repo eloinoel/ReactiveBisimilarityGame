@@ -488,7 +488,6 @@ export class PhaserGameController {
                             duration: 500,
                             onComplete: () => {
                                 fireball.destroy();
-                                (fire_anim as Phaser.Animations.Animation).destroy();
                             }
                         })
                     } else {
@@ -519,7 +518,6 @@ export class PhaserGameController {
                             duration: 500,
                             onComplete: () => {
                                 waterball.destroy();
-                                (water_anim as Phaser.Animations.Animation).destroy();
                             }
                         })
                     } else {
@@ -548,7 +546,6 @@ export class PhaserGameController {
                             duration: 500,
                             onComplete: () => {
                                 spell.destroy();
-                                (spell_anim as Phaser.Animations.Animation).destroy();
                             }
                         })
                     } else {
@@ -614,7 +611,7 @@ export class PhaserGameController {
     private launchEndScreen(win: boolean) {
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
-            console.log(current_level)
+            //console.log(current_level)
             if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
                 console.log("The attacker won the game!");
                 //get number of stars
