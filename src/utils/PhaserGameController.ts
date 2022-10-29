@@ -73,7 +73,7 @@ export class PhaserGameController {
         this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
         this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
-        this.debug = true;  //Set this if you want to see possible moves, current position and environment field
+        this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
@@ -247,15 +247,6 @@ export class PhaserGameController {
                 this.movable_environment_panel.disable();
                 this.movable_environment_panel.makeInvisible()
 
-                //environment wasn't changed if it is still enabled
-                /* if(cur_pos instanceof RestrictedAttackerNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
-                    if(!SetOps.areEqual(cur_pos.environment, this.game.getEnvironment())) {
-                        this.game.setEnvironment(cur_pos.environment);
-                    }
-                } else if (cur_pos instanceof AttackerNode || cur_pos instanceof SimulationDefenderNode) {
-                    
-                    this.game.resetEnvironment();
-                } */
             }
 
             let edgeLabel = this.game.lts.getActionBetweenTwoProcesses(cur_pos.process1, next_process);
@@ -275,8 +266,8 @@ export class PhaserGameController {
                     let vector = new Phaser.Math.Vector2(p2_btn.x - p1_btn.x, p2_btn.y - p1_btn.y);
                     let center = new Phaser.Math.Vector2(p1_btn.x, p1_btn.y).add(vector.clone().scale(0.5)); 
                     this.movable_environment_panel.stopAllTweens()
-                    this.movable_environment_panel.setPanelPosition(center)
                     this.movable_environment_panel.enable();
+                    this.movable_environment_panel.setPanelPosition(center)
                     this.movable_environment_panel.makeVisible();
                     (this.scene as BaseScene).background.setInteractive()
                     this.highlightEnvironmentSelectionEffect(new Set(this.movable_environment_panel.getActiveActions()))
@@ -355,6 +346,7 @@ export class PhaserGameController {
             }
 
             //update visuals
+            this.spellAnimation(action, cur_pos, next_position[0]);
             this.updateVisualsAfterMove()
 
 
@@ -409,6 +401,240 @@ export class PhaserGameController {
     }
 
     /**
+     * displays an animation when a move is performed
+     * @param action 
+     * @param cur_pos 
+     * @param next_pos 
+     * @returns 
+     */
+    private spellAnimation(action: string, cur_pos: GamePosition, next_pos: GamePosition) {
+        let c: Phaser.Math.Vector2;
+        let src;
+        let dest;
+        let anim_angle: number = 0;
+        let same_btn = false;
+
+        //get position, angle and type of animation
+        if((cur_pos instanceof AttackerNode || cur_pos instanceof RestrictedAttackerNode) && !(next_pos instanceof AttackerNode || next_pos instanceof RestrictedAttackerNode)) {
+            //same source and destination
+            if(cur_pos.process1 === next_pos.process1) {
+                src = this.stateBtns.get(cur_pos.process1);
+                if(src === undefined) {
+                    this.printError("spellAnimation: button not found")
+                    return;
+                }
+                c = new Phaser.Math.Vector2(src.x, src.y);
+                anim_angle = 0;
+                same_btn = true;
+            } else {
+                src = this.stateBtns.get(cur_pos.process1);
+                dest = this.stateBtns.get(next_pos.process1);
+                if(src === undefined || dest === undefined) {
+                    this.printError("spellAnimation: buttons not found")
+                    return;
+                }
+                let vec = new Phaser.Math.Vector2(dest.x - src.x, dest.y - src.y);
+                c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5)); 
+                anim_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(vec.angle()));
+            }
+        //defender makes a move
+        } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
+            //same source and destination
+            if(cur_pos.process2 === next_pos.process2) {
+                src = this.stateBtns.get(cur_pos.process2);
+                if(src === undefined) {
+                    this.printError("spellAnimation: button not found")
+                    return;
+                }
+                c = new Phaser.Math.Vector2(src.x, src.y);
+                anim_angle = 0;
+                same_btn = true;
+            } else {
+                src = this.stateBtns.get(cur_pos.process2);
+                dest = this.stateBtns.get(next_pos.process2);
+                if(src === undefined || dest === undefined) {
+                    this.printError("spellAnimation: buttons not found")
+                    return;
+                }
+                let vec = new Phaser.Math.Vector2(dest.x - src.x, dest.y - src.y);
+                c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5)); 
+                anim_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(vec.angle()))
+            }
+        } else {
+            //symmetry move
+            return
+        }
+
+        
+        //play correct animation according to action
+        switch(action) {
+            case "a":
+            	if(!same_btn) {
+                    let fire_anim = this.scene.anims.create({
+                        key: 'fireball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('fireball_vfx', {frames: [0, 1, 2, 3]}),
+                        frameRate: 20,
+                        repeat: -1
+                    })
+                    if(fire_anim !== false) {
+                        let fireball = this.scene.add.sprite(src.x, src.y, 'fireball_vfx').setScale(1.8).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        fireball.play('fireball_anim')
+    
+                        this.scene.tweens.add({
+                            targets: fireball,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                fireball.destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: fire animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case "b":
+                if(!same_btn) {
+                    let water_anim = this.scene.anims.create({
+                        key: 'waterball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('waterball_vfx', {frames: [5, 6, 7, 8, 9]}),
+                        frameRate: 20,
+                        repeat: -1
+                    })
+                    if(water_anim !== false) {
+                        let waterball = this.scene.add.sprite(src.x, src.y, 'waterball_vfx', 5).setScale(1.1).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        waterball.play('waterball_anim')
+    
+                        this.scene.tweens.add({
+                            targets: waterball,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                waterball.destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: water animation undefined")
+                        return;
+                    }
+                } else {
+                    let water_anim = this.scene.anims.create({
+                        key: 'waterball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('waterball_vfx', {frames: [5, 6, 7, 8, 9]}),
+                        frameRate: 20,
+                        repeat: -1
+                    })
+                    if(water_anim !== false) {
+                        let waterball = this.scene.add.sprite(src.x, src.y, 'waterball_vfx', 5).setScale(1.1).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        waterball.play('waterball_anim');
+
+                        let circular_path = new Phaser.Curves.Path();
+                        circular_path.add(new Phaser.Curves.Ellipse(waterball.x - 40, waterball.y, 50, 30))
+    
+                        let param = {t: 0, vec: new Phaser.Math.Vector2()};
+                        this.scene.tweens.add({
+                            targets: param,
+                            t: 1,
+                            onUpdate: () => {
+                                circular_path.getPoint(param.t, param.vec)
+                                waterball.x = param.vec.x
+                                waterball.y = param.vec.y
+                                waterball.angle = Phaser.Math.RadToDeg((Phaser.Math.PI2) * param.t) + 90
+                            },
+                            duration: 500,
+                            onComplete: () => {
+                                waterball.destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: water animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case "c":
+                if(!same_btn) {
+                    let spell_anim = this.scene.anims.create({
+                        key: 'plant_anim',
+                        frames: this.scene.anims.generateFrameNumbers('windplant_vfx', {frames: [0, 1, 2, 3, 4, 5]}),
+                        frameRate: 30,
+                        repeat: -1
+                    })
+                    if(spell_anim !== false) {
+                        let spell = this.scene.add.sprite(src.x, src.y, 'windplant_vfx', 0).setScale(1.5).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        spell.play('plant_anim')
+    
+                        this.scene.tweens.add({
+                            targets: spell,
+                            x: dest?.x,
+                            y: dest?.y,
+                            ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                spell.destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: plant animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case Constants.TIMEOUT_ACTION:
+                if(!same_btn) {
+                    let spell_anim = this.scene.anims.create({
+                        key: 'thunder_anim',
+                        frames: this.scene.anims.generateFrameNumbers('thunder_vfx', {frames: [2, 3,  4, 5, 6, 7, 8, 9, 10, 11, 12]}),
+                        frameRate: 15,
+                        //repeat: -1
+                    })
+
+                    if(spell_anim !== false) {
+                        let vec = new Phaser.Math.Vector2((dest as LtsStateButton).x - src.x, (dest as LtsStateButton).y - src.y);
+                        c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5));
+                        anim_angle = Phaser.Math.RadToDeg(Phaser.Math.Angle.Normalize(vec.angle() - Phaser.Math.PI2/4 ))
+                        let spell = this.scene.add.sprite(c.x, c.y, 'thunder_vfx').setScale(2.2).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        spell.scaleY = vec.length() / spell.height;
+                        spell.scaleX = 0.9;
+                        
+                        spell.play('thunder_anim')
+                        this.scene.time.delayedCall(3000, () => {spell.destroy()})
+                    } else {
+                        this.printError("spellAnimation: timeout animation undefined")
+                        return;
+                    }
+                }
+                break;
+            case Constants.HIDDEN_ACTION:
+                if(!same_btn) {
+                    let spell_anim = this.scene.anims.create({
+                        key: 'dark_anim',
+                        frames: this.scene.anims.generateFrameNumbers('dark_vfx', {frames: [0, 1, 2, 3, 4, 5]}),
+                        frameRate: 15,
+                        //repeat: -1
+                    })
+                    if(spell_anim !== false) {
+                        let spell = this.scene.add.sprite(c.x, c.y, 'dark_vfx').setScale(2.2).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+
+                        spell.play('dark_anim')
+                    } else {
+                        this.printError("spellAnimation: hidden animation undefined")
+                        return;
+                    }
+                }
+                break;
+            default:
+                this.printError("spellAnimation: unknown action")
+                return
+        }
+    }
+
+    /**
      * set localstorage stars, 
      * end screen Popup
      * @param win 
@@ -416,6 +642,7 @@ export class PhaserGameController {
     private launchEndScreen(win: boolean) {
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
+            //console.log(current_level)
             if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
                 console.log("The attacker won the game!");
                 //get number of stars
@@ -444,29 +671,56 @@ export class PhaserGameController {
                 }
 
                 //grey overlay
-                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7);
+                let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7).setInteractive();
 
-                //open popup
-                let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
-                    //replayAction
-                    (this.scene as BaseScene).fade(false, () => {
-                        pop.destroyPopup();
-                        bg_overlay.destroy();
-                        console.clear(); 
-                        this.scene.scene.stop("GUIScene"); 
-                        this.scene.scene.restart()
+                //last level
+                if(current_level === 17) {
+                    console.log("last level")
+                    //open popup
+                    let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
+                        //replayAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            console.clear(); 
+                            this.scene.scene.stop("GUIScene"); 
+                            this.scene.scene.restart()
+                        })
+                    }, () => {
+                        //nextLevelAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
+                            console.clear();
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            this.scene.scene.stop("GUIScene");
+                            this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
+                        })
+                    }, true);
+                } else {
+                    //open popup
+                    let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
+                        //replayAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            console.clear(); 
+                            this.scene.scene.stop("GUIScene"); 
+                            this.scene.scene.restart()
+                        })
+                    }, () => {
+                        //nextLevelAction
+                        (this.scene as BaseScene).fade(false, () => {
+                            localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
+                            console.clear();
+                            pop.destroyPopup();
+                            bg_overlay.destroy();
+                            this.scene.scene.stop("GUIScene");
+                            this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
+                        })
                     })
-                }, () => {
-                    //nextLevelAction
-                    (this.scene as BaseScene).fade(false, () => {
-                        localStorage.setItem("currentLevel", JSON.stringify(current_level + 1));
-                        console.clear();
-                        pop.destroyPopup();
-                        bg_overlay.destroy();
-                        this.scene.scene.stop("GUIScene");
-                        this.scene.scene.start(this.getSceneKeyFromIndex(current_level + 1));
-                    })
-                })
+                }
+                
             } else {
                 this.printError("launchEndScreen: currenLevel: " + current_level);
                 let wintext = this.scene.add.text(this.scene.renderer.width / 2, this.scene.renderer.height / 2, "The attacker won the game!", {fontFamily: Constants.textStyle, color: Constants.COLORS_GREEN.c2, fontStyle: "bold", stroke: "#0", strokeThickness: 3}).setFontSize(50).setDepth(4).setOrigin(0.5).setInteractive().on("pointerdown", () => {
@@ -524,11 +778,14 @@ export class PhaserGameController {
         let env = SetOps.toArray(environment_selection);
 
         //get all relevant buttons
-        let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));;
+
+        //next moves from current
+        let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));
         let moves = this.game.possibleMoves(undefined, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!))); //filter out symmetry move
-        //let timeouts = moves.filter((position) => (position as SimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION);
         let possibleMoves = moves.filter((position) => env.includes((position as SimulationDefenderNode).previousAction) || (position as SimulationDefenderNode).previousAction === Constants.HIDDEN_ACTION || ((position as RestrictedSimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION)); //possible moves for the environment selection
-        
+        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
+        let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
+
         /* console.log(possibleMoves)
         for(let i = 0; i < possibleMoves.length; i++) {
             if(possibleMoves[i] instanceof RestrictedSimulationDefenderNode) {
@@ -538,15 +795,14 @@ export class PhaserGameController {
             }
             
         } //TODO: delete debug*/
-        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
-        let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
+
         /* console.log(env)
         console.log(generated_moves)
         console.log(possibleMoves)
         console.log(not_possibleMoves) //TODO: delete debug
         console.log(moves) */
 
-        //get objects of not possible moves
+        //get objects of not possible moves and gray out
         let buttons = [];
         let edges = [];
         for(let i = 0; i < not_possibleMoves.length; i++) {
@@ -566,6 +822,38 @@ export class PhaserGameController {
                 this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
             }
         }
+
+
+        //next moves after timeout
+        /* let position_after_timeout = new RestrictedAttackerNode(clickedProcess, curPosition!.process2, environment_selection); //process 2 is wrong but irrelevant
+        let future_generated_moves = this.game.generateMoves(position_after_timeout, true, environment_selection).filter((position) => !(position.process2 === clickedProcess));
+        let future_possible_moves = this.game.possibleMoves(position_after_timeout, true).filter((position) => !(position.process2 === clickedProcess));
+        let future_not_possible_moves = future_generated_moves.filter((position) => !(future_possible_moves.find(move => move.process1 === position.process1)));
+
+        console.log(future_generated_moves)
+        console.log(future_possible_moves)
+        //get objects of future not possible moves and gray out
+        buttons = [];
+        edges = []
+        for(let i = 0; i < future_not_possible_moves.length; i++) {
+            let btn = this.stateBtns.get(future_not_possible_moves[i].process1);
+            if(btn !== undefined) {
+                //buttons.push(btn);
+                btn.setAlpha(0.3);
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined future statebutton")
+            }
+
+            let edge = this.transitionObjects.get("".concat(clickedProcess, (future_not_possible_moves[i] as SimulationDefenderNode).previousAction, future_not_possible_moves[i].process1));
+            if(edge !== undefined) {
+                //edges.push(edge);
+                edge.setAlpha(0.3)
+            } else {
+                this.printError("hightlightEnvironmentSelectionEffect: undefined future edge")
+            }
+        } */
+
+
     }
 
     resetEnvironmentSelectionHighlighting() {
@@ -580,7 +868,7 @@ export class PhaserGameController {
         }
 
         let curProcess = curPosition!.process1; 
-        let adjacent = this.game.lts.getActionsAndDestinations(curProcess)
+        /* let adjacent = this.game.lts.getActionsAndDestinations(curProcess);
 
         for(let i = 0; i < adjacent.length; i++) {
             let btn = this.stateBtns.get(adjacent[i][1]);
@@ -598,7 +886,10 @@ export class PhaserGameController {
             } else {
                 this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
             }
-        }
+        } */
+
+        this.stateBtns.forEach(btn => { btn.setAlpha(1) })
+        this.transitionObjects.forEach(edge => { edge.setAlpha(1) })
 
 
     }

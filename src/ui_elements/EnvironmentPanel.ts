@@ -261,8 +261,15 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         for (var i = 0; i < this.possibleActions.length; i++) {
             let icon;
             let label: Label;
-            let label_bg = this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3) ).setDepth(6))
-            : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setDepth(6));
+            let label_bg;
+            /* let label_bg = this.curEnvironment.has(this.possibleActions[i])? this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3) ).setDepth(6))
+            : this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setDepth(6)); */
+            if(this.curEnvironment.has(this.possibleActions[i])) {
+                label_bg = this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3) ).setDepth(6));
+            } else {
+                label_bg = this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 0, 0, 14 * this.scale, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)).setDepth(6));
+                label_bg.setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(0.5);
+            }
 
             if(this.possibleActions[i] === "a" || this.possibleActions[i] === "b" || this.possibleActions[i] === "c") {
                 if(this.possibleActions[i] === "a") {

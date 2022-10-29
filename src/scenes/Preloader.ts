@@ -81,6 +81,13 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("timeout_arrow" , 'assets/Transition/timeout_arrow.png')
         this.load.image("tau_arrow" , 'assets/Transition/tau_arrow.png')
 
+        //vfx spells
+        this.load.spritesheet("fireball_vfx", "assets/fx/Fire\ Effect\ 1/Firebolt\ SpriteSheet.png", {frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("waterball_vfx", "assets/fx/Water\ Ball/WaterBall.png", {frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet("windplant_vfx", "assets/fx/Wind\ Effect\ 01/Wind\ Projectile.png", {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet("thunder_vfx", "assets/fx/Thunder\ Effect\ 02/Thunder\ Strike/Thunderstrike\ w\ blur.png", {frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet("dark_vfx", "assets/fx/Thrust/Thrusts1SpriteSheet.png", {frameWidth: 64, frameHeight: 32});
+
         /* Loader Events:
             - complete: when done loading everything
             - progress: loader number progress in decimal || can also just use create()

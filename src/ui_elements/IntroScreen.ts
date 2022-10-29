@@ -128,14 +128,14 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
 
                 let atk_rule_3 = new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "If no spell is possible ", this.textStyle).setFontSize(26).setResolution(2))
-                .add(this.scene.add.image(0, 0, "environment_panel_no_spell_possible", ).setOrigin(0.5).setScale(0.8))
+                .add(this.scene.add.text(0, 0, "If no basic spell is possible", this.textStyle).setFontSize(26).setResolution(2))
+                //.add(this.scene.add.image(0, 0, "environment_panel_no_spell_possible", ).setOrigin(0.5).setScale(0.8))
                 .add(this.scene.add.text(0, 0, " after a time spell, ", this.textStyle).setFontSize(26).setResolution(2))
 
                 let cond = new Sizer(this.scene, {orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "You can reset the restriction by casting any spell", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "The restriction can be lifted by performing any basic spell", this.textStyle).setFontSize(26).setResolution(2))
 
-                sizer.add(atk_rule_3, {align: 'center', padding: {top: -20, bottom: -20}});
+                sizer.add(atk_rule_3, {align: 'center', padding: {/* top: -20, */ bottom: -20}});
                 sizer.add(cond, {align: 'center'})
                 break;
             case 4:

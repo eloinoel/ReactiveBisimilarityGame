@@ -120,6 +120,7 @@ export class LtsStateButton extends Button {
     
     constructor(scene: Phaser.Scene, x: number, y: number, actionOnClick = () => {}, caption: string, showCaption = true) {
         super(scene, x, y, "circle", actionOnClick, caption, "circle_over", "circle_down", showCaption);
+        this.setDepth(2)
     }
 }
 
