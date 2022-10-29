@@ -494,8 +494,6 @@ export class PhaserGameController {
                         this.printError("spellAnimation: fire animation undefined")
                         return;
                     }
-                } else {
-                    //TODO:
                 }
                 break;
             case "b":
@@ -515,6 +513,39 @@ export class PhaserGameController {
                             x: dest?.x,
                             y: dest?.y,
                             ease: Phaser.Math.Easing.Quadratic.In,
+                            duration: 500,
+                            onComplete: () => {
+                                waterball.destroy();
+                            }
+                        })
+                    } else {
+                        this.printError("spellAnimation: water animation undefined")
+                        return;
+                    }
+                } else {
+                    let water_anim = this.scene.anims.create({
+                        key: 'waterball_anim',
+                        frames: this.scene.anims.generateFrameNumbers('waterball_vfx', {frames: [5, 6, 7, 8, 9]}),
+                        frameRate: 20,
+                        repeat: -1
+                    })
+                    if(water_anim !== false) {
+                        let waterball = this.scene.add.sprite(src.x, src.y, 'waterball_vfx', 5).setScale(1.1).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        waterball.play('waterball_anim');
+
+                        let circular_path = new Phaser.Curves.Path();
+                        circular_path.add(new Phaser.Curves.Ellipse(waterball.x - 40, waterball.y, 50, 30))
+    
+                        let param = {t: 0, vec: new Phaser.Math.Vector2()};
+                        this.scene.tweens.add({
+                            targets: param,
+                            t: 1,
+                            onUpdate: () => {
+                                circular_path.getPoint(param.t, param.vec)
+                                waterball.x = param.vec.x
+                                waterball.y = param.vec.y
+                                waterball.angle = Phaser.Math.RadToDeg((Phaser.Math.PI2) * param.t) + 90
+                            },
                             duration: 500,
                             onComplete: () => {
                                 waterball.destroy();
@@ -562,12 +593,7 @@ export class PhaserGameController {
                         frameRate: 15,
                         //repeat: -1
                     })
-                    /* let spell_anim = this.scene.anims.create({
-                        key: 'thunderball_anim',
-                        frames: this.scene.anims.generateFrameNumbers('thunderball_vfx', {frames: [0, 1, 2, 3, 4]}),
-                        frameRate: 30,
-                        repeat: -1
-                    }) */
+
                     if(spell_anim !== false) {
                         let vec = new Phaser.Math.Vector2((dest as LtsStateButton).x - src.x, (dest as LtsStateButton).y - src.y);
                         c = new Phaser.Math.Vector2(src.x, src.y).add(vec.clone().scale(0.5));
@@ -577,17 +603,7 @@ export class PhaserGameController {
                         spell.scaleX = 0.9;
                         
                         spell.play('thunder_anim')
-                        /* this.scene.tweens.add({
-                            targets: spell,
-                            x: dest?.x,
-                            y: dest?.y,
-                            ease: Phaser.Math.Easing.Quadratic.In,
-                            duration: 500,
-                            onComplete: () => {
-                                spell.destroy();
-                                (spell_anim as Phaser.Animations.Animation).destroy();
-                            }
-                        }) */
+                        this.scene.time.delayedCall(3000, () => {spell.destroy()})
                     } else {
                         this.printError("spellAnimation: timeout animation undefined")
                         return;
@@ -595,7 +611,22 @@ export class PhaserGameController {
                 }
                 break;
             case Constants.HIDDEN_ACTION:
-                //TODO:
+                if(!same_btn) {
+                    let spell_anim = this.scene.anims.create({
+                        key: 'dark_anim',
+                        frames: this.scene.anims.generateFrameNumbers('dark_vfx', {frames: [0, 1, 2, 3, 4, 5]}),
+                        frameRate: 15,
+                        //repeat: -1
+                    })
+                    if(spell_anim !== false) {
+                        let spell = this.scene.add.sprite(c.x, c.y, 'dark_vfx').setScale(2.2).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+
+                        spell.play('dark_anim')
+                    } else {
+                        this.printError("spellAnimation: hidden animation undefined")
+                        return;
+                    }
+                }
                 break;
             default:
                 this.printError("spellAnimation: unknown action")

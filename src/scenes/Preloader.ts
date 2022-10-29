@@ -86,7 +86,7 @@ export default class Preloader extends Phaser.Scene {
         this.load.spritesheet("waterball_vfx", "assets/fx/Water\ Ball/WaterBall.png", {frameWidth: 64, frameHeight: 64});
         this.load.spritesheet("windplant_vfx", "assets/fx/Wind\ Effect\ 01/Wind\ Projectile.png", {frameWidth: 32, frameHeight: 32});
         this.load.spritesheet("thunder_vfx", "assets/fx/Thunder\ Effect\ 02/Thunder\ Strike/Thunderstrike\ w\ blur.png", {frameWidth: 64, frameHeight: 64});
-        //this.load.spritesheet("thunderball_vfx", "assets/fx/Thunder\ Effect\ 01/Thunder\ Projectile\ 1/Thunder\ projectile1\ w\ blur.png", {frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet("dark_vfx", "assets/fx/Thrust/Thrusts1SpriteSheet.png", {frameWidth: 64, frameHeight: 32});
 
         /* Loader Events:
             - complete: when done loading everything

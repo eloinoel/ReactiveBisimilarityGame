@@ -252,7 +252,7 @@ export class AI {
 
 
     /**
-     * calculate the next "best" move
+     * calculate the next "best" move for the defender
      * @returns undefined if there is no next move
      */
      getNextMove(curPosition?: GamePosition): GamePosition | undefined {
@@ -306,7 +306,8 @@ export class AI {
         console.log("getNextMove: could not find any next move")
         return undefined;
 
-        /* let bfs_result = this.modifiedBfs(curPosition);
+        /* OLD BFS CODE
+         let bfs_result = this.modifiedBfs(curPosition);
         if(bfs_result !== undefined && bfs_result[0] !== undefined) {
             //traverse graph on path until pred === current position 
             let current = bfs_result[0] as Node<[GamePosition, Node<any>[], number]>;
@@ -351,7 +352,12 @@ export class AI {
         return path_string;
     }
 
-
+    /**
+     * gets shortest path to attacker winning region leaf node given that the defender tries to delay the attacker as much as possible
+     * requires defender winning region algorithm to be performed beforehand
+     * @param curPosition 
+     * @returns 
+     */
     launchModifiedMinMax(curPosition?: GamePosition): GamePosition[] | undefined {
         if(this.graph !== undefined) {
 
