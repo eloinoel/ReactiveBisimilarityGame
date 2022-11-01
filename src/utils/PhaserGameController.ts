@@ -44,6 +44,7 @@ export class PhaserGameController {
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
     private replayPulseTween!: Phaser.Tweens.Tween;
+    private pulsateNextMoves: boolean;    //for tutorial level 1.1
 
     /**shows debug UI if set to true */
     debug: boolean;
@@ -77,6 +78,7 @@ export class PhaserGameController {
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
+        this.pulsateNextMoves = false;
     }
 
     /**
@@ -343,11 +345,14 @@ export class PhaserGameController {
                 (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
                 (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
                 this.scene.events.emit('clickedSymmetryButton')
+                this.updateVisualsAfterMove()
+                return 0;
             }
 
             //update visuals
-            this.spellAnimation(action, cur_pos, next_position[0]);
             this.updateVisualsAfterMove()
+            this.spellAnimation(action, cur_pos, next_position[0]);
+
 
 
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
@@ -367,19 +372,29 @@ export class PhaserGameController {
                 //AI makes a move
                 } else {
                     let defender_move = this.ai_controller.getNextMove(cur_pos);
-                    if(defender_move !== undefined) {
-                        let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
-                        if(return_code === -1) {
-                            this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
-                        } else {
-                            this.updateVisualsAfterMove()
-                            moves = this.game.possibleMoves(undefined, true);
-                            //should only occur in simulation game because there is always a symmetry move in bisimilar games
-                            if(moves.length === 0) {
-                                this.launchEndScreen(false);
+                    this.scene.time.delayedCall(500, () => {
+                        if(defender_move !== undefined) {
+                            this.spellAnimation((cur_pos as SimulationDefenderNode).previousAction, cur_pos, defender_move);
+                            let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
+                            if(return_code === -1) {
+                                this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
+                            } else {
+                                this.updateVisualsAfterMove()
+                                moves = this.game.possibleMoves(undefined, true);
+                                //should only occur in simulation game because there is always a symmetry move in bisimilar games
+                                if(moves.length === 0) {
+                                    this.launchEndScreen(false);
+                                } else {
+                                    //after defender made move, highlight possible moves for attacker
+                                    if(this.pulsateNextMoves) {
+                                        this.pulsateNextMoveButtons();
+                                    }
+                                }
                             }
+                        } else {
+                            this.printError("doMove: defender_move is undefined");
                         }
-                    }
+                    })
                 }
 
             //Attackers Turn, only reachable after symmetry move
@@ -392,8 +407,8 @@ export class PhaserGameController {
                 
             }
             if(!isSymmetryMove) {
-                this.scene.events.emit('clickedLtsButton')
-                this.scene.events.emit('clickedButton', this.stateBtns.get(next_process))
+                this.scene.events.emit('clickedLtsButton')  //pulsateNextMovesButtons
+                this.scene.events.emit('clickedButton', this.stateBtns.get(next_process)) //Level 3.1 pulsate timeout button
             }
             return 0
         }
@@ -615,11 +630,11 @@ export class PhaserGameController {
                     let spell_anim = this.scene.anims.create({
                         key: 'dark_anim',
                         frames: this.scene.anims.generateFrameNumbers('dark_vfx', {frames: [0, 1, 2, 3, 4, 5]}),
-                        frameRate: 15,
+                        frameRate: 12,
                         //repeat: -1
                     })
                     if(spell_anim !== false) {
-                        let spell = this.scene.add.sprite(c.x, c.y, 'dark_vfx').setScale(2.2).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        let spell = this.scene.add.sprite(c.x, c.y, 'dark_vfx').setScale(2.4).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
 
                         spell.play('dark_anim')
                     } else {
@@ -757,7 +772,7 @@ export class PhaserGameController {
      * @returns 
      */
     highlightEnvironmentSelectionEffect(environment_selection: Set<string>) {
-        console.log("hi")
+        //console.log("hi")
         let clickedProcess = this.last_clicked_process;
         if(!this.game_initialized) {
             this.printError("hightlightEnvironmentSelectionEffect: game not initialized");
@@ -1278,7 +1293,7 @@ export class PhaserGameController {
                     (button as LtsStateButton).setScale(scale)
                 }
                 this.scene.events.off('clickedLtsButton')
-                this.pulsateNextMoveButtons()
+                this.pulsateNextMoves = true;
             })
         }
     }
@@ -1307,6 +1322,11 @@ export class PhaserGameController {
         }
     }
 
+    /**
+     * pulsate any process button
+     * @param process 
+     * @returns 
+     */
     pulsateProcessBtn(process: string) {
         if(this.game_initialized) {
 
@@ -1327,7 +1347,7 @@ export class PhaserGameController {
             })
 
             this.scene.events.on('clickedButton', () => {
-                console.log('test')
+                //console.log('test')
                 tween.complete()
                 button!.setScale(scale);
                 this.scene.events.off('clickedButton')
