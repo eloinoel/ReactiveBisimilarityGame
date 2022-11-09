@@ -57,10 +57,10 @@ export default class Level3_7 extends BaseScene {
         game_controller.addState("q1", 1, 1, 0);
         game_controller.addState("q2", 1, 1, 1);
         game_controller.addState("q3", 1, 2, -1);
-        game_controller.addState("q4", 1, 2, 0);
-        game_controller.addState("q5", 1, 2, 1);
-        game_controller.addState("q6", 1, 3, -1);
-        game_controller.addState("q7", 1, 3, 1);
+        game_controller.addState("q4", 1, 2, 1);
+        game_controller.addState("q5", 1, 2, 0);
+        game_controller.addState("q6", 1, 3, 2);
+        game_controller.addState("q7", 1, 3, 0);
 
         game_controller.addTransition("q0", "q1", Constants.HIDDEN_ACTION);
         game_controller.addTransition("q0", "q2", Constants.HIDDEN_ACTION);

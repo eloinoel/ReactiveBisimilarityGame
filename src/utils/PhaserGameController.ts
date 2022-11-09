@@ -341,6 +341,9 @@ export class PhaserGameController {
             console.log("move not possible: " + action + ", " + next_position.toString());
             return -1;
         } else {
+            //attacker did a move, update counter
+            this.num_moves++;
+
             if(isSymmetryMove) {
                 (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
                 (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
@@ -358,8 +361,6 @@ export class PhaserGameController {
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             moves = this.game.possibleMoves(undefined, true);
 
-            //attacker did a move, update counter
-            this.num_moves++;
 
             if(cur_pos.activePlayer === Player.Defender) {
                 //check if the game is over
@@ -920,7 +921,7 @@ export class PhaserGameController {
         }
     }
 
-    printAttackerShortestPath() {
+    /* printAttackerShortestPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
             let path = this.ai_controller.getShortestPathFromBfs();
             if(path !== undefined) {
@@ -934,7 +935,7 @@ export class PhaserGameController {
                     previous = path[i].data[0].activePlayer;
                     path_string = path_string.concat(path[i].data[0].toString() + ", ");
                 }
-                path_string = path_string.concat("; moves: " + length);
+                path_string = path_string.concat("; attacker moves: " + length);
                 console.log(path_string);
             } else {
                 this.printError("printAttackerShortestPath: path undefined" )
@@ -943,7 +944,7 @@ export class PhaserGameController {
         } else {
             this.printError("printAttackerShortestPath: AI not initialized.");
         }
-    }
+    } */
 
     printAttackerShortestMinMaxPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
@@ -951,7 +952,7 @@ export class PhaserGameController {
 
             if(path !== undefined) {
                 let length = 0;
-                let path_string = "";
+                let path_string = "MiniMaxPath to attacker winning region: ";
                 let previous = undefined;   //for detecting symmetry moves
                 for(let i = 0; i < path.length; i++) {
                     if(path[i].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].activePlayer === Player.Attacker)) {
@@ -960,7 +961,7 @@ export class PhaserGameController {
                     previous = path[i].activePlayer;
                     path_string = path_string.concat(path[i].toString() + ", ");
                 }
-                path_string = path_string.concat("; moves: " + length + "; pathlen: " + (path.length - 1));
+                path_string = path_string.concat("; attacker moves: " + length + "; pathlen: " + (path.length - 1));
                 console.log(path_string);
             } else {
                 this.printError("printAttackerShortestMindMaxPath: returned path is undefined")
