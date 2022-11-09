@@ -30,10 +30,10 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
                 this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.1);
                 break;
             case 2:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.2, this.scene.renderer.height/1.45);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.45);
                 break;
             case 3:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.26, this.scene.renderer.height/1.23);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.23);
                 this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2 + 35);
                 break;
             default:

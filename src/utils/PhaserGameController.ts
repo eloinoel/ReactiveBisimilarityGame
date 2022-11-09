@@ -44,6 +44,7 @@ export class PhaserGameController {
     private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
 
     private replayPulseTween!: Phaser.Tweens.Tween;
+    private pulsateNextMoves: boolean;    //for tutorial level 1.1
 
     /**shows debug UI if set to true */
     debug: boolean;
@@ -77,6 +78,7 @@ export class PhaserGameController {
         this.level_description = level_description;
         this.num_moves_for_stars = [0, 0];
         this.num_moves = 0;
+        this.pulsateNextMoves = false;
     }
 
     /**
@@ -339,22 +341,26 @@ export class PhaserGameController {
             console.log("move not possible: " + action + ", " + next_position.toString());
             return -1;
         } else {
+            //attacker did a move, update counter
+            this.num_moves++;
+
             if(isSymmetryMove) {
                 (this.player_icons[0] as Phaser.GameObjects.Sprite).toggleFlipX();
                 (this.player_icons[2] as Phaser.GameObjects.Sprite).toggleFlipX();
                 this.scene.events.emit('clickedSymmetryButton')
+                this.updateVisualsAfterMove()
+                return 0;
             }
 
             //update visuals
-            this.spellAnimation(action, cur_pos, next_position[0]);
             this.updateVisualsAfterMove()
+            this.spellAnimation(action, cur_pos, next_position[0]);
+
 
 
             cur_pos = this.game.getPlay()[this.game.getPlay().length - 1];
             moves = this.game.possibleMoves(undefined, true);
 
-            //attacker did a move, update counter
-            this.num_moves++;
 
             if(cur_pos.activePlayer === Player.Defender) {
                 //check if the game is over
@@ -367,19 +373,29 @@ export class PhaserGameController {
                 //AI makes a move
                 } else {
                     let defender_move = this.ai_controller.getNextMove(cur_pos);
-                    if(defender_move !== undefined) {
-                        let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
-                        if(return_code === -1) {
-                            this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
-                        } else {
-                            this.updateVisualsAfterMove()
-                            moves = this.game.possibleMoves(undefined, true);
-                            //should only occur in simulation game because there is always a symmetry move in bisimilar games
-                            if(moves.length === 0) {
-                                this.launchEndScreen(false);
+                    this.scene.time.delayedCall(500, () => {
+                        if(defender_move !== undefined) {
+                            this.spellAnimation((cur_pos as SimulationDefenderNode).previousAction, cur_pos, defender_move);
+                            let return_code = this.game.performMove((cur_pos as SimulationDefenderNode).previousAction, defender_move);
+                            if(return_code === -1) {
+                                this.printError("doMove: Could not execute move the defender AI said to be possible: " + defender_move.toString());
+                            } else {
+                                this.updateVisualsAfterMove()
+                                moves = this.game.possibleMoves(undefined, true);
+                                //should only occur in simulation game because there is always a symmetry move in bisimilar games
+                                if(moves.length === 0) {
+                                    this.launchEndScreen(false);
+                                } else {
+                                    //after defender made move, highlight possible moves for attacker
+                                    if(this.pulsateNextMoves) {
+                                        this.pulsateNextMoveButtons();
+                                    }
+                                }
                             }
+                        } else {
+                            this.printError("doMove: defender_move is undefined");
                         }
-                    }
+                    })
                 }
 
             //Attackers Turn, only reachable after symmetry move
@@ -392,8 +408,8 @@ export class PhaserGameController {
                 
             }
             if(!isSymmetryMove) {
-                this.scene.events.emit('clickedLtsButton')
-                this.scene.events.emit('clickedButton', this.stateBtns.get(next_process))
+                this.scene.events.emit('clickedLtsButton')  //pulsateNextMovesButtons
+                this.scene.events.emit('clickedButton', this.stateBtns.get(next_process)) //Level 3.1 pulsate timeout button
             }
             return 0
         }
@@ -615,11 +631,11 @@ export class PhaserGameController {
                     let spell_anim = this.scene.anims.create({
                         key: 'dark_anim',
                         frames: this.scene.anims.generateFrameNumbers('dark_vfx', {frames: [0, 1, 2, 3, 4, 5]}),
-                        frameRate: 15,
+                        frameRate: 12,
                         //repeat: -1
                     })
                     if(spell_anim !== false) {
-                        let spell = this.scene.add.sprite(c.x, c.y, 'dark_vfx').setScale(2.2).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
+                        let spell = this.scene.add.sprite(c.x, c.y, 'dark_vfx').setScale(2.4).setOrigin(0.5).setDepth(1).setAngle(anim_angle);
 
                         spell.play('dark_anim')
                     } else {
@@ -757,7 +773,7 @@ export class PhaserGameController {
      * @returns 
      */
     highlightEnvironmentSelectionEffect(environment_selection: Set<string>) {
-        console.log("hi")
+        //console.log("hi")
         let clickedProcess = this.last_clicked_process;
         if(!this.game_initialized) {
             this.printError("hightlightEnvironmentSelectionEffect: game not initialized");
@@ -905,7 +921,7 @@ export class PhaserGameController {
         }
     }
 
-    printAttackerShortestPath() {
+    /* printAttackerShortestPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
             let path = this.ai_controller.getShortestPathFromBfs();
             if(path !== undefined) {
@@ -919,7 +935,7 @@ export class PhaserGameController {
                     previous = path[i].data[0].activePlayer;
                     path_string = path_string.concat(path[i].data[0].toString() + ", ");
                 }
-                path_string = path_string.concat("; moves: " + length);
+                path_string = path_string.concat("; attacker moves: " + length);
                 console.log(path_string);
             } else {
                 this.printError("printAttackerShortestPath: path undefined" )
@@ -928,7 +944,7 @@ export class PhaserGameController {
         } else {
             this.printError("printAttackerShortestPath: AI not initialized.");
         }
-    }
+    } */
 
     printAttackerShortestMinMaxPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
@@ -936,7 +952,7 @@ export class PhaserGameController {
 
             if(path !== undefined) {
                 let length = 0;
-                let path_string = "";
+                let path_string = "MiniMaxPath to attacker winning region: ";
                 let previous = undefined;   //for detecting symmetry moves
                 for(let i = 0; i < path.length; i++) {
                     if(path[i].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].activePlayer === Player.Attacker)) {
@@ -945,7 +961,7 @@ export class PhaserGameController {
                     previous = path[i].activePlayer;
                     path_string = path_string.concat(path[i].toString() + ", ");
                 }
-                path_string = path_string.concat("; moves: " + length + "; pathlen: " + (path.length - 1));
+                path_string = path_string.concat("; attacker moves: " + length + "; pathlen: " + (path.length - 1));
                 console.log(path_string);
             } else {
                 this.printError("printAttackerShortestMindMaxPath: returned path is undefined")
@@ -1278,7 +1294,7 @@ export class PhaserGameController {
                     (button as LtsStateButton).setScale(scale)
                 }
                 this.scene.events.off('clickedLtsButton')
-                this.pulsateNextMoveButtons()
+                this.pulsateNextMoves = true;
             })
         }
     }
@@ -1307,6 +1323,11 @@ export class PhaserGameController {
         }
     }
 
+    /**
+     * pulsate any process button
+     * @param process 
+     * @returns 
+     */
     pulsateProcessBtn(process: string) {
         if(this.game_initialized) {
 
@@ -1327,7 +1348,7 @@ export class PhaserGameController {
             })
 
             this.scene.events.on('clickedButton', () => {
-                console.log('test')
+                //console.log('test')
                 tween.complete()
                 button!.setScale(scale);
                 this.scene.events.off('clickedButton')
