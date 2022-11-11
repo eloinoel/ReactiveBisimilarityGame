@@ -659,8 +659,9 @@ export class PhaserGameController {
         if(win) {
             let current_level = parseInt(localStorage.getItem("currentLevel") as string);
             //console.log(current_level)
-            if(current_level !== undefined && current_level >= 0 && current_level <= 17) {
+            if(current_level !== undefined && current_level >= 0 && current_level <= 19) {
                 console.log("The attacker won the game!");
+                
                 //get number of stars
                 let num_stars = 1;
                 for(let i = 0; i < this.num_moves_for_stars.length && i < 2; i++) {
@@ -679,7 +680,7 @@ export class PhaserGameController {
                         levels[current_level].stars = num_stars;
                     }
                     //unlock next level
-                    if(current_level < 17 && levels[current_level + 1].state === false) {
+                    if(current_level < 19 && levels[current_level + 1].state === false) {
                         levels[current_level + 1].state = true;
                     }
 
@@ -690,8 +691,7 @@ export class PhaserGameController {
                 let bg_overlay = this.scene.add.rectangle(this.scene.renderer.width/2, this.scene.renderer.height/2, this.scene.renderer.width + 1, this.scene.renderer.height + 1, 0x000000, 0.7).setOrigin(0.5).setDepth(7).setInteractive();
 
                 //last level
-                if(current_level === 17) {
-                    console.log("last level")
+                if(current_level === 19) {
                     //open popup
                     let pop = new WinPopup(this.scene, num_stars, this.num_moves, () => {
                         //replayAction
@@ -1014,6 +1014,10 @@ export class PhaserGameController {
                 return "ReBisim_Level9";
             case 17:
                 return "ReBisim_Level10";
+            case 18:
+                return "ReBisim_Level11";
+            case 19:
+                return "ReBisim_Level12";
             default:
                 this.printError("getSceneKeyFromIndex: Unknown index " + index);
                 return undefined;

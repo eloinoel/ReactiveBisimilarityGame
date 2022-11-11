@@ -71,6 +71,8 @@ export default class LevelMap extends BaseScene {
                 {state: false, stars: 0},    //level 3.8
                 {state: false, stars: 0},    //level 3.9
                 {state: false, stars: 0},    //level 3.10
+                {state: false, stars: 0},    //level 3.11
+                {state: false, stars: 0},    //level 3.12
             ]
         }
         localStorage.setItem("levels", JSON.stringify(levels));
@@ -101,20 +103,22 @@ export default class LevelMap extends BaseScene {
         this.levelObjects.push(new LevelSelectionButton(this, 270, this.renderer.height/2 + 45, "orange_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "4");this.scene.start("Bisim_Level1")})}, "Level 2.1"));
         this.levelObjects.push(new LevelSelectionButton(this, 200, this.renderer.height/2 - 50, "orange_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "5");this.scene.start("Bisim_Level2")})}, "Level 2.2"));
         this.levelObjects.push(new LevelSelectionButton(this, 95, 187, "orange_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "6");this.scene.start("Bisim_Level3")})}, "Level 2.3"));
-        this.levelObjects.push(new LevelSelectionButton(this, 290, 200, "orange_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "7");this.scene.start("Bisim_Level4")})}, "Level 2.4").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 290, 200, "orange_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "7");this.scene.start("Bisim_Level4")})}, "Level 2.4"));
 
         //reactive bisimulation
         let rebisimText = this.add.text(this.renderer.width - 300, 110, "Reactive Bisimulation", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white, fontStyle: 'bold italic'}).setOrigin(0.5).setFontSize(45).setStroke('#000000', 4).setResolution(2);       
         this.levelObjects.push(new LevelSelectionButton(this, 440, 150, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "8");this.scene.start("ReBisim_Level1")})}, "Level 3.1"));
         this.levelObjects.push(new LevelSelectionButton(this, 540, 240, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "9");this.scene.start("ReBisim_Level2")})}, "Level 3.2"));
         this.levelObjects.push(new LevelSelectionButton(this, 720, 220, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "10");this.scene.start("ReBisim_Level3")})}, "Level 3.3"));
-        this.levelObjects.push(new LevelSelectionButton(this, 800, 350, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "11");this.scene.start("ReBisim_Level4")})}, "Level 3.4").disable());
+        this.levelObjects.push(new LevelSelectionButton(this, 800, 350, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "11");this.scene.start("ReBisim_Level4")})}, "Level 3.4"));
         this.levelObjects.push(new LevelSelectionButton(this, 930, 255, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "12");this.scene.start("ReBisim_Level5")})}, "Level 3.5"));
-        this.levelObjects.push(new LevelSelectionButton(this, 1120, 210, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "13");this.scene.start("ReBisim_Level6")})}, "Level 3.6").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 1045, 360, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "14");this.scene.start("ReBisim_Level7")})}, "Level 3.7").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 1125, 510, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "15");this.scene.start("ReBisim_Level8")})}, "Level 3.8").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 1160, 655, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "16");this.scene.start("ReBisim_Level9")})}, "Level 3.9").disable());
-        this.levelObjects.push(new LevelSelectionButton(this, 973, 682, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "17");this.scene.start("ReBisim_Level10")})}, "Level 3.10"));
+        this.levelObjects.push(new LevelSelectionButton(this, 1120, 210, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "13");this.scene.start("ReBisim_Level6")})}, "Level 3.6"));
+        this.levelObjects.push(new LevelSelectionButton(this, 1045, 360, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "14");this.scene.start("ReBisim_Level7")})}, "Level 3.7"));
+        this.levelObjects.push(new LevelSelectionButton(this, 1210, 400, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "15");this.scene.start("ReBisim_Level8")})}, "Level 3.8"));
+        this.levelObjects.push(new LevelSelectionButton(this, 1150, 495, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "16");this.scene.start("ReBisim_Level9")})}, "Level 3.9"));
+        this.levelObjects.push(new LevelSelectionButton(this, 1060, 580, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "17");this.scene.start("ReBisim_Level10")})}, "Level 3.10"));
+        this.levelObjects.push(new LevelSelectionButton(this, 1160, 655, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "18");this.scene.start("ReBisim_Level11")})}, "Level 3.11"));
+        this.levelObjects.push(new LevelSelectionButton(this, 973, 682, "red_button", () => {this.fade(false, () => {localStorage.setItem("currentLevel", "19");this.scene.start("ReBisim_Level12")})}, "Level 3.12"));
 
         //disable all levels that players hasn't unlocked yet
         let fartest_enabled_level_index = 0;
@@ -212,6 +216,8 @@ export default class LevelMap extends BaseScene {
             {state: false, stars: 0},    //level 3.8
             {state: false, stars: 0},    //level 3.9
             {state: false, stars: 0},    //level 3.10
+            {state: false, stars: 0},    //level 3.11
+            {state: false, stars: 0},    //level 3.12
         ]
         localStorage.removeItem("levelsBeforeToggle")
         localStorage.setItem("levels", JSON.stringify(levels));

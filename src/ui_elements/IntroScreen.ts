@@ -59,7 +59,7 @@ export class IntroScreen extends Phaser.GameObjects.Container {
             space: {item: 50, top: 15, bottom: 5, left: 15, right: 15}
         })
         //debug
-        sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4)).setAlpha(0.0)))
+        //sizer.addBackground(this.scene.add.existing(new RoundRectangle(this.scene, 0, 0, 2, 2, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4)).setAlpha(0.0)))
         
     
         //intro types
@@ -128,7 +128,7 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
 
                 let atk_rule_3 = new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "If no basic spell is possible", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "If no basic spell is allowed", this.textStyle).setFontSize(26).setResolution(2))
                 //.add(this.scene.add.image(0, 0, "environment_panel_no_spell_possible", ).setOrigin(0.5).setScale(0.8))
                 .add(this.scene.add.text(0, 0, " after a time spell, ", this.textStyle).setFontSize(26).setResolution(2))
 

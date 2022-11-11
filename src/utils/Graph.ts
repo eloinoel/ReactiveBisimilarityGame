@@ -126,6 +126,16 @@ export class Graph<T> {
         return edges;
     }
 
+    getEdgeAmount(): number {
+        let amount = 0; 
+        this.nodes.forEach((node) => {
+            node.adjacent.forEach((edge) => {
+                amount++;
+            })
+        })
+        return amount;
+    }
+
     getEdgesAsString(): string {
         let edgeListList = this.getEdgesList();
         let edgeString = "";

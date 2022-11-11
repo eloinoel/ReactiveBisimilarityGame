@@ -657,7 +657,8 @@ export class AI {
     }
     
     printGraph() {
-        console.log("-------------------- GAME MOVE GRAPH --------------------")
+        console.log("-------------------- GAME GRAPH --------------------")
+        console.log("number of nodes: " + this.graph.getNodeAmount() + ", number of edges: " + this.graph.getEdgeAmount())
         console.log("Graph: <Vertex>: <(edgeLabel, destinationNode)> ...");
         this.graph.getNodes().forEach((node) => {
             let edgestring = "Vertex " + node.data[0].toString() + ", score = " + node.data[2] + ": ";

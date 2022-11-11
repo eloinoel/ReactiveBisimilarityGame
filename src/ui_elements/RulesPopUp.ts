@@ -146,20 +146,20 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             .add(this.scene.add.text(0, 0, " spells:", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
 
             let timeout_cond1_3 = new Sizer(this.scene, {orientation: 'x'})
-            .add(this.scene.add.text(0, 0, "                     - no basic spells possible in current state from the previous ", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, "                     - no basic spells allowed in current state from the previous ", this.textStyle).setFontSize(20).setResolution(2))
             .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.08))
             .add(this.scene.add.text(0, 0, " restriction", this.textStyle).setFontSize(20).setResolution(2))
             
 
             let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
             .add(this.scene.add.text(0, 0, "        • consequence: disabled basic spells ", this.textStyle).setFontSize(20).setResolution(2))
-            .add(this.scene.add.text(0, 0, "won't be possible after ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
+            .add(this.scene.add.text(0, 0, "won't be allowed immediately after ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
             .add(this.scene.add.text(0, 0, "this spell,", this.textStyle).setFontSize(20).setResolution(2))
 
             let timeout_cond3 = new Sizer(this.scene, {orientation: 'x'})
-            .add(this.scene.add.text(0, 0, "                       unless ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
-            .add(this.scene.add.text(0, 0, "no basic spell is possible by the selection ", this.textStyle).setFontSize(20).setResolution(2))
-            .add(this.scene.add.text(0, 0, "(idling)", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('italic'))
+            .add(this.scene.add.text(0, 0, "                       unless", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
+            .add(this.scene.add.text(0, 0, " if no basic spell is allowed in the next state, any spell can be performed", this.textStyle).setFontSize(20).setResolution(2))
+            //.add(this.scene.add.text(0, 0, "(idling)", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('italic'))
 
             //if no basic magic spell is possible
             sizer.add(atk_rule_timeout, {align: 'left'});
