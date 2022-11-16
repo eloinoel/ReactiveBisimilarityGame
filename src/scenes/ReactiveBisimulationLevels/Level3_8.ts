@@ -53,7 +53,8 @@ export default class Level3_8 extends BaseScene {
         game_controller.addTransition("p0", "p2", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("p2", "p3", Constants.HIDDEN_ACTION);
         game_controller.addTransition("p3", "p4", "a");
-        game_controller.addTransition("p3", "p5", "b");
+        game_controller.addTransition("p3", "p5", Constants.HIDDEN_ACTION);
+        game_controller.addTransition("p5", "p4", "a")
 
         game_controller.addState("q0", 1, 0, 0);
         game_controller.addState("q1", 1, 1, -1);
@@ -65,10 +66,11 @@ export default class Level3_8 extends BaseScene {
         game_controller.addTransition("q0", "q1", "a");
         game_controller.addTransition("q0", "q2", Constants.TIMEOUT_ACTION);
         game_controller.addTransition("q2", "q3", Constants.HIDDEN_ACTION);
-        game_controller.addTransition("q3", "q4", "a");
-        game_controller.addTransition("q3", "q5", "c");
+        //game_controller.addTransition("q3", "q5", "b");
+        game_controller.addTransition("q3", "q5", Constants.HIDDEN_ACTION);
+        game_controller.addTransition("q5", "q4", "b")
 
-        game_controller.startGame(this, "p0", "q0", true, true, [4, 3]);
+        game_controller.startGame(this, "p0", "q0", true, true, [6, 4]);
         new IntroScreen(this, 5)
         game_controller.printAttackerShortestMinMaxPath()
         //console.log("expected moves: 3")
