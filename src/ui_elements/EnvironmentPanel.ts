@@ -26,7 +26,7 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
     private enabled = true;
     private activated = true;
-    private disabledAlpha = 0.4;
+    private disabledAlpha = 0.3;
     private current_alpha = 1;
     private inFadeTween = false;
     private tweenList: Tweens.Tween[];
@@ -88,12 +88,12 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.sizer.disableInteractive();
         this.sizer_bg.setStrokeStyle();
         let list = this.sizer.getAllChildren()
-        this.caption.setAlpha(0.9)
+        this.caption.setAlpha(0.8)
         for(let i = 0; i < list.length; i++) {
             (list[i] as Label).setAlpha(this.disabledAlpha)
             //icons
             if(list[i] instanceof Phaser.GameObjects.Image) {
-                (list[i] as Label).setAlpha(0.9)
+                (list[i] as Label).setAlpha(0.8)
             }
 
             if(list[i] instanceof Label) {

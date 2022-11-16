@@ -70,7 +70,7 @@ export class WinPopup extends Phaser.GameObjects.Container {
         if(lastLevel) {
             sizer.add(this.scene.add.text(0, 0, "Congratulations!", this.textStyle).setResolution(2).setFontSize(20),{padding: {top: 5, bottom: 3}})
             sizer.add(this.scene.add.text(0, 0, "You have completed all the levels.", this.textStyle).setResolution(2).setFontSize(20), {padding: {bottom: 3}})
-            sizer.add(this.scene.add.text(0, 0, "You are truly a reactive master!", this.textStyle).setResolution(2).setFontSize(20))
+            sizer.add(this.scene.add.text(0, 0, "Truly, you are a reactive master!", this.textStyle).setResolution(2).setFontSize(20))
 
             sizer.add(new Sizer(this.scene)
             .add(this.replay_btn = new ReplayButton(this.scene, 0, 0, this.replay_action, Constants.COLORS_BLUE_LIGHT.c3, Constants.COLORS_BLUE_LIGHT.c1, "Replay", this.textStyle), {padding: {top: 10, right: 7}}));
@@ -103,7 +103,9 @@ export class WinPopup extends Phaser.GameObjects.Container {
 
     destroyPopup() {
         this.replay_btn.destroyButton();
-        this.next_level_btn.destroyButton();
+        if(this.next_level_btn !== undefined) {
+            this.next_level_btn.destroyButton();
+        }
         this.sizer.destroy()
         this.destroy();
     }
