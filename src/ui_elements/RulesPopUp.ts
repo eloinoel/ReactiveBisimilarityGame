@@ -30,10 +30,10 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
                 this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.1);
                 break;
             case 2:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.45);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.38);
                 break;
             case 3:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.23);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.19);
                 this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2 + 35);
                 break;
             default:
@@ -158,7 +158,10 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
 
             let timeout_cond3 = new Sizer(this.scene, {orientation: 'x'})
             .add(this.scene.add.text(0, 0, "                       unless", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
-            .add(this.scene.add.text(0, 0, " if no basic spell is allowed in the next state, any spell can be performed", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, " if no available basic spell is allowed in the next state, ", this.textStyle).setFontSize(20).setResolution(2))
+            
+            let timeout_cond4 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "                       any basic spell can be performed", this.textStyle).setFontSize(20).setResolution(2))
             //.add(this.scene.add.text(0, 0, "(idling)", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('italic'))
 
             //if no basic magic spell is possible
@@ -168,6 +171,7 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             sizer.add(timeout_cond1_3, {align: 'left'})
             sizer.add(timeout_cond2, {align: 'left'})
             sizer.add(timeout_cond3, {align: 'left'})
+            sizer.add(timeout_cond4, {align: 'left'})
         }
 
         //hidden action

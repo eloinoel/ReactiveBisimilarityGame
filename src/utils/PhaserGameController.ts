@@ -1056,8 +1056,8 @@ export class PhaserGameController {
 
             this.replayPulseTween = this.scene.tweens.add({
                 targets: replayBtn,
-                duration: 700,
-                scale: scale + 0.15,
+                duration: 650,
+                scale: scale + 0.18,
                 ease: Phaser.Math.Easing.Quadratic.InOut,
                 yoyo: true,
                 loop: -1,
