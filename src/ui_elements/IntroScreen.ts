@@ -105,7 +105,7 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 .add(this.scene.add.text(0, 0, "• You can disable other magic spells ", this.textStyle).setFontSize(22).setResolution(2))
                 .add(this.scene.add.image(0, 0, "environment_panel", ).setOrigin(0.5).setScale(1))
                 .add(this.scene.add.text(0, 0, " by selection, when using ", this.textStyle).setFontSize(22).setResolution(2))
-                .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.08))
+                .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.1))
 
                 let timeout_cond3 = new Sizer(this.scene, {orientation: 'x'})
                 .add(this.scene.add.text(0, 0, "• The disabled spells will remain disabled until another spell is cast ", this.textStyle).setFontSize(22).setResolution(2))
@@ -128,12 +128,12 @@ export class IntroScreen extends Phaser.GameObjects.Container {
                 sizer.add(this.scene.add.text(0, 0, "Reactive Bisimulation", this.textStyle).setFontSize(30).setResolution(2).setFontStyle('bold'), {align: "center"});
 
                 let atk_rule_3 = new Sizer(this.scene, { orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "If no basic spell is allowed", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "If no outgoing basic spell is allowed in the next state", this.textStyle).setFontSize(26).setResolution(2))
                 //.add(this.scene.add.image(0, 0, "environment_panel_no_spell_possible", ).setOrigin(0.5).setScale(0.8))
                 .add(this.scene.add.text(0, 0, " after a time spell, ", this.textStyle).setFontSize(26).setResolution(2))
 
                 let cond = new Sizer(this.scene, {orientation: 'x'})
-                .add(this.scene.add.text(0, 0, "The restriction can be lifted by performing any basic spell", this.textStyle).setFontSize(26).setResolution(2))
+                .add(this.scene.add.text(0, 0, "this restriction can be bypassed and any basic spell can be performed", this.textStyle).setFontSize(26).setResolution(2))
 
                 sizer.add(atk_rule_3, {align: 'center', padding: {/* top: -20, */ bottom: -20}});
                 sizer.add(cond, {align: 'center'})
