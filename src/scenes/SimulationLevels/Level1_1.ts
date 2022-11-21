@@ -67,7 +67,7 @@ export default class Level1_1 extends BaseScene {
         new IntroScreen(this, 0);
         game_controller.printAttackerShortestMinMaxPath()
         //console.log("expected moves: 3")
-        //game_controller.printAIGraph();
+        game_controller.printAIGraph();
 
         game_controller.pulsateNextMoveButtons()
     }
