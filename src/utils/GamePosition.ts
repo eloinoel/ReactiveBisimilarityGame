@@ -2,7 +2,7 @@ import { Constants } from "./Constants";
 import { SetOps } from "./SetOps";
 
 /**
- * Data Class representing the current or previous game state
+ * Data Class representing the current or previous game position
  */
 export abstract class GamePosition {
     readonly process1: string;

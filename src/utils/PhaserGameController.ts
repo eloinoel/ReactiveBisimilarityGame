@@ -15,36 +15,39 @@ import { WinPopup, LosePopup } from "../ui_elements/EndGamePopup";
 import BaseScene from "../scenes/BaseScene";
 import GUIScene from "../scenes/GUIScene";
 
+/**
+ * this class handles all the visuals of a game level and also coordinates multiple components like the AI and the theoretical game model
+ */
 export class PhaserGameController {
-    private game: ReactiveBisimilarityGame;
-    private game_initialized: boolean;
+    private game: ReactiveBisimilarityGame; //theoretical game model
+    private game_initialized: boolean; //true if startGame() function of this class was called successfully
 
-    private left_coordinates: Phaser.Math.Vector2; //coordinates of first lts
-    private right_coordinates: Phaser.Math.Vector2; //coordinates of second lts to compare
+    private left_coordinates: Phaser.Math.Vector2; //coordinates of first sub-LTS on screen
+    private right_coordinates: Phaser.Math.Vector2; //coordinates of second sub-LTS on screen
     private offset_between_vertices: Phaser.Math.Vector2; //distance between vertices
 
-    private stateBtns: Map<string, LtsStateButton>; //map from state names to visual buttons references
-    private transitionObjects: Map<string, Phaser.GameObjects.Container>;
-    private scene: Phaser.Scene;    
-    private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references with indeces 0 and 1
+    private stateBtns: Map<string, LtsStateButton>; //map from state names to visual button references
+    private transitionObjects: Map<string, Phaser.GameObjects.Container>; //map from transition names (eg. "p0ap1", <state1><action><state2>) to visual representation references
+    private scene: Phaser.Scene; //scene in which this class was instantiated
+    private current_hightlights: Phaser.GameObjects.Arc[];  //visual hightlight references of current states (circles around buttons) with indeces 0 and 1, only visible in debug mode
     private player_icons: Phaser.GameObjects.GameObject[];  //0:_player icon sprite, 1: geometryMaskObject, 2: opponent icon sprite, 3: mask2
-    private environment_container!: Phaser.GameObjects.Container;  //text object displaying the current environment
-    private current_position!: Phaser.GameObjects.Container;  //text object displaying current game position 
-    private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves
-    private switch_button!: Phaser.GameObjects.Container;
-    private environment_panel!: EnvironmentPanel;
-    private movable_environment_panel!: EnvironmentPanel;
-    private level_description: LevelDescription;
-    ai_controller!: AI;     //TODO: set private
-    private last_clicked_process!: string; //for environment selection panel highlights
+    private environment_container!: Phaser.GameObjects.Container;  //text object displaying the current environment, visible in debug mode
+    private current_position!: Phaser.GameObjects.Container;  //text object displaying current game position, visible in debug mode
+    private possible_moves_text!: ScrollableTextArea; //panel object displaying all possible moves, visible in debug mode
+    private switch_button!: Phaser.GameObjects.Container; //button to switch sides (symmetry moves)
+    private environment_panel!: EnvironmentPanel; //panel that displays the current environment, not interactive
+    private movable_environment_panel!: EnvironmentPanel; //panel that is used to choose and change environments when performing a timeout action
+    private level_description: LevelDescription; //description of a level at top of screen
+    ai_controller!: AI; //manages game graphs, calculates next moves and shortest worst case paths for the attacker
+    private last_clicked_process!: string; //for displaying environment selection panel effects (graying out transitions and state buttons according to environment selection)
 
-    private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars 
-    private num_moves: number; //the number of moves a player currently made
+    private num_moves_for_stars: number[];  //contains the number of moves needed for 2 or 3 stars (eg. [4, 3] would be 3 attacker moves for 3 stars)
+    private num_moves: number; //the number of moves a player already made in the current game
 
-    private nextProcessAfterTimeout: string;    //used to call doMove after environmentPanel was set for timeout actions
+    private nextProcessAfterTimeout: string; //used to call doMove after movable environmentPanel was set for timeout actions
 
-    private replayPulseTween!: Phaser.Tweens.Tween;
-    private pulsateNextMoves: boolean;    //for tutorial level 1.1
+    private replayPulseTween!: Phaser.Tweens.Tween; //replay button pulsates when the game arrives in a defender winning region position
+    private pulsateNextMoves: boolean; //for tutorial level 1.1
 
     /**shows debug UI if set to true */
     debug: boolean;
@@ -68,11 +71,6 @@ export class PhaserGameController {
         this.nextProcessAfterTimeout = "";
         this.current_hightlights = [];
         this.player_icons = [];
-        /* this.environment_container = new Phaser.GameObjects.Container(this.scene, 0, 0);
-        this.current_position = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {});
-        this.possible_moves_text = new Phaser.GameObjects.Container(this.scene, 0, 0) as ScrollableTextArea;
-        this.switch_button = new Phaser.GameObjects.Container(this.scene, 0, 0);
-        this.environment_panel = new Phaser.GameObjects.Container(this.scene, 0, 0); */
         this.game_initialized = false;
         this.debug = false;  //Set this if you want to see possible moves, current position and environment field
         this.level_description = level_description;
@@ -151,11 +149,11 @@ export class PhaserGameController {
     startGame(scene: Phaser.Scene, p0: string, p1: string, reactive = true, bisimilar = true, num_moves_for_stars = [0, 0, 0]) {
         if(this.game.startNewGame(p0, p1) === 0) {
             this.createEnvironmentField();
+            this.createReactiveElements();
             this.game.setReactive(reactive) //order with createEnvironmentField is important
             this.game.setBisimilar(bisimilar);
             this.game_initialized = true;
             this.createHighlights(p0, p1);
-            this.createReactiveElements();
             this.environment_panel.disable(); //only enable on timeout
             this.movable_environment_panel.disable()
             if(!reactive) {
@@ -285,6 +283,8 @@ export class PhaserGameController {
     }
 
     /**
+     * checks if a move is valid and performs it;
+     * also calls AI functions to get a defender move after attacker move has been performed
      * does not work if there are multiple edges between processes
      * @param next_process
      * @isSymmetryMove
@@ -301,7 +301,7 @@ export class PhaserGameController {
             return -1;
         }
 
-        // cautious when using this in the next if case
+        // be cautious when using this in the next if case
         if(!this.game.lts.hasTransition(cur_pos.process1, next_process)) {
             isSymmetryMove = true;
         }
@@ -318,13 +318,13 @@ export class PhaserGameController {
                 }
             }
             if(next_position.length === 0) {
-                this.printError("doMove: no possible move to process " + next_process);
+                this.printError("doMove: no possible move to process " + next_process + " for given environment");
                 return -1;
             }
         } else if(cur_pos instanceof SimulationDefenderNode || cur_pos instanceof RestrictedSimulationDefenderNode) {
             next_position = moves.filter((position) => (position.process2 === next_process));
             if(next_position.length === 0) {
-                this.printError("doMove: no possible move to process " + next_process);
+                this.printError("doMove: no possible move to process " + next_process  + " for given environment");
                 return -1;
             }
             action = cur_pos.previousAction;
@@ -401,8 +401,8 @@ export class PhaserGameController {
             //Attackers Turn, only reachable after symmetry move
             } else {
                 
-                //TODO: detect symmetry move loop with bfs
                 if(false) {
+                    //not worth programming
                     this.launchEndScreen(false)
                 }
                 
@@ -765,8 +765,9 @@ export class PhaserGameController {
         }
     }
 
-    /** TODO:
+    /** 
      * give visual feedback when player selects or deselects actions in the environment selection window
+     * grays out all transitions and next possible state buttons that are not allowed by the current environment selections
      * @param curProcess 
      * @param clickedProcess 
      * @param environment_selection 
@@ -799,24 +800,8 @@ export class PhaserGameController {
         let generated_moves = this.game.generateMoves(curPosition!, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!)));
         let moves = this.game.possibleMoves(undefined, false, environment_selection).filter((position) => (!position.isSymmetryMove(this.game.getCurrentPosition()!))); //filter out symmetry move
         let possibleMoves = moves.filter((position) => env.includes((position as SimulationDefenderNode).previousAction) || (position as SimulationDefenderNode).previousAction === Constants.HIDDEN_ACTION || ((position as RestrictedSimulationDefenderNode).previousAction === Constants.TIMEOUT_ACTION)); //possible moves for the environment selection
-        //let not_possibleMoves = moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)) && moves.findIndex(move => move.process1 === position.process1 && move.process2 === position.process2) === index);  //is disjunct with possible moves if two processes only have one edge between them; only one t-move for each two processes
         let not_possibleMoves = generated_moves.filter((position, index) => !(possibleMoves.find(move => move.process1 === position.process1 && move.process2 === move.process2)));
 
-        /* console.log(possibleMoves)
-        for(let i = 0; i < possibleMoves.length; i++) {
-            if(possibleMoves[i] instanceof RestrictedSimulationDefenderNode) {
-                console.log((possibleMoves[i] as RestrictedSimulationDefenderNode).environment)
-                console.log(environment_selection)
-                console.log(SetOps.areEqual((possibleMoves[i] as RestrictedSimulationDefenderNode).environment, environment_selection))
-            }
-            
-        } //TODO: delete debug*/
-
-        /* console.log(env)
-        console.log(generated_moves)
-        console.log(possibleMoves)
-        console.log(not_possibleMoves) //TODO: delete debug
-        console.log(moves) */
 
         //get objects of not possible moves and gray out
         let buttons = [];
@@ -839,8 +824,8 @@ export class PhaserGameController {
             }
         }
 
-
         //next moves after timeout
+        //commented out because was irritating
         /* let position_after_timeout = new RestrictedAttackerNode(clickedProcess, curPosition!.process2, environment_selection); //process 2 is wrong but irrelevant
         let future_generated_moves = this.game.generateMoves(position_after_timeout, true, environment_selection).filter((position) => !(position.process2 === clickedProcess));
         let future_possible_moves = this.game.possibleMoves(position_after_timeout, true).filter((position) => !(position.process2 === clickedProcess));
@@ -868,8 +853,6 @@ export class PhaserGameController {
                 this.printError("hightlightEnvironmentSelectionEffect: undefined future edge")
             }
         } */
-
-
     }
 
     resetEnvironmentSelectionHighlighting() {
@@ -883,31 +866,10 @@ export class PhaserGameController {
             this.printError("hightlightEnvironmentSelectionEffect: curPosition illegal");
         }
 
-        let curProcess = curPosition!.process1; 
-        /* let adjacent = this.game.lts.getActionsAndDestinations(curProcess);
-
-        for(let i = 0; i < adjacent.length; i++) {
-            let btn = this.stateBtns.get(adjacent[i][1]);
-            if(btn !== undefined) {
-                //buttons.push(btn);
-                btn.setAlpha(1);
-            } else {
-                this.printError("hightlightEnvironmentSelectionEffect: undefined statebutton")
-            }
-
-            let edge = this.transitionObjects.get("".concat(curProcess, adjacent[i][0], adjacent[i][1]));
-            if(edge !== undefined) {
-                //edges.push(edge);
-                edge.setAlpha(1)
-            } else {
-                this.printError("hightlightEnvironmentSelectionEffect: undefined edge")
-            }
-        } */
+        let curProcess = curPosition!.process1;
 
         this.stateBtns.forEach(btn => { btn.setAlpha(1) })
         this.transitionObjects.forEach(edge => { edge.setAlpha(1) })
-
-
     }
 
     /************************************* UTILITY AND DEBUG *************************************/
@@ -920,31 +882,6 @@ export class PhaserGameController {
             this.printError("printAIGraph: AI not initialized.");
         }
     }
-
-    /* printAttackerShortestPath() {
-        if(this.ai_controller !== undefined && this.ai_controller !== null) {
-            let path = this.ai_controller.getShortestPathFromBfs();
-            if(path !== undefined) {
-                let length = 0;
-                let path_string = "";
-                let previous = undefined;   //for detecting symmetry moves
-                for(let i = 0; i < path.length; i++) {
-                    if(path[i].data[0].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].data[0].activePlayer === Player.Attacker)) {
-                        length++;
-                    }
-                    previous = path[i].data[0].activePlayer;
-                    path_string = path_string.concat(path[i].data[0].toString() + ", ");
-                }
-                path_string = path_string.concat("; attacker moves: " + length);
-                console.log(path_string);
-            } else {
-                this.printError("printAttackerShortestPath: path undefined" )
-            }
-            
-        } else {
-            this.printError("printAttackerShortestPath: AI not initialized.");
-        }
-    } */
 
     printAttackerShortestMinMaxPath() {
         if(this.ai_controller !== undefined && this.ai_controller !== null) {
@@ -1066,13 +1003,12 @@ export class PhaserGameController {
     }
     /**
      * Method not needed in project
-     * TODO: check if switching game mode is possible in current game state
      * if @reactive = true, @bisimilar is not checked in the internal game engine
      * @param reactive 
      * @param bisimilar 
      */
     setGameMode(reactive = true, bisimilar = true) {
-        //TODO: visual feedback if not possible
+        //TODO: check if switching game mode is possible in current game state
         let react = this.game.setReactive(reactive);
         let bisim = this.game.setBisimilar(bisimilar);
         
@@ -1084,7 +1020,6 @@ export class PhaserGameController {
         } else {
             this.switch_button.setVisible(true);
         }
-        
     }
 
     /**
@@ -1291,7 +1226,6 @@ export class PhaserGameController {
             this.scene.events.on('clickedLtsButton', () => {
                 let tweens = this.scene.tweens.getAllTweens();
                 let pulse_tweens = tweens.filter(tween => tween.targets[0] instanceof LtsStateButton);
-                console.log(pulse_tweens.length)
                 for(let i = 0; i < pulse_tweens.length; i++) {
                     let button = pulse_tweens[i].targets[0];
                     pulse_tweens[i].complete();

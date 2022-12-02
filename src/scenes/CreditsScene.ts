@@ -66,10 +66,8 @@ export default class CreditsScene extends BaseScene {
                                      
         this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "    - Adopted Levels", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(24)));
         this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "        Level 2.1, 2.3                                Dominik Peacock", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(23)));
-        /* this.toFadeIn.push(scrollable_area.addNewLine(this.getLinkIcon("https://concurrency-theory.org/rvg-game/") as unknown as Phaser.GameObjects.Text));
-        this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "        Level 2.4                                     Luca Tesei", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(23))); */
         this.toFadeIn.push(scrollable_area.addNewLine(this.getLinkIcon("http://didattica.cs.unicam.it/old/lib/exe/fetch.php?media=didattica:magistrale:rtpsv:ay_1718:ex_and_solutions_bisim_hml_weak_fixpoint.pdf") as unknown as Phaser.GameObjects.Text));
-        this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "        Level 3.10                                     Rob van Glabbeek", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(23)));
+        this.toFadeIn.push(scrollable_area.addText(this.add.text(0, 0, "        Level 3.10                                    Rob van Glabbeek", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(23)));
         this.toFadeIn.push(scrollable_area.addNewLine(this.getLinkIcon("https://link.springer.com/content/pdf/10.1007/s00236-022-00417-1.pdf") as unknown as Phaser.GameObjects.Text));
         
         this.toFadeIn.push(scrollable_area.addNewLine(this.add.text(0, 0, "Assets:", {fontFamily: Constants.textStyle, fontStyle: 'bold', color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(30)));

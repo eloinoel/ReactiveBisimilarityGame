@@ -3,6 +3,11 @@ import { Constants } from './Constants';
 import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulationDefenderNode, SimulationDefenderNode, Player } from './GamePosition';
 import { SetOps } from './SetOps';
 
+/**
+ * class that implements the theoretical reactive bisimulation game, 
+ * isMovePossible()-method for checking if a game move can be performed, 
+ * can also compute all possible moves
+ */
 export class ReactiveBisimilarityGame {
 
     lts: LTSController; //lts for the game to be played on
@@ -143,7 +148,6 @@ export class ReactiveBisimilarityGame {
         /************************************************ REACTIVE BISIMULATION GAME ************************************************/
         } else {
             /* check all game move cases */
-            //- check if action is possible from p or q
             if(curPosition instanceof AttackerNode) {
                 //symmetry move
                 if(action === Constants.NO_ACTION && curPosition.isSymmetryMove(nextPosition)) {
@@ -159,7 +163,6 @@ export class ReactiveBisimilarityGame {
                     //timeout simulation challenge
                     } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2
                         && nextPosition.previousAction === Constants.TIMEOUT_ACTION) {
-                        //console.log("isMovePossible: Timeout Simulation Challenge") //TODO: remove debug
                         //check move conditions
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, nextPosition.environment) 
                         && SetOps.isSubsetEq(nextPosition.environment, A)) {
@@ -183,19 +186,16 @@ export class ReactiveBisimilarityGame {
                 } else if(action !== Constants.NO_ACTION && this.lts.getOutgoingActions(curPosition.process1).has(action)) {
                     //restricted simulation challenge
                     if(nextPosition instanceof SimulationDefenderNode && nextPosition.previousAction === action && curPosition.process2 === nextPosition.process2) {
-                        //console.log("isMovePossible: Restricted Simulation Challenge") //TODO: remove debug
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && A.has(action) && (curPosition.environment.has(action) || this.initialsEmpty(curPosition.process1, curPosition.environment))) {
                             return this.getCodeFromMoveString("Restricted Simulation Challenge");
                         }
                     //invisible simulation challenge
                     } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && action === Constants.HIDDEN_ACTION && curPosition.process2 === nextPosition.process2 &&  SetOps.areEqual(curPosition.environment, nextPosition.environment)) {
-                        //console.log("isMovePossible: Invisible Simulation Challenge") //TODO: remove debug
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action)) {
                             return this.getCodeFromMoveString("Invisible Simulation Challenge");
                         }
                     //timeouted timeout simulation challenge
                     } else if(nextPosition instanceof RestrictedSimulationDefenderNode && nextPosition.previousAction === action && action === Constants.TIMEOUT_ACTION && curPosition.process2 === nextPosition.process2) {
-                        //console.log("isMovePossible: Timeouted Timeout Simulation Challenge") //TODO: remove debug
                         if(this.lts.hasTransition(curPosition.process1, nextPosition.process1, action) && this.initialsEmpty(curPosition.process1, SetOps.union(curPosition.environment, nextPosition.environment)) && SetOps.isSubsetEq(nextPosition.environment, A)) {
                             return this.getCodeFromMoveString("Timeouted Timeout Simulation Challenge");
                         }
@@ -580,8 +580,9 @@ export class ReactiveBisimilarityGame {
      * 
                 * README: only generating one restricted move for the current environment, 
                 * This is theoretically not correct as one could choose any environment that allows a timeout in a state, 
-                * But calculating all permutations and throwing them into the isMovePossible()-method could technically explode the time complexity of the game, 
-     * 
+                * But calculating all permutations and throwing them into the isMovePossible()-method could technically explode the time complexity of the game,
+                * 
+     * @param allEnvironmentCombinations If you want all enviroment combinations possible, then set to true
      * @param curPosition 
      * @param environment used to generate timeout moves only
      * @returns 
@@ -739,6 +740,7 @@ export class ReactiveBisimilarityGame {
     /**
      * makes a new reference while copying the same values as this game
      * copies are created call by value
+     * Method could be buggy and not work, wasn't used in this project in the end
      * @returns 
      */
     copy() {

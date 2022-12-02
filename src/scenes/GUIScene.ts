@@ -4,6 +4,9 @@ import { Constants } from "../utils/Constants";
 import { UI_Button } from '../ui_elements/Button';
 import { RulesPopUp } from '../ui_elements/RulesPopUp';
 
+/**
+ * GUI Buttons for a level
+ */
 export default class GUIScene extends BaseScene {
     otherRunningScene!: Phaser.Scene;
     replay_btn!: UI_Button;

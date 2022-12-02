@@ -1,6 +1,10 @@
 import { RoundRectangle, Sizer } from "phaser3-rex-plugins/templates/ui/ui-components";
 import { Constants } from "../utils/Constants";
 
+/**
+ * file contains classes to display a feedback popup at the end of a level
+ */
+
 export class WinPopup extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;

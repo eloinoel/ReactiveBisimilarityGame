@@ -1,7 +1,10 @@
 import { RoundRectangle, Sizer } from "phaser3-rex-plugins/templates/ui/ui-components";
-import Level1_1 from "../scenes/SimulationLevels/Level1_1";
 import { Constants } from "../utils/Constants";
 
+/**
+ * Class to display a popup containing an explanation for the game rules in text. 
+ * Changes the contents dependant on game type (simulation, bisimulation, reactive bisimulation)
+ */
 export class RulesPopUp extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;

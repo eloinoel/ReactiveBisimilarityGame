@@ -9,13 +9,12 @@ import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
  */
 export class AI {
     
-    /** copy of the game at initialization time */
     readonly game: ReactiveBisimilarityGame;
 
     /** to disable/reenable printing in console */
     private consoleLogSignature;
-    /**graph of all branching game positions, with all predecessors and, with a number for whether game position vertex is in the winning region of attacker (1), or defender (0),
-     * or a number [0,1] indicating how likely a player will blunder */
+
+    /**graph of all branching game positions, with all predecessors and, with a number for whether game position vertex is in the winning region of attacker (1), or defender (0) */
     private graph!: Graph<[GamePosition, Node<any>[], number]>;
 
     constructor(game: ReactiveBisimilarityGame) {
@@ -85,6 +84,11 @@ export class AI {
         }
     }
 
+    /**
+     * returns a reference to a node in the graph representing a game position
+     * @param move 
+     * @returns undefined if no nodes coincides with the given game position
+     */
     private graphHasNode(move: GamePosition): Node<[GamePosition, Node<any>[], number]> | undefined {
         let nodes = this.graph.getNodes();
         let existing_node = nodes.find((node) => (node.data[0].samePosition(move)));
@@ -110,8 +114,12 @@ export class AI {
     }
 
     /**
-     * Algorithm by Benjamin Bisping, see Master's Thesis "Computing Coupled Similarity" or sources in Bachelor's Thesis accompanying this software in github repository
-     * Computes winning regions on game move graphs in simple games
+     * Algorithm by Benjamin Bisping, see Master's Thesis "Computing Coupled Similarity" 
+     * source: B. Bisping and U. Nestmann. “Computing Coupled Similarity”. In: Tools and Al-
+     * gorithms for the Construction and Analysis of Systems. Ed. by T. Vojnar and L.
+     * Zhang. Cham: Springer International Publishing, 2019, pp. 244–261.
+     * 
+     * Computes winning regions on game move graphs in reachability games
      */
     determineWinningRegion() {
         //game graph is initialized
@@ -166,6 +174,7 @@ export class AI {
     /**
      * performs breadths first search and returns shortest path to defender winning region node
      * requires winning region algorithm to be performed before
+     * doesn't take into account defender behaviour
      * @param curPosition 
      * @returns (nearest defender winning region node, predecessor path, distance to source)
      */
@@ -305,45 +314,13 @@ export class AI {
         //no move --> return undefined
         console.log("getNextMove: could not find any next move")
         return undefined;
-
-        /* OLD BFS CODE
-         let bfs_result = this.modifiedBfs(curPosition);
-        if(bfs_result !== undefined && bfs_result[0] !== undefined) {
-            //traverse graph on path until pred === current position 
-            let current = bfs_result[0] as Node<[GamePosition, Node<any>[], number]>;
-            let path: Node<[GamePosition, Node<any>[], number]>[] = []; //path from destination to source (curPosition)
-            let visited_starting_node = false;
-            while(current !== undefined) {
-                path.push(current);
-                current = bfs_result[1].get(current)!;
-                //if destination is source (cycle), build path but break the cycle when reaching node again
-                if(current !== undefined && current.data[0].samePosition(curPosition)) {    
-                    if(visited_starting_node) {
-                        path.push(current);
-                        break;
-                    } else {
-                        visited_starting_node = true;
-                    }
-                }
-            }
-            //console.log("AI: Current node: " + curPosition.toString() + ", path: " + this.getShortestPathString(path));  // TODO: Delete debug
-            return path[path.length - 2].data[0];
-        } else {
-            //return any node if bfs results in undefined, shouldn't happen though hahaaaa
-            let node = this.graphHasNode(curPosition);
-            if(node !== undefined && node.adjacent.length > 0) {
-                let random_number = Math.floor(Math.random() * (node.adjacent.length));
-                this.printError("getNextMove: bfs returned undefined but there are adjacent nodes");
-                return node.adjacent[random_number].node.data[0];  //return "random" node
-            }
-
-            //no move --> return undefined
-            console.log("getNextMove: could not find any next move")
-            return undefined;
-        } */
     }
 
-
+    /**
+     * get string from array
+     * @param path 
+     * @returns 
+     */
     private getShortestPathString(path: Node<[GamePosition, Node<any>[], number]>[]): string {
         let path_string = "";
         for(let i = 0; i < path.length; i++) {
@@ -353,7 +330,7 @@ export class AI {
     }
 
     /**
-     * gets shortest path to attacker winning region leaf node given that the defender tries to delay the attacker as much as possible
+     * gets shortest path to attacker winning region leaf node given that the defender tries to maximise the length of this path
      * requires defender winning region algorithm to be performed beforehand
      * @param curPosition 
      * @returns 
@@ -375,10 +352,7 @@ export class AI {
 
             let callpath: Node<[GamePosition, Node<any>[], number]>[] = [];
 
-            /* let shortestWorstCasePath = this.minMaxAttackerCost(sourceNode, callpath);
-            console.log("ShortestMinMaxPath moves number: " +  shortestWorstCasePath) */
-
-            let minMaxResult = this.minMax(sourceNode, callpath);
+            let minMaxResult = this.modifiedMinMax(sourceNode, callpath);
             let gamepos_path = [];
             for(let i = 0; i < minMaxResult.path.length; i++) {
                 if(minMaxResult.path[i] !== undefined) {
@@ -397,11 +371,12 @@ export class AI {
 
     /**
      * returns the total number of game moves on the (optimal) shortest path to a attacker winning region leaf if the defender tries to delay the attacker as much as possible (worst case)
+     * is best launched with launchModifiedMinimax()-method (see above)
      * @param node 
      * @param path 
      * @returns 
      */
-    private minMax(node: Node<[GamePosition, Node<any>[], number]>, path: Node<[GamePosition, Node<any>[], number]>[]): {cost: number, path: Node<any>[]} {
+    private modifiedMinMax(node: Node<[GamePosition, Node<any>[], number]>, path: Node<[GamePosition, Node<any>[], number]>[]): {cost: number, path: Node<any>[]} {
         //node in current expansion path, cycle
         if(path.find((entry) => (entry.data[0].samePosition(node.data[0])))) {
             return {cost: Infinity, path: []}
@@ -418,12 +393,11 @@ export class AI {
             let maxEval = 0;
             let bestPath: Node<any>[] = [];
             for(let i = 0; i < node.adjacent.length; i++) {
-                //child in defender winning region, probably unreachable
-                if(Boolean(node.adjacent[i].node.data[2]) === false) {
+                if(Boolean(node.adjacent[i].node.data[2]) === false) { //child in defender winning region, probably unreachable
                     continue;
                 }
                 path.push(node);
-                let tmpeval = this.minMax(node.adjacent[i].node, path);
+                let tmpeval = this.modifiedMinMax(node.adjacent[i].node, path);
                 path.pop();
                 if(tmpeval.cost > maxEval) {
                     maxEval = tmpeval.cost;
@@ -443,7 +417,7 @@ export class AI {
                     continue;
                 }
                 path.push(node);
-                let tmpeval = this.minMax(node.adjacent[i].node, path);
+                let tmpeval = this.modifiedMinMax(node.adjacent[i].node, path);
                 path.pop();
                 if(tmpeval.cost < minEval) {
                     minEval = tmpeval.cost;
@@ -520,6 +494,65 @@ export class AI {
     }
 
 
+    private max(val0: number, val1: number) {
+        if(val0 > val1) {
+            return val0;
+        } else {
+            return val1;
+        }
+    }
+
+    private min(val0: number, val1: number) {
+        if(val0 <= val1) {
+            return val0;
+        } else {
+            return val1;
+        }
+    }
+    
+    printGraph() {
+        console.log("-------------------- GAME GRAPH --------------------")
+        console.log("number of nodes: " + this.graph.getNodeAmount() + ", number of edges: " + this.graph.getEdgeAmount())
+        console.log("Graph: <vertex>, <winning region (1=attacker, 0=defender)>: <(edgeLabel, destinationNode)> ...");
+        this.graph.getNodes().forEach((node) => {
+            let edgestring = "Vertex " + node.data[0].toString() + ", score = " + node.data[2] + ": ";
+            for(let j = 0; j < node.adjacent.length; j++) {
+                edgestring = edgestring.concat(node.adjacent[j].node.data[0].toString(), ", ");
+            }
+            //print predecessors 
+            edgestring = edgestring.concat("            predecessors: ")
+            for(let j = 0; j < node.data[1].length; j++) {
+                edgestring = edgestring.concat(node.data[1][j].data[0].toString() + ", ");
+            }
+            console.log(edgestring);
+        })
+    }
+
+    private disableConsole() {
+        console.log = () => {};
+    }
+
+    private enableConsole() {
+        console.log = this.consoleLogSignature;
+    }
+
+    /**
+     * 
+     * @param error throws an error message that prints in red to the console
+     */
+     printError(error: string) {
+        try {
+            throw(error);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+    
+    
+
+
+/**---------------------------------------------- GARBAGE COLLECTION OF POTENTIALLY USABLE CODE ----------------------------------------------**/
 
      /**
      * performs breadths first search and returns shortest paths to attacker winning region leafs
@@ -528,7 +561,7 @@ export class AI {
      * @param curPosition 
      * @returns (Array of winning leafs, predecessor path, distance to source)
      */
-      private BFS_attacker(curPosition?: GamePosition): [Node<any>[], Map<Node<any>, Node<any>>, Map<Node<any>, number>] | undefined {
+     /*  private BFS_attacker(curPosition?: GamePosition): [Node<any>[], Map<Node<any>, Node<any>>, Map<Node<any>, number>] | undefined {
         if(this.graph !== undefined) {
 
             let nodes = this.graph.getNodes();
@@ -597,12 +630,12 @@ export class AI {
             this.printError("Bfs_attacker: graph uninitialized")
         }
         return undefined;
-    }
+    } */
 
     /** method doesnt return desired solution, always chooses optimal path for the attacker even if the defender wouldnt choose same path
      * returns shortest path of moves in which the player can win in
      */
-     getShortestPathFromBfs(curPosition?: GamePosition): Node<any>[] | undefined {
+     /* getShortestPathFromBfs(curPosition?: GamePosition): Node<any>[] | undefined {
         if(curPosition === undefined && this.game.getPlay().length > 0) {
             curPosition = this.game.getPlay()[this.game.getPlay().length - 1];
         }
@@ -637,68 +670,8 @@ export class AI {
             return path;
         }
         return undefined;
-    }
+    } */
 
-
-    private max(val0: number, val1: number) {
-        if(val0 > val1) {
-            return val0;
-        } else {
-            return val1;
-        }
-    }
-
-    private min(val0: number, val1: number) {
-        if(val0 <= val1) {
-            return val0;
-        } else {
-            return val1;
-        }
-    }
-    
-    printGraph() {
-        console.log("-------------------- GAME GRAPH --------------------")
-        console.log("number of nodes: " + this.graph.getNodeAmount() + ", number of edges: " + this.graph.getEdgeAmount())
-        console.log("Graph: <Vertex>: <(edgeLabel, destinationNode)> ...");
-        this.graph.getNodes().forEach((node) => {
-            let edgestring = "Vertex " + node.data[0].toString() + ", score = " + node.data[2] + ": ";
-            for(let j = 0; j < node.adjacent.length; j++) {
-                edgestring = edgestring.concat(node.adjacent[j].node.data[0].toString(), ", ");
-            }
-            //print predecessors 
-            edgestring = edgestring.concat("            predecessors: ")
-            for(let j = 0; j < node.data[1].length; j++) {
-                edgestring = edgestring.concat(node.data[1][j].data[0].toString() + ", ");
-            }
-            console.log(edgestring);
-        })
-    }
-
-    private disableConsole() {
-        console.log = () => {};
-    }
-
-    private enableConsole() {
-        console.log = this.consoleLogSignature;
-    }
-
-    /**
-     * 
-     * @param error throws an error message that prints in red to the console
-     */
-     printError(error: string) {
-        try {
-            throw(error);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-}
-    
-    
-
-
-/**---------------------------------------------- GARBAGE COLLECTION OF OLD ALGORITHMS TO STEAL CODE FROM  ----------------------------------------------**/
 
 /**
      * Dijkstra calculates the distance to each node in game graph
@@ -761,7 +734,7 @@ export class AI {
     let node_entry = succ_values.get(leaf_node);
 
     let debug = []
-    debug.push(leaf_node.data[0].toString()); //TODO:remove debug
+    debug.push(leaf_node.data[0].toString()); //remove debug
 
     if(node_entry === undefined) {
         this.printError("propagatePathCost: called with undefined leaf node");
@@ -770,7 +743,7 @@ export class AI {
     
     while(current !== undefined) {
 
-        debug.push(current.data[0].toString())  //TODO: remove debug
+        debug.push(current.data[0].toString())  // remove debug
 
         let successor_values_to_update_with = succ_values.get(successor)!;
         let succ_list = succ_values.get(current)!.successors;
@@ -793,7 +766,7 @@ export class AI {
         successor = current;
         current = pred.get(current)!;
     }
-    console.log(debug); //TODO: remove debug
+    console.log(debug); //remove debug
     
     let tmp = "last updated node: "
     let tmp_result = succ_values.get(successor)!;
@@ -1058,12 +1031,12 @@ private propagatePathCost(node: Node<[GamePosition, Node<any>[], number]>, pred:
         
         let current = pred.get(node)!;
         let nodeBestPath = curBestPath.get(node)!;
-        console.log("----------------propagate(" + node.data[0].toString() + "), dist = " + nodeBestPath[0] +"------------")    //TODO: remove debug
+        console.log("----------------propagate(" + node.data[0].toString() + "), dist = " + nodeBestPath[0] +"------------")    //remove debug
         //console.log(nodeBestPath)
         let previous: Node<[GamePosition, Node<any>[], number]> = node;
 
         let debug = []
-        debug.push(node.data[0])    //TODO:remove debug
+        debug.push(node.data[0])    //remove debug
         //propagate result on shortest path to root
         while(current !== undefined) {
             let currentBest = curBestPath.get(current)!;
@@ -1139,7 +1112,7 @@ private propagatePathCost(node: Node<[GamePosition, Node<any>[], number]>, pred:
                 return;
             }
 
-            debug.push(current.data[0]) //TODO: remove debug
+            debug.push(current.data[0]) //remove debug
             previous = current;
             current = pred.get(current)!;
         }

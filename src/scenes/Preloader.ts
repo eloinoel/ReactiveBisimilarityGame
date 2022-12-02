@@ -1,4 +1,4 @@
-/* Preload Screen to load main menu assets */
+/* Preload Screen to load assets */
 
 export default class Preloader extends Phaser.Scene {
 
@@ -24,7 +24,6 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("ui_level_map_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/list_bulleted.png");
         this.load.image("ui_questionmark_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/help.png");
         this.load.image("ui_cross_btn", "assets/UI/Iconsforgamesgameassetpack/icons_128/cross.png");
-        //this.load.image("ui_swap_btn", "assets/switch.png")
         this.load.image("ui_swap_btn", "assets/Transition/symmetry_arrow.png")
 
         //LTS
@@ -41,8 +40,6 @@ export default class Preloader extends Phaser.Scene {
         this.load.image("background_mountain_desert", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_2/game_background_2.png');
         this.load.image("background_forest", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_3/game_background_3.1.png');
         this.load.image("background_swamp", 'assets/background_parallax/Free-Horizontal-Game-Backgrounds/PNG/game_background_4/game_background_4.png');
-        this.load.image("background_dark_gradient", 'assets/background_parallax/dark_gradient.png');
-        this.load.image("background_dark_gradient_green", 'assets/background_parallax/dark_gradient_green.png');
 
 
         //characters/icons

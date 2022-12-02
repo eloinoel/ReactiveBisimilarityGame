@@ -6,6 +6,9 @@ import { Tick_Button } from "./Button";
 import { PhaserGameController } from "../utils/PhaserGameController";
 import { Time, Tweens } from "phaser";
 
+/**
+ * environment panel for choosing and changing environments and also displaying them in reactive bisimulation levels
+ */
 export class EnvironmentPanel extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;
@@ -30,6 +33,8 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
     private current_alpha = 1;
     private inFadeTween = false;
     private tweenList: Tweens.Tween[];
+
+    private infoPopup!: FixWidthSizer;
 
 
     constructor(scene: Phaser.Scene, x: number, y: number, game: ReactiveBisimilarityGame, phaser_game: PhaserGameController, display_caption = true, scale = 1) {
@@ -101,6 +106,78 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
             }
         }
         this.tickButton.setVisible(false);
+
+        //for user feedback when clicking non interactive environment display
+        if(this.displayCaption) {
+            let bg = this.sizer_bg;
+            if(bg !== undefined && bg.listenerCount('pointerup') === 0) {
+                bg.setInteractive()
+                bg.on('pointerup', () => {
+                    this.redBlinking(0.3, 1)
+                    //spawn a textbox that explains what to do, maybe unnecessary
+                    if(this.infoPopup === undefined) {
+                        this.infoPopup = new FixWidthSizer(this.scene, {
+                            x: this.coordinates.x, y: this.coordinates.y + 60,
+                            width: 100,
+                            height: 30,
+                            align: "center",
+                            space: { item: 7 * this.scale, top: 7* this.scale, bottom: 7 * this.scale },
+                        }).setDepth(6);
+    
+    
+                        let popup_bg;
+                        this.infoPopup.addBackground(this.scene.add.existing(popup_bg = new RoundRectangle(this.scene, 0, 0, 100, 50, 10, Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c4)).setDepth(6).setAlpha(0)))
+    
+                        let text;
+                        this.scene.add.existing(text = new Label(this.scene, {
+                            width: 110, height: 20,
+                            text: this.scene.add.text(0, 0, "shows allowed magic for current state", {fontFamily: Constants.textStyle, fontStyle: 'bold'}).setFontSize(16).setResolution(2),
+                            space: {
+                                left: 5,
+                                right: 5,
+                                top: 5,
+                                bottom: 5,
+                            },
+                            align: 'center'
+                        }).setDepth(6))
+                        this.infoPopup.add(text);
+    
+                        this.infoPopup.layout();
+    
+                        //fade in
+                        this.scene.tweens.add({
+                            targets: popup_bg,
+                            duration: 250,
+                            alpha: 0.2
+                        })
+    
+                        this.scene.tweens.add({
+                            targets: text,
+                            duration: 250,
+                            alpha: 1
+                        })
+    
+                        popup_bg.setInteractive();
+                        popup_bg.on('pointerup', () => {
+                            //fade out
+                            this.scene.tweens.add({
+                                targets: this.infoPopup,
+                                duration: 250,
+                                alpha: 0,
+                                onComplete: () => {
+                                    this.infoPopup.destroy()
+                                    this.infoPopup = undefined!;
+                                }
+                            })
+    
+                        })
+                    }
+                    
+                })
+            }
+            
+        }
+
         return this;
     }
 
@@ -164,15 +241,15 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.createPanel();
     }
 
-    redBlinking() {
+    redBlinking(blinkingAlpha = 0.8, repeatNum = 1) {
         //this.blinkingRectangle.setVisible(true)
         this.blinkingRectangle.alpha = 0
         this.scene.tweens.add({
             targets: this.blinkingRectangle,
-            alpha: 0.8,
+            alpha: blinkingAlpha,
             ease: Phaser.Math.Easing.Quintic.InOut,
             duration: 160,
-            repeat: 1,
+            repeat: repeatNum,
             onComplete: () => {
                 this.blinkingRectangle.alpha = 0
             }
@@ -199,8 +276,11 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         this.tickButton.destroy()
     }
     
+    /**
+     * moves the environment selection object to destination and fades it out
+     * @param destination 
+     */
     swooshAnimation(destination: Phaser.Math.Vector2) {
-
         //position
         let tw0 = this.scene.tweens.add({
             targets: this.coordinates,
@@ -371,72 +451,22 @@ export class EnvironmentPanel extends Phaser.GameObjects.Container {
         }
 
         this.sizer.layout();
-
-        //OLD CODE, IF SOMETHING BREAKS WITH NEW CODE
-        /* this.sizer.setChildrenInteractive({})
-            .on('child.up', (child: Label) => {  
-                //toggle on or off
-                this.panel_buttons.set(child, this.panel_buttons.get(child) === undefined? true : !this.panel_buttons.get(child))
-                //activated
-                if(this.panel_buttons.get(child)) {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setAlpha(1);
-                    (child.getElement('background') as RoundRectangle).setStrokeStyle(4, Constants.convertColorToNumber(Constants.COLORS_GREEN.c3));
-                //toggled off
-                } else {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)).setAlpha(0.5);
-                    (child.getElement('background') as RoundRectangle).setStrokeStyle();
-                }
-                
-                //set Environment
-                let tmp = this.getActiveActions();
-                this.game.setEnvironment(new Set(tmp));
-            })
-            .on('child.down', (child: Label) => {
-                //activated
-                if(this.panel_buttons.get(child)) {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c3)).setAlpha(1);
-                //toggled off
-                } else {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c3)).setAlpha(0.5);
-                }
-                //var index = (this.sizer.getElement('items') as Phaser.GameObjects.GameObject[]).indexOf(child);
-                //print.text += `click ${index}\n`; 
-            })
-            .on('child.over', (child: Label) => {
-                //activated
-                if(this.panel_buttons.get(child)) {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c2)).setAlpha(1);
-                //toggled off
-                } else {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c2)).setAlpha(0.5);
-                }
-                
-            })
-            .on('child.out', (child: Label) => {
-                //activated
-                if(this.panel_buttons.get(child)) {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_GREEN.c1)).setAlpha(1);
-                //toggled off
-                } else {
-                    (child.getElement('background') as RoundRectangle).setFillStyle(Constants.convertColorToNumber(Constants.COLORS_BLUE_LIGHT.c1)).setAlpha(0.5);
-                }
-            }); */
         
-            //if update call, restore previous settings
-            if(!this.enabled) {
-                this.disable();
-            }
-            if(!this.activated) {
-                this.makeInvisible();
-            }
+        //if update call, restore previous settings
+        if(!this.enabled) {
+            this.disable();
+        }
+        if(!this.activated) {
+            this.makeInvisible();
+        }
 
-            if(this.inFadeTween) {
-                this.caption.setAlpha(1)
-                let list = this.sizer.getAllChildren()
-                for(let i = 0; i < list.length; i++) {
-                    (list[i] as Label).setAlpha(this.current_alpha);
-                }
+        if(this.inFadeTween) {
+            this.caption.setAlpha(1)
+            let list = this.sizer.getAllChildren()
+            for(let i = 0; i < list.length; i++) {
+                (list[i] as Label).setAlpha(this.current_alpha);
             }
+        }
     }
 
 
