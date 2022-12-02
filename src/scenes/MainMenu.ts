@@ -36,17 +36,6 @@ export default class MainMenu extends BaseScene {
             this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*100 + 100);
         }
 
-        /* let logo = this.add.image(this.renderer.width/2 + 80, this.renderer.height - 50, "logo").setOrigin(0.5).setScale(0.3)
-        let built_with = this.add.text(this.renderer.width/2 - 70, this.renderer.height - 50, "Built with", {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.white}).setResolution(2).setFontSize(20).setOrigin(0.5).setDepth(1).setResolution(2);
-        this.toFadeIn.push(built_with);
-        this.toFadeIn.push(logo);
-
-        for(let i = 0; i < this.toFadeIn.length; i++) {
-            this.fadeImage(this.toFadeIn[i] as Phaser.GameObjects.Image, i*25 + 200);
-        } */
-
-        
-
         /** make image buttons interactive
          * PointerEvents:
          *    pointerover - hovering

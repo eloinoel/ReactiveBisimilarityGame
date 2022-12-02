@@ -1,7 +1,10 @@
 import { Constants } from "../utils/Constants";
 
+/**
+ * BaseScene that every other Scene can inherit from, 
+ * contains fading methods for smooth transitions 
+ */
 export default class BaseScene extends Phaser.Scene {
-
 
     background!: Phaser.GameObjects.Image;
     /**

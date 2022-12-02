@@ -1,6 +1,9 @@
 import { ScrollablePanel, FixWidthSizer, RoundRectangle, Sizer } from 'phaser3-rex-plugins/templates/ui/ui-components';
 import { Constants } from '../utils/Constants';
 
+/**
+ * Class for scrollable text areas, eg. for debugging
+ */
 export class ScrollableTextArea extends Phaser.GameObjects.Container {
 
     private text: string;

@@ -1,6 +1,10 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle";
 import { Constants } from "../utils/Constants";
 
+/**
+ * file containing various buttons with different behaviours
+ */
+
 export class Button extends Phaser.GameObjects.Container {
 
     private outImage: Phaser.GameObjects.Image;
@@ -55,10 +59,7 @@ export class Button extends Phaser.GameObjects.Container {
 
         
         //red blink animation
-        this.blinkingRectangle = this.scene.add.graphics({
-            /* x: this.overImage.x - this.overImage.width/2,
-            y: this.overImage.y - this.overImage.height/2, */
-        })
+        this.blinkingRectangle = this.scene.add.graphics({})
         .fillStyle(Constants.convertColorToNumber(Constants.COLORS_RED.c4), 1).fillRect(this.x - this.width*this.scale/2, this.y - this.height*this.scale/2, this.width*this.scale, this.height*this.scale).setDepth(10).setAlpha(0);
         
         let mask_img = this.scene.make.image({

@@ -1,4 +1,8 @@
 import { Constants } from "../utils/Constants";
+
+/**
+ * Description of a level at the top of the screen
+ */
 export class LevelDescription extends Phaser.GameObjects.Container {
 
     private img_player: Phaser.GameObjects.Image;

@@ -6,6 +6,10 @@ import { AttackerNode, GamePosition, RestrictedAttackerNode, RestrictedSimulatio
 import { ReactiveBisimilarityGame } from "./ReactiveBisimilarityGameController";
 import { AI } from "./AI";
 
+/**
+ * Testing ground class that is now worthless because the project is finished
+ * can be used with TestScene.ts
+ */
 export class Tests {
 
     testReactiveBisimgame0() {
@@ -90,7 +94,7 @@ export class Tests {
         let shortestPathLength = ai_controller.getShortestPathLength(game.getPlay()[game.getPlay().length - 1]);
         console.log("shortestPathLength: " + shortestPathLength);
 
-        //TODO: Test position in defender winning region, or when no reachable defender winning region node
+        //Test position in defender winning region, or when no reachable defender winning region node
         console.log("** - Test for game position: " + (new RestrictedSimulationDefenderNode("p1", "q0", Constants.TIMEOUT_ACTION, new Set("a"))).toString() + ", in defender winning region")
         let result_defender_winning = ai_controller.modifiedBfs(new RestrictedSimulationDefenderNode("p1", "q0", Constants.TIMEOUT_ACTION, new Set("a")));
         console.log("destination node: " + result_defender_winning![0].data[0].toString());

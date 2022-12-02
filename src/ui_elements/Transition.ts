@@ -1,6 +1,9 @@
 import { Vector } from "matter";
 import { Constants } from "../utils/Constants";
 
+/**
+ * Class to display a transition arrow between two game nodes on screen that expands in length depending on the distance
+ */
 export class Transition extends Phaser.GameObjects.Container {
     
     private text!: Phaser.GameObjects.Text;
@@ -45,7 +48,6 @@ export class Transition extends Phaser.GameObjects.Container {
             } else if(caption === "c") {
                 this.icon = this.scene.add.image(-100, 0, "leaf_icon").setOrigin(0.5).setDepth(2).setScale(0.05);
                 this.add(this.icon);
-            //TODO:
             } else if(caption === Constants.TIMEOUT_ACTION) {
                 this.text = scene.add.text(-100, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
                 this.add(this.text);
@@ -97,25 +99,10 @@ export class Transition extends Phaser.GameObjects.Container {
                 this.head_img.x = this.middle_img.x + target_mid_len/(2*scale) + this.head_img.width/2;
                 this.tail_img.x = this.middle_img.x - target_mid_len/(2*scale) - this.tail_img.width/2;
 
-                /* 
-                TODO: Delete DEBUG
-                let debug = scene.add.circle(source_x, source_y, 2, 0xFF2E63).setDepth(4);
-                let debug2 = scene.add.circle(destination_x, destination_y, 2, 0xFF2E63).setDepth(4); 
-                let scale_head = head_len / total_len;
-                let scale_tail = tail_len / total_len;
-                let point = new Phaser.Math.Vector2(destination_x, destination_y).subtract(v_12.clone().scale(scale_head));
-                let debug3 = scene.add.circle(point.x, point.y, 2, 0xFF2E63).setDepth(4); 
-                let point2 = new Phaser.Math.Vector2(source_x, source_y).add(v_12.clone().scale(scale_tail));
-                let debug4 = scene.add.circle(point2.x, point2.y, 2, 0xFF2E63).setDepth(4); 
-                this.tail_img.setVisible(false);
-                this.head_img.setVisible(false);
-                this.middle_img.setVisible(false);
-                this.middle_img.setTint(0x3CCF4E);
-                */
+
             }
             /** caption */
             //calculate position in 90 degree angle to transition middle
-
             let caption_position;
             //position caption left of arrow
             if(arrow_angle >= 0 && arrow_angle < 90) {
@@ -138,7 +125,6 @@ export class Transition extends Phaser.GameObjects.Container {
             //plant
             } else if(caption === "c") {
                 this.icon = this.scene.add.image(caption_position.x, caption_position.y, "leaf_icon").setOrigin(0.5).setDepth(2).setScale(0.05);
-            //TODO:
             } else if(caption === Constants.TIMEOUT_ACTION) {
                 this.text = scene.add.text(0, 0, caption, {fontFamily: Constants.textStyle, color: Constants.COLORPACK_1.red_pink, fontStyle: 'bold' }).setOrigin(0.5).setFontSize(30 * scale * 5).setDepth(2);
                 this.text.x = Math.round(c.x + v_12.x*scale);
@@ -171,6 +157,9 @@ export class Transition extends Phaser.GameObjects.Container {
     }
 }
 
+/**
+ * Class to display a transition arrow between two game nodes on screen
+ */
 export class FixedLengthTransition extends Phaser.GameObjects.Container {
     
     private text!: Phaser.GameObjects.Text;

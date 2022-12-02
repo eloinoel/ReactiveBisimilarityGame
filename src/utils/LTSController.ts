@@ -114,6 +114,11 @@ export class LTSController {
         return -1;
     }
 
+    /**
+     * get index of process in the array storing current processes the LTS is in (can be multiple)
+     * @param process 
+     * @returns 
+     */
     getCurrentIndexOf(process: string): number {
         return this.current.findIndex( value => value == process);
     }
@@ -258,6 +263,10 @@ export class LTSController {
         return false;
     }
 
+    /**
+     * set the visible actions of the LTS (a set of actions excluding tau and timeout actions)
+     * @param A 
+     */
     setVisibleActions(A: Set<string>): void {
         let B = this.getAllVisibleActions();
         if(SetOps.isSubsetEq(B, A) && !SetOps.hasSpecialAction(A)) {
@@ -265,6 +274,10 @@ export class LTSController {
         }
     }
 
+    /**
+     * add a visible action to the set storing all the visible actions in the LTS
+     * @param action 
+     */
     addVisibleActionToA(action: string): void {
         if(!Constants.isSpecialAction(action)) {
             this.A.add(action);
@@ -279,6 +292,11 @@ export class LTSController {
         return new Set(this.A);
     }
 
+    /**
+     * returns a copy of this LTS data structure 
+     * probably has a bug and wasn't used in the end
+     * @returns 
+     */
     copy(): LTSController {
         let clone = new LTSController();
         clone.graph = this.graph.copy();

@@ -56,7 +56,7 @@ export default class Level3_1 extends BaseScene {
 
         game_controller.startGame(this, "p0", "q0", true, true, [3, 2]);
         new IntroScreen(this, 2)
-        //game_controller.pulsateProcessBtn("p1")
+        game_controller.pulsateProcessBtn("p1")
         game_controller.printAttackerShortestMinMaxPath()
         //console.log("expected moves: 2")
     }

@@ -24,7 +24,8 @@ export default class LevelMap extends BaseScene {
 
     create() {
 
-        /* localStorage.removeItem("levels");
+        /* //reset storage
+        localStorage.removeItem("levels");
         localStorage.removeItem("levelsBeforeToggle") */
 
         //zoom effect

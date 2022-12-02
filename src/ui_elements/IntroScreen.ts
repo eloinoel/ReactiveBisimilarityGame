@@ -1,6 +1,9 @@
 import { RoundRectangle, Sizer } from "phaser3-rex-plugins/templates/ui/ui-components";
 import { Constants } from "../utils/Constants";
 
+/**
+ * Spawns an overlay with text and images when a new game rule is introduced in a level
+ */
 export class IntroScreen extends Phaser.GameObjects.Container {
 
     private coordinates: Phaser.Math.Vector2;
