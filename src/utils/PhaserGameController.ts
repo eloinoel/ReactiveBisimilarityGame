@@ -889,7 +889,7 @@ export class PhaserGameController {
 
             if(path !== undefined) {
                 let length = 0;
-                let path_string = "MiniMaxPath to attacker winning region: ";
+                let path_string = "MiniMaxPath to attacker win: ";
                 let previous = undefined;   //for detecting symmetry moves
                 for(let i = 0; i < path.length; i++) {
                     if(path[i].activePlayer === Player.Defender || (previous === Player.Attacker && path[i].activePlayer === Player.Attacker)) {

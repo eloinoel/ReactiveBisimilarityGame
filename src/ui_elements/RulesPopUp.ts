@@ -33,10 +33,10 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
                 this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.8, this.scene.renderer.height/2.1);
                 break;
             case 2:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.38);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.49);
                 break;
             case 3:
-                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.19);
+                this.dimensions = new Phaser.Math.Vector2(this.scene.renderer.width/1.1, this.scene.renderer.height/1.25);
                 this.coordinates = new Phaser.Math.Vector2(scene.renderer.width/2, scene.renderer.height/2 + 35);
                 break;
             default:
@@ -142,16 +142,16 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             .add(this.scene.add.text(0, 0, " time magic spell", this.textStyle).setFontSize(22).setResolution(2).setFontStyle('bold'))
 
             let timeout_cond1 = new Sizer(this.scene, {orientation: 'x'})
-            .add(this.scene.add.text(0, 0, "        • condition: Disable all basic spells that are possible in the current state", this.textStyle).setFontSize(20).setResolution(2))
-            let timeout_cond1_2 = new Sizer(this.scene, {orientation: 'x'})
+            .add(this.scene.add.text(0, 0, "        • condition: all basic spells that are possible in the current state are disabled", this.textStyle).setFontSize(20).setResolution(2))
+            /* let timeout_cond1_2 = new Sizer(this.scene, {orientation: 'x'})
             .add(this.scene.add.text(0, 0, "                     AND if consecutive ", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
             .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.08))
-            .add(this.scene.add.text(0, 0, " spells:", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold'))
+            .add(this.scene.add.text(0, 0, " spells:", this.textStyle).setFontSize(20).setResolution(2).setFontStyle('bold')) */
 
-            let timeout_cond1_3 = new Sizer(this.scene, {orientation: 'x'})
+            /* let timeout_cond1_3 = new Sizer(this.scene, {orientation: 'x'})
             .add(this.scene.add.text(0, 0, "                     - no basic spells allowed in current state from the previous ", this.textStyle).setFontSize(20).setResolution(2))
             .add(this.scene.add.image(0, 0, "timeout_arrow_icon", ).setOrigin(0.5).setScale(0.08))
-            .add(this.scene.add.text(0, 0, " restriction", this.textStyle).setFontSize(20).setResolution(2))
+            .add(this.scene.add.text(0, 0, " restriction", this.textStyle).setFontSize(20).setResolution(2)) */
             
 
             let timeout_cond2 = new Sizer(this.scene, {orientation: 'x'})
@@ -170,8 +170,8 @@ export class RulesPopUp extends Phaser.GameObjects.Container {
             //if no basic magic spell is possible
             sizer.add(atk_rule_timeout, {align: 'left'});
             sizer.add(timeout_cond1, {align: 'left', padding: {top: 5}})
-            sizer.add(timeout_cond1_2, {align: 'left'})
-            sizer.add(timeout_cond1_3, {align: 'left'})
+            /* sizer.add(timeout_cond1_2, {align: 'left'}) */
+            /* sizer.add(timeout_cond1_3, {align: 'left'}) */
             sizer.add(timeout_cond2, {align: 'left'})
             sizer.add(timeout_cond3, {align: 'left'})
             sizer.add(timeout_cond4, {align: 'left'})
