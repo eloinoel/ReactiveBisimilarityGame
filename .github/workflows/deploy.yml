@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-verion: 16
+          node-version: 16
       
       - name: Install dependencies
         uses: borales/actions-yarn@v3.0.0

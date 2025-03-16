@@ -147,6 +147,8 @@ export default class LevelMap extends BaseScene {
             })
         }
 
+        console.log("Press Shift + T to toggle unlock or lock all levels.\n")
+        console.log("Press Shift + R to reset all progress.\n")
         //toggle switch
         this.input.keyboard.on('keydown-T', (event:KeyboardEvent) => {
             if(event.shiftKey) {
